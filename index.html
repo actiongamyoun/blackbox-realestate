@@ -268,7 +268,7 @@ body {
   </div>
 
   <!-- CTA 버튼 2열 -->
-  <div style="display:flex;gap:14px;max-width:480px;width:100%;margin:0 auto;">
+  <div style="display:flex;gap:14px;max-width:480px;width:100%;margin:0 auto 36px;">
     <button onclick="window.location.href='/pages/dashboard.html'"
       style="flex:1;padding:16px 20px;background:transparent;color:#fff;font-size:16px;font-weight:700;border:2px solid rgba(255,255,255,.5);border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;"
       onmouseover="this.style.background='rgba(255,255,255,.1)';this.style.borderColor='rgba(255,255,255,.85)'"
@@ -427,7 +427,8 @@ function selectSuggestion(idx) {
 }
 
 function hideSuggestions() {
-  document.getElementById('addr-suggestions').style.display = 'none';
+  const el = document.getElementById('addr-suggestions');
+  if (el) el.style.display = 'none';
   _suggestions = [];
 }
 
@@ -466,7 +467,8 @@ function highlightSuggestion(idx) {
 
 // 외부 클릭 시 닫기
 document.addEventListener('click', e => {
-  if (!e.target.closest('#addr-suggestions') && e.target.id !== 'hero-input') {
+  if (document.getElementById('addr-suggestions') &&
+      !e.target.closest('#addr-suggestions') && e.target.id !== 'hero-input') {
     hideSuggestions();
   }
 });
@@ -506,9 +508,7 @@ function goToDetail() { window.location.href='/pages/report.html'; return; // or
   alert('상세 분석 화면으로 이동합니다.\n(다음 단계 화면을 개발 중입니다)');
 }
 
-document.getElementById('hero-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') startAnalysis();
-});
+// 주소 입력은 analyze.html에서 처리
 </script>
 
 <script>
