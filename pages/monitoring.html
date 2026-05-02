@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html class="light" lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>부동산 블랙박스 — 사후 모니터링</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode:"class",
+  theme:{
+    extend:{
+      colors:{
+        "primary":"#041627","primary-container":"#1a2b3c",
+        "on-primary":"#ffffff","on-primary-container":"#8192a7",
+        "secondary":"#505f76","surface":"#fbf9fa",
+        "surface-container-lowest":"#ffffff","surface-container-low":"#f5f3f4",
+        "surface-container":"#efedef","surface-container-high":"#e9e7e9",
+        "surface-container-highest":"#e4e2e3","on-surface":"#1b1c1d",
+        "on-surface-variant":"#44474c","outline":"#74777d",
+        "outline-variant":"#c4c6cd","background":"#fbf9fa",
+        "on-background":"#1b1c1d","error":"#ba1a1a","on-error":"#ffffff",
+      },
+      fontFamily:{
+        "sans":["Noto Sans KR","Inter","sans-serif"],
+        "mono":["IBM Plex Mono","monospace"],
+      },
+      borderRadius:{"DEFAULT":"0","lg":"0","xl":"0.5rem","full":"9999px"},
+    }
+  }
+}
+</script>
+<style>
+*{font-family:'Noto Sans KR','Inter',sans-serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.material-symbols-outlined{
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  display:inline-block;vertical-align:middle;
+}
+.fill-icon{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+
+/* 실시간 펄스 */
+@keyframes pulse-green{
+  0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(34,197,94,.7);}
+  70%{transform:scale(1);box-shadow:0 0 0 8px rgba(34,197,94,0);}
+  100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(34,197,94,0);}
+}
+@keyframes pulse-red{
+  0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(220,38,38,.7);}
+  70%{transform:scale(1);box-shadow:0 0 0 8px rgba(220,38,38,0);}
+  100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(220,38,38,0);}
+}
+.pulse-green{animation:pulse-green 2s infinite;}
+.pulse-red{animation:pulse-red 1.5s infinite;}
+
+/* 푸시 알림 팝업 */
+@keyframes slideIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(120%);opacity:0;}}
+.push-popup{animation:slideIn .4s cubic-bezier(.4,0,.2,1) forwards;}
+.push-popup.hide{animation:slideOut .3s cubic-bezier(.4,0,.2,1) forwards;}
+
+/* 피드 아이템 등장 */
+@keyframes feedIn{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+.feed-new{animation:feedIn .4s ease forwards;}
+
+/* 스캔 라인 */
+@keyframes scanLine{
+  0%{top:0%;opacity:.8;}
+  100%{top:100%;opacity:0;}
+}
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(34,197,94,.6),transparent);
+  animation:scanLine 2.5s ease-in-out infinite;
+}
+
+/* 링 애니메이션 */
+@keyframes ringPulse{
+  0%,100%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.15);opacity:.6;}
+}
+.ring-anim{animation:ringPulse 2s ease-in-out infinite;}
+
+body{min-height:100dvh;background:#fbf9fa;padding-bottom:80px;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#c4c6cd;border-radius:3px;}
+</style>
+</head>
+
+<body class="text-on-background">
+
+<!-- ══════════════════════════════════
+     PUSH 알림 팝업 (우상단 고정)
+══════════════════════════════════ -->
+<div id="push-container" class="fixed top-4 right-4 z-[200] flex flex-col gap-2 w-80"></div>
+
+<!-- ══════════════════════════════════
+     HEADER
+══════════════════════════════════ -->
+<header class="flex justify-between items-center w-full px-6 h-14 bg-white border-b border-outline-variant fixed top-0 z-50">
+  <div class="flex items-center gap-3">
+    <div style="width:30px;height:30px;background:#041627;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="1.5" width="13" height="13" rx="2.5" stroke="white" stroke-width="1.3"/>
+        <path d="M4 8h8M4 5.5h8M4 10.5h5" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div style="font-size:14px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
+      <div class="mono" style="font-size:9px;color:#8192a7;letter-spacing:1.5px;">REAL ESTATE BLACKBOX</div>
+    </div>
+    <nav class="flex items-center gap-1 ml-6">
+      <a href="/" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">매물 분석</a>
+      <a href="/pages/report.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">분석 리포트</a>
+      <span class="px-3 py-1.5 text-xs font-bold text-primary bg-surface-container-high" style="border-bottom:2px solid #041627;">사후 모니터링</span>
+      <a href="#" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">중개사 대시보드</a>
+    </nav>
+  </div>
+  <div class="flex items-center gap-3">
+    <!-- 알림 벨 -->
+    <button onclick="triggerTestPush()" class="relative p-2 hover:bg-surface-container-low transition-colors" title="테스트 알림 발생">
+      <span class="material-symbols-outlined text-primary">notifications</span>
+      <span id="bell-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center mono" style="font-size:9px;font-weight:700;">3</span>
+    </button>
+    <button class="p-2 hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+    </button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     MAIN
+══════════════════════════════════ -->
+<main class="max-w-[1200px] mx-auto px-5 pt-20 pb-6">
+
+  <!-- ① 상태 배너 -->
+  <section class="mb-5">
+    <div class="bg-white border border-outline-variant p-5 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <!-- 펄스 인디케이터 -->
+        <div class="relative flex items-center justify-center w-10 h-10">
+          <div class="w-3 h-3 bg-green-500 rounded-full pulse-green z-10 relative"></div>
+          <div class="absolute inset-0 rounded-full border-2 border-green-200 ring-anim"></div>
+        </div>
+        <div>
+          <p class="mono text-xs tracking-widest text-on-surface-variant mb-0.5">NETWORK STATUS</p>
+          <h2 class="text-xl font-black text-primary tracking-tight">실시간 모니터링 활성화</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">마지막 스캔: <span class="mono font-medium text-primary" id="last-scan">방금 전</span> · 다음 스캔: <span class="mono font-medium" id="next-scan">30초 후</span></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right mr-4">
+          <p class="mono text-xs text-on-surface-variant">모니터링 중인 매물</p>
+          <p class="text-2xl font-black text-primary mono">1건</p>
+        </div>
+        <button onclick="triggerTestPush()" class="flex items-center gap-2 bg-primary text-white px-4 py-2.5 text-xs font-bold hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-base">add_circle</span>
+          매물 추가 등록
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- ══════ 왼쪽: 알림 피드 ══════ -->
+    <section class="lg:col-span-1 flex flex-col gap-4">
+
+      <!-- 알림 피드 헤더 -->
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-black text-primary">알림 피드</h3>
+        <div class="flex items-center gap-2">
+          <span id="unread-badge" class="bg-red-600 text-white mono text-xs font-bold px-2 py-0.5 rounded-full">3 미확인</span>
+          <button onclick="markAllRead()" class="text-xs text-on-surface-variant hover:text-primary transition-colors">전체 읽음</button>
+        </div>
+      </div>
+
+      <!-- 필터 탭 -->
+      <div class="flex gap-1 bg-surface-container-high p-1">
+        <button onclick="filterFeed('all',this)" class="flex-1 py-1.5 text-xs font-bold bg-white text-primary shadow-sm transition-all">전체</button>
+        <button onclick="filterFeed('danger',this)" class="flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all">위험</button>
+        <button onclick="filterFeed('warning',this)" class="flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all">주의</button>
+        <button onclick="filterFeed('safe',this)" class="flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all">정상</button>
+      </div>
+
+      <!-- 알림 리스트 -->
+      <div id="feed-list" class="flex flex-col gap-2 overflow-y-auto" style="max-height:560px;">
+        <!-- JS로 렌더링 -->
+      </div>
+
+      <!-- 테스트 버튼 -->
+      <button onclick="simulateNewAlert()" class="w-full py-2.5 border border-dashed border-outline-variant text-xs text-on-surface-variant hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-sm">science</span>
+        실시간 알림 시뮬레이션 (테스트)
+      </button>
+    </section>
+
+    <!-- ══════ 오른쪽: 내 매물 카드 + 모니터링 상세 ══════ -->
+    <section class="lg:col-span-2 flex flex-col gap-5">
+
+      <!-- 내 계약 매물 카드 -->
+      <div class="bg-white border border-outline-variant overflow-hidden">
+        <!-- 상단 그라데이션 배너 -->
+        <div class="relative h-36 overflow-hidden" style="background:linear-gradient(135deg,#041627 0%,#1a2b3c 60%,#2d4a6a 100%);">
+          <!-- 그리드 패턴 -->
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:20px 20px;"></div>
+          <!-- 스캔 라인 -->
+          <div class="scan-line"></div>
+          <div class="absolute inset-0 flex items-end p-5">
+            <div class="flex items-end justify-between w-full">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-symbols-outlined text-green-400 text-sm fill-icon">radar</span>
+                  <span class="mono text-xs text-green-400 tracking-widest">MONITORING ACTIVE</span>
+                </div>
+                <h3 class="text-white font-black text-lg tracking-tight">서울시 강남구 역삼동 825-13</h3>
+                <p class="text-xs mt-0.5" style="color:#8192a7;">래미안 아파트 502호 · 전세 3억 2천만 원</p>
+              </div>
+              <div class="text-right">
+                <p class="mono text-xs mb-1" style="color:#8192a7;">SAFE SCORE</p>
+                <p class="mono font-black text-yellow-400" style="font-size:36px;line-height:1;">78</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모니터링 항목 4개 그리드 -->
+        <div class="grid grid-cols-2 divide-x divide-y divide-outline-variant">
+
+          <!-- 등기부 변동 -->
+          <div class="p-4 relative overflow-hidden" id="mon-registry">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">gavel</span>
+                <span class="text-xs font-bold text-primary">등기부 변동 감지</span>
+              </div>
+              <span class="w-2 h-2 bg-red-500 rounded-full pulse-red"></span>
+            </div>
+            <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2">
+              <p class="mono text-xs font-bold text-red-700 mb-0.5">⚠ 변동 감지됨</p>
+              <p class="text-xs text-red-600">을구 근저당권 추가<br>채권최고액 5,000만 원</p>
+              <p class="mono text-xs text-red-400 mt-1">2026.05.02 09:14:33</p>
+            </div>
+            <button onclick="showDetail('registry')" class="w-full text-xs font-bold text-primary hover:bg-surface-container-low py-1.5 transition-colors flex items-center justify-center gap-1">
+              상세 보기 <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+
+          <!-- 경매·공매 -->
+          <div class="p-4" id="mon-auction">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">balance</span>
+                <span class="text-xs font-bold text-primary">경매·공매 개시</span>
+              </div>
+              <span class="w-2 h-2 bg-green-500 rounded-full pulse-green"></span>
+            </div>
+            <div class="bg-green-50 border-l-4 border-green-500 p-3 mb-2">
+              <p class="mono text-xs font-bold text-green-700 mb-0.5">✓ 이상 없음</p>
+              <p class="text-xs text-green-600">경매·공매 접수 내역<br>확인되지 않음</p>
+              <p class="mono text-xs text-green-400 mt-1">2026.05.02 09:00:00</p>
+            </div>
+            <button class="w-full text-xs font-medium text-on-surface-variant py-1.5 flex items-center justify-center gap-1">
+              법원 경매 연동 중 <span class="material-symbols-outlined text-sm">sync</span>
+            </button>
+          </div>
+
+          <!-- 임대인 체납 -->
+          <div class="p-4" id="mon-tax">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">receipt_long</span>
+                <span class="text-xs font-bold text-primary">임대인 세금 체납</span>
+              </div>
+              <span class="w-2 h-2 bg-green-500 rounded-full pulse-green"></span>
+            </div>
+            <div class="bg-green-50 border-l-4 border-green-500 p-3 mb-2">
+              <p class="mono text-xs font-bold text-green-700 mb-0.5">✓ 이상 없음</p>
+              <p class="text-xs text-green-600">국세·지방세 완납<br>체납 이력 없음</p>
+              <p class="mono text-xs text-green-400 mt-1">2026.05.01 정기조회</p>
+            </div>
+            <div class="flex items-center gap-1.5 justify-center">
+              <span class="mono text-xs text-on-surface-variant">다음 조회:</span>
+              <span class="mono text-xs font-bold text-primary" id="tax-countdown">89일 후</span>
+            </div>
+          </div>
+
+          <!-- 전세가율 변동 -->
+          <div class="p-4" id="mon-price">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">trending_down</span>
+                <span class="text-xs font-bold text-primary">전세가율 변동</span>
+              </div>
+              <span class="w-2 h-2 bg-yellow-400 rounded-full" style="animation:pulse-green 2.5s infinite;"></span>
+            </div>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-2">
+              <p class="mono text-xs font-bold text-yellow-700 mb-0.5">△ 주의 필요</p>
+              <p class="text-xs text-yellow-700">시세 하락 감지<br>전세가율 77.7% → <strong>79.2%</strong></p>
+              <p class="mono text-xs text-yellow-500 mt-1">KB시세 4.04억 (↓800만)</p>
+            </div>
+            <button onclick="showDetail('price')" class="w-full text-xs font-bold text-primary hover:bg-surface-container-low py-1.5 transition-colors flex items-center justify-center gap-1">
+              시세 추이 보기 <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 알림 설정 -->
+        <div class="border-t border-outline-variant p-4 bg-surface-container-low">
+          <p class="text-xs font-bold text-primary mb-3">알림 수신 설정</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'등기부 변동')"/>
+              <span class="text-xs text-on-surface">등기부 변동</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'경매 개시')"/>
+              <span class="text-xs text-on-surface">경매 개시</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'세금 체납')"/>
+              <span class="text-xs text-on-surface">세금 체납</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'시세 변동')"/>
+              <span class="text-xs text-on-surface">시세 변동</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 시세 추이 미니 차트 -->
+      <div class="bg-white border border-outline-variant p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="mono text-xs tracking-widest text-on-surface-variant mb-0.5">KB 시세 추이</p>
+            <h4 class="font-bold text-primary">전세가율 변동 현황</h4>
+          </div>
+          <div class="flex gap-2">
+            <span class="px-2 py-1 bg-surface-container-high text-xs font-bold text-primary">3개월</span>
+            <span class="px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-colors">6개월</span>
+            <span class="px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-colors">1년</span>
+          </div>
+        </div>
+        <!-- SVG 차트 -->
+        <svg viewBox="0 0 600 140" class="w-full" style="height:140px;">
+          <!-- 그리드 라인 -->
+          <line x1="0" y1="28" x2="600" y2="28" stroke="#e9e7e9" stroke-width="1"/>
+          <line x1="0" y1="70" x2="600" y2="70" stroke="#e9e7e9" stroke-width="1"/>
+          <line x1="0" y1="112" x2="600" y2="112" stroke="#e9e7e9" stroke-width="1"/>
+          <!-- 레이블 -->
+          <text x="2" y="25" font-size="9" fill="#74777d" font-family="IBM Plex Mono">85%</text>
+          <text x="2" y="67" font-size="9" fill="#74777d" font-family="IBM Plex Mono">79%</text>
+          <text x="2" y="109" font-size="9" fill="#74777d" font-family="IBM Plex Mono">73%</text>
+          <!-- 위험선 (80%) -->
+          <line x1="30" y1="56" x2="600" y2="56" stroke="#fca5a5" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="540" y="52" font-size="9" fill="#ef4444" font-family="IBM Plex Mono">위험 80%</text>
+          <!-- 전세가율 라인 -->
+          <polyline points="30,105 110,98 190,92 270,88 350,84 430,79 510,75 590,72"
+            fill="none" stroke="#041627" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- 영역 채우기 -->
+          <polygon points="30,105 110,98 190,92 270,88 350,84 430,79 510,75 590,72 590,125 30,125"
+            fill="rgba(4,22,39,0.06)"/>
+          <!-- 데이터 포인트 -->
+          <circle cx="30" cy="105" r="3.5" fill="#041627"/>
+          <circle cx="190" cy="92" r="3.5" fill="#041627"/>
+          <circle cx="350" cy="84" r="3.5" fill="#041627"/>
+          <circle cx="510" cy="75" r="3.5" fill="#041627"/>
+          <circle cx="590" cy="72" r="4.5" fill="#ef4444" stroke="white" stroke-width="2"/>
+          <!-- 최신 포인트 레이블 -->
+          <text x="558" y="68" font-size="9" fill="#ef4444" font-family="IBM Plex Mono" font-weight="600">79.2%↑</text>
+          <!-- X축 날짜 -->
+          <text x="20" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">2.02</text>
+          <text x="178" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">3.02</text>
+          <text x="338" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">4.02</text>
+          <text x="498" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">5.02</text>
+        </svg>
+        <div class="flex items-center gap-4 mt-2">
+          <div class="flex items-center gap-1.5">
+            <div class="w-4 h-0.5 bg-primary"></div>
+            <span class="text-xs text-on-surface-variant">전세가율</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <div class="w-4 h-0.5 bg-red-300" style="border-top:1px dashed #fca5a5;"></div>
+            <span class="text-xs text-on-surface-variant">위험 기준선 (80%)</span>
+          </div>
+          <div class="ml-auto text-xs text-on-surface-variant">
+            현재 <span class="font-bold text-red-600">79.2%</span> — 위험선까지 <span class="font-bold">0.8%p</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 빠른 액션 -->
+      <div class="grid grid-cols-3 gap-3">
+        <button onclick="showDetail('report')" class="bg-white border border-outline-variant p-4 text-left hover:bg-surface-container-low transition-colors group">
+          <span class="material-symbols-outlined text-primary mb-2 group-hover:scale-110 transition-transform inline-block">description</span>
+          <p class="text-xs font-bold text-primary">분석 리포트</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">최신 리포트 확인</p>
+        </button>
+        <button onclick="showDetail('alert')" class="bg-white border border-outline-variant p-4 text-left hover:bg-surface-container-low transition-colors group">
+          <span class="material-symbols-outlined text-primary mb-2 group-hover:scale-110 transition-transform inline-block">campaign</span>
+          <p class="text-xs font-bold text-primary">중개사 연락</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">위험 사항 공유</p>
+        </button>
+        <button onclick="showDetail('hug')" class="bg-primary p-4 text-left hover:opacity-90 transition-opacity group">
+          <span class="material-symbols-outlined text-white mb-2 group-hover:scale-110 transition-transform inline-block">shield</span>
+          <p class="text-xs font-bold text-white">HUG 보증보험</p>
+          <p class="text-xs mt-0.5" style="color:#8192a7;">가입 현황 확인</p>
+        </button>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════
+     하단 네비바
+══════════════════════════════════ -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 h-16 bg-white border-t border-outline-variant">
+  <a href="/" class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+    <span class="material-symbols-outlined text-xl">search</span>
+    <span class="mono text-xs font-bold uppercase tracking-widest mt-0.5">분석</span>
+  </a>
+  <a href="/pages/report.html" class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+    <span class="material-symbols-outlined text-xl">analytics</span>
+    <span class="mono text-xs font-bold uppercase tracking-widest mt-0.5">리포트</span>
+  </a>
+  <a href="#" class="flex flex-col items-center justify-center text-primary px-4 py-1">
+    <span class="material-symbols-outlined text-xl fill-icon">visibility</span>
+    <span class="mono text-xs font-bold uppercase tracking-widest mt-0.5 border-b-2 border-primary pb-0.5">모니터링</span>
+  </a>
+  <a href="#" class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+    <span class="material-symbols-outlined text-xl">business_center</span>
+    <span class="mono text-xs font-bold uppercase tracking-widest mt-0.5">중개사</span>
+  </a>
+  <a href="#" class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+    <span class="material-symbols-outlined text-xl">settings</span>
+    <span class="mono text-xs font-bold uppercase tracking-widest mt-0.5">설정</span>
+  </a>
+</nav>
+
+<!-- ══════════════════════════════════
+     JS
+══════════════════════════════════ -->
+<script>
+/* ── 알림 데이터 ── */
+const FEED_DATA = [
+  {
+    id:1, type:'danger', icon:'warning', read:false,
+    title:'근저당권 신규 설정 감지',
+    desc:'을구 근저당권 추가 — 채권최고액 5,000만 원 (채권자: ○○은행)',
+    time:'오늘 09:14', tag:'등기부 변동', tagColor:'red'
+  },
+  {
+    id:2, type:'warning', icon:'trending_down', read:false,
+    title:'전세가율 상승 경보',
+    desc:'KB시세 하락으로 전세가율 77.7% → 79.2% 상승. 위험선(80%) 근접.',
+    time:'오늘 08:30', tag:'시세 변동', tagColor:'yellow'
+  },
+  {
+    id:3, type:'warning', icon:'update', read:false,
+    title:'소유권 관련 서류 접수',
+    desc:'갑구 문서 접수 확인 (서류번호 #2026-829-QX). 내용 확인 권장.',
+    time:'어제 17:45', tag:'등기부 변동', tagColor:'yellow'
+  },
+  {
+    id:4, type:'safe', icon:'check_circle', read:true,
+    title:'정기 스캔 완료 — 이상 없음',
+    desc:'등기부, 경매, 세금 체납 전항목 정상 확인.',
+    time:'어제 09:00', tag:'정기 점검', tagColor:'green'
+  },
+  {
+    id:5, type:'safe', icon:'shield', read:true,
+    title:'HUG 보증보험 갱신 완료',
+    desc:'전세보증금 반환보증 2026.05.01 자동 갱신 완료.',
+    time:'2026.05.01', tag:'보증보험', tagColor:'green'
+  },
+  {
+    id:6, type:'safe', icon:'receipt_long', read:true,
+    title:'임대인 국세 완납 확인',
+    desc:'분기 정기 조회 — 국세·지방세 완납 확인. 체납 없음.',
+    time:'2026.04.01', tag:'세금 체납', tagColor:'green'
+  },
+];
+
+let feedFilter = 'all';
+let unreadCount = FEED_DATA.filter(f=>!f.read).length;
+
+/* ── 피드 렌더링 ── */
+function renderFeed(filter='all'){
+  const list = document.getElementById('feed-list');
+  const filtered = filter==='all' ? FEED_DATA :
+    filter==='danger' ? FEED_DATA.filter(f=>f.type==='danger') :
+    filter==='warning' ? FEED_DATA.filter(f=>f.type==='warning') :
+    FEED_DATA.filter(f=>f.type==='safe');
+
+  list.innerHTML = filtered.map(item => {
+    const colors = {
+      red:   {bg:'bg-red-50',   border:'border-red-500',  icon:'text-red-600',   tag:'bg-red-100 text-red-700'},
+      yellow:{bg:'bg-yellow-50',border:'border-yellow-400',icon:'text-yellow-600',tag:'bg-yellow-100 text-yellow-700'},
+      green: {bg:'bg-green-50', border:'border-green-500', icon:'text-green-600', tag:'bg-green-100 text-green-700'},
+    }[item.tagColor];
+
+    return `
+    <div class="bg-white border-l-4 ${colors.border} shadow-sm p-3 cursor-pointer hover:shadow-md transition-shadow ${item.read?'opacity-60':''}"
+         onclick="markRead(${item.id})">
+      <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined ${colors.icon} text-xl flex-shrink-0 mt-0.5 ${item.read?'':'fill-icon'}">${item.icon}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+            ${!item.read ? '<span class="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0"></span>' : ''}
+            <p class="text-xs font-black text-primary truncate">${item.title}</p>
+          </div>
+          <p class="text-xs text-on-surface-variant leading-relaxed">${item.desc}</p>
+          <div class="flex items-center gap-2 mt-1.5">
+            <span class="mono text-xs ${colors.tag} px-1.5 py-0.5 rounded font-medium">${item.tag}</span>
+            <span class="mono text-xs text-on-surface-variant">${item.time}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markRead(id){
+  const item = FEED_DATA.find(f=>f.id===id);
+  if(item && !item.read){
+    item.read = true;
+    unreadCount = Math.max(0, unreadCount-1);
+    updateBadge();
+    renderFeed(feedFilter);
+  }
+}
+
+function markAllRead(){
+  FEED_DATA.forEach(f=>f.read=true);
+  unreadCount = 0;
+  updateBadge();
+  renderFeed(feedFilter);
+}
+
+function updateBadge(){
+  const badge = document.getElementById('unread-badge');
+  const bell  = document.getElementById('bell-badge');
+  badge.textContent = unreadCount > 0 ? `${unreadCount} 미확인` : '모두 읽음';
+  badge.className = unreadCount > 0
+    ? 'bg-red-600 text-white mono text-xs font-bold px-2 py-0.5 rounded-full'
+    : 'bg-surface-container text-on-surface-variant mono text-xs font-bold px-2 py-0.5 rounded-full';
+  if(bell) bell.textContent = unreadCount > 0 ? String(unreadCount) : '';
+  if(bell) bell.style.display = unreadCount > 0 ? 'flex' : 'none';
+}
+
+function filterFeed(type, btn){
+  feedFilter = type;
+  document.querySelectorAll('[onclick^="filterFeed"]').forEach(b=>{
+    b.className = 'flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all';
+  });
+  btn.className = 'flex-1 py-1.5 text-xs font-bold bg-white text-primary shadow-sm transition-all';
+  renderFeed(type);
+}
+
+/* ── 푸시 알림 팝업 ── */
+const PUSH_QUEUE = [
+  {
+    level:'danger', icon:'warning',
+    title:'⚠ 긴급: 근저당권 추가 감지',
+    body:'강남구 역삼동 매물 — 을구 변동 발생. 즉시 확인하세요.',
+  },
+  {
+    level:'warning', icon:'trending_down',
+    title:'△ 전세가율 79.2% 상승',
+    body:'위험선(80%)까지 0.8%p. 시세 추이를 확인하세요.',
+  },
+  {
+    level:'safe', icon:'check_circle',
+    title:'✓ 정기 스캔 완료',
+    body:'경매·체납 항목 이상 없음. 모든 항목 정상입니다.',
+  },
+];
+let pushIdx = 0;
+
+function showPush(cfg){
+  const colors = {
+    danger:  {bg:'#fff1f1', border:'#dc2626', icon:'text-red-600'},
+    warning: {bg:'#fffbeb', border:'#d97706', icon:'text-yellow-600'},
+    safe:    {bg:'#f0fdf4', border:'#16a34a', icon:'text-green-600'},
+  }[cfg.level];
+
+  const div = document.createElement('div');
+  div.className = 'push-popup bg-white shadow-xl border-l-4 p-4 flex gap-3 items-start cursor-pointer';
+  div.style.cssText = `border-left-color:${colors.border};border-top:0.5px solid #e4e7ec;border-right:0.5px solid #e4e7ec;border-bottom:0.5px solid #e4e7ec;width:320px;`;
+  div.innerHTML = `
+    <span class="material-symbols-outlined ${colors.icon} text-xl fill-icon flex-shrink-0 mt-0.5">${cfg.icon}</span>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-xs font-black text-primary leading-tight">${cfg.title}</p>
+        <button onclick="this.closest('.push-popup').remove()" class="text-on-surface-variant hover:text-primary flex-shrink-0">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+      <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">${cfg.body}</p>
+      <div class="flex items-center gap-2 mt-2">
+        <span class="mono text-xs text-on-surface-variant">부동산 블랙박스</span>
+        <span class="mono text-xs text-on-surface-variant">·</span>
+        <span class="mono text-xs text-on-surface-variant">방금 전</span>
+      </div>
+    </div>`;
+  div.onclick = (e)=>{ if(e.target.tagName!=='BUTTON' && !e.target.closest('button')) div.remove(); };
+
+  const container = document.getElementById('push-container');
+  container.prepend(div);
+  setTimeout(()=>{
+    div.classList.add('hide');
+    setTimeout(()=>div.remove(), 400);
+  }, 5000);
+}
+
+function triggerTestPush(){
+  showPush(PUSH_QUEUE[pushIdx % PUSH_QUEUE.length]);
+  pushIdx++;
+}
+
+function simulateNewAlert(){
+  const newAlert = {
+    id: Date.now(), type:'danger', icon:'warning', read:false,
+    title:'🔴 실시간 감지: 등기부 변동',
+    desc:`새로운 변동사항이 감지되었습니다. (${new Date().toLocaleTimeString('ko-KR')})`,
+    time:'방금 전', tag:'등기부 변동', tagColor:'red'
+  };
+  FEED_DATA.unshift(newAlert);
+  unreadCount++;
+  updateBadge();
+  renderFeed(feedFilter);
+  // 피드 최상단 강조
+  const list = document.getElementById('feed-list');
+  if(list.firstChild) list.firstChild.classList.add('feed-new');
+  // 동시에 푸시도
+  showPush({
+    level:'danger', icon:'warning',
+    title:'⚠ 실시간 등기부 변동 감지',
+    body:`${new Date().toLocaleTimeString('ko-KR')} — 을구 변동. 즉시 확인하세요.`,
+  });
+}
+
+/* ── 상세 팝업 ── */
+function showDetail(type){
+  const msgs = {
+    registry: '등기부 변동 상세:\n\n을구 근저당권 신규 설정\n채권자: ○○은행\n채권최고액: 5,000만 원\n접수일: 2026.05.02\n\n→ 중개사에게 즉시 연락하여 말소 여부를 확인하세요.',
+    price:    '전세가율 추이:\n\n2월: 77.7%\n3월: 78.1%\n4월: 78.9%\n5월: 79.2% ← 현재\n\n위험선(80%)까지 0.8%p 남았습니다.',
+    report:   '분석 리포트 화면으로 이동합니다.',
+    alert:    '중개사 연락처:\n담당: 김○○ 공인중개사\n연락처: 010-1234-5678\n\n위험 사항을 공유하시겠습니까?',
+    hug:      'HUG 보증보험 현황:\n가입일: 2026.01.15\n만료일: 2028.01.14\n보증금액: 3억 2천만 원\n상태: ✓ 정상 유지 중',
+  };
+  alert(msgs[type] || '준비 중입니다.');
+}
+
+/* ── 알림 설정 ── */
+function updateAlertSetting(el, name){
+  const msg = el.checked ? `${name} 알림이 활성화되었습니다.` : `${name} 알림이 비활성화되었습니다.`;
+  // 토스트
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-2 text-xs font-bold z-[300] shadow-lg';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 2000);
+}
+
+/* ── 스캔 카운트다운 ── */
+let scanSec = 30;
+setInterval(()=>{
+  scanSec--;
+  if(scanSec <= 0){
+    scanSec = 30;
+    document.getElementById('last-scan').textContent = '방금 전';
+  }
+  document.getElementById('next-scan').textContent = `${scanSec}초 후`;
+}, 1000);
+
+/* ── 초기화 ── */
+window.addEventListener('load', ()=>{
+  renderFeed('all');
+  updateBadge();
+  // 3초 후 자동 푸시 시뮬레이션
+  setTimeout(()=>showPush(PUSH_QUEUE[0]), 3000);
+});
+</script>
+</body>
+</html>

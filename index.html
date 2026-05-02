@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>부동산 블랙박스</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #f8f8f6;
+  min-height: 100vh;
+}
+
+/* 네비 */
+.bb-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px;
+  background: #fff;
+  border-bottom: 0.5px solid #e0e0da;
+  position: sticky; top: 0; z-index: 10;
+}
+.bb-logo-row { display: flex; align-items: center; gap: 10px; }
+.bb-logo-box {
+  width: 34px; height: 34px; background: #111;
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+}
+.bb-logo-name { font-size: 16px; font-weight: 700; color: #111; letter-spacing: -0.4px; }
+.bb-logo-eng { font-size: 10px; color: #888; letter-spacing: 0.5px; }
+.bb-top-btns { display: flex; gap: 8px; }
+.btn-ghost {
+  padding: 8px 18px; border-radius: 8px; font-size: 13px;
+  border: 0.5px solid #ccc; background: transparent; color: #333; cursor: pointer;
+  font-family: inherit;
+}
+.btn-ghost:hover { background: #f5f5f3; }
+.btn-dark {
+  padding: 8px 18px; border-radius: 8px; font-size: 13px;
+  border: none; background: #111; color: #fff; cursor: pointer;
+  font-family: inherit;
+}
+.btn-dark:hover { opacity: 0.85; }
+
+/* 히어로 */
+.bb-hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 56px 24px 48px; text-align: center;
+}
+.bb-hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 14px; border-radius: 20px;
+  background: #fff; border: 0.5px solid #ddd;
+  font-size: 12px; color: #666; margin-bottom: 24px;
+}
+.badge-dot { width: 7px; height: 7px; border-radius: 50%; background: #3B6D11; }
+
+.bb-hero-title {
+  font-size: 36px; font-weight: 700;
+  color: #111; line-height: 1.25; letter-spacing: -1.2px;
+  margin-bottom: 14px;
+}
+.title-underline {
+  border-bottom: 4px solid #111; padding-bottom: 2px;
+}
+.bb-hero-sub {
+  font-size: 15px; color: #666; line-height: 1.8;
+  max-width: 440px; margin-bottom: 32px;
+}
+
+/* 검색박스 */
+.bb-search-wrap {
+  width: 100%; max-width: 520px; margin-bottom: 12px;
+}
+.bb-search-box {
+  background: #fff; border: 2px solid #111;
+  border-radius: 14px; padding: 16px 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.bb-search-label {
+  font-size: 11px; color: #888; margin-bottom: 8px; text-align: left;
+}
+.bb-search-row { display: flex; gap: 10px; align-items: center; }
+.bb-search-input {
+  flex: 1; border: none; outline: none;
+  font-size: 14px; background: transparent; color: #111;
+  font-family: inherit;
+}
+.bb-search-input::placeholder { color: #aaa; }
+.bb-search-btn {
+  padding: 9px 20px; background: #111; color: #fff;
+  border: none; border-radius: 9px; font-size: 13px; font-weight: 500;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+  transition: opacity 0.15s;
+}
+.bb-search-btn:hover { opacity: 0.85; }
+
+/* 예시 칩 */
+.bb-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+.bb-chip {
+  padding: 6px 14px; border-radius: 20px;
+  background: #fff; border: 0.5px solid #ddd;
+  font-size: 12px; color: #555; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.bb-chip:hover { border-color: #111; color: #111; }
+
+/* 신뢰 수치 */
+.bb-stats-row {
+  display: flex; gap: 0;
+  border: 0.5px solid #e0e0da; border-radius: 12px;
+  overflow: hidden; background: #fff;
+  width: 100%; max-width: 520px; margin-bottom: 32px;
+}
+.bb-stat-cell {
+  flex: 1; text-align: center; padding: 16px 8px;
+  border-right: 0.5px solid #e8e8e4;
+}
+.bb-stat-cell:last-child { border-right: none; }
+.bb-stat-num { font-size: 22px; font-weight: 700; color: #111; }
+.bb-stat-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.5; }
+
+/* 결과 프리뷰 */
+.bb-result-preview {
+  display: none;
+  width: 100%; max-width: 520px;
+  background: #fff; border: 0.5px solid #e0e0da;
+  border-radius: 14px; padding: 18px;
+  text-align: left; margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.result-addr { font-size: 13px; font-weight: 500; color: #111; }
+.risk-pill {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+  background: #FCEBEB; color: #A32D2D;
+}
+.result-bars { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+.rbar-row { display: flex; align-items: center; gap: 10px; }
+.rbar-label { font-size: 12px; color: #666; width: 90px; flex-shrink: 0; }
+.rbar-bg { flex: 1; height: 6px; background: #f0f0ee; border-radius: 3px; }
+.rbar-fill { height: 6px; border-radius: 3px; }
+.rbar-val { font-size: 11px; font-weight: 500; width: 40px; text-align: right; flex-shrink: 0; }
+.result-alerts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.mini-alert {
+  padding: 8px 12px; border-radius: 8px;
+  font-size: 12px; line-height: 1.5;
+}
+.mia-danger { background: #FCEBEB; color: #A32D2D; border-left: 3px solid #E24B4A; }
+.mia-warn { background: #FAEEDA; color: #854F0B; border-left: 3px solid #EF9F27; }
+.result-cta {
+  width: 100%; padding: 11px;
+  background: #111; color: #fff; border: none;
+  border-radius: 9px; font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit;
+}
+.result-cta:hover { opacity: 0.85; }
+
+/* 기능 카드 */
+.bb-features {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; width: 100%; max-width: 520px;
+}
+.bb-feat-card {
+  background: #fff; border: 0.5px solid #e0e0da;
+  border-radius: 12px; padding: 16px; text-align: left;
+}
+.feat-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: #111; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+}
+.feat-title { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 4px; }
+.feat-desc { font-size: 11px; color: #888; line-height: 1.6; }
+
+/* 로딩 스피너 */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin 0.7s linear infinite; vertical-align: middle;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.4s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- 네비 -->
+<div class="bb-top">
+  <div class="bb-logo-row">
+    <div class="bb-logo-box">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="2" y="2" width="14" height="14" rx="3" stroke="white" stroke-width="1.4"/>
+        <path d="M5 9h8M5 6h8M5 12h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="bb-logo-name">부동산 블랙박스</div>
+      <div class="bb-logo-eng">REAL ESTATE BLACKBOX</div>
+    </div>
+  </div>
+  <div class="bb-top-btns">
+    <button class="btn-ghost">중개사 로그인</button>
+    <button class="btn-dark">무료 시작하기</button>
+  </div>
+</div>
+
+<!-- 히어로 -->
+<div class="bb-hero">
+  <div class="bb-hero-badge">
+    <div class="badge-dot"></div>
+    전세사기 제로를 향해 · 중개사 & 임차인 모두를 위한 플랫폼
+  </div>
+
+  <div class="bb-hero-title">
+    계약 전 <span class="title-underline">모든 위험</span>을<br>데이터로 확인하세요
+  </div>
+  <div class="bb-hero-sub">
+    등기부등본 자동 분석, 전세가율 위험 감지,<br>
+    HUG 보증보험 가능 여부까지 AI가 3분 안에 판단합니다
+  </div>
+
+  <!-- 주소 입력 -->
+  <div class="bb-search-wrap">
+    <div class="bb-search-box">
+      <div class="bb-search-label">매물 주소를 입력하면 AI가 즉시 분석합니다</div>
+      <div class="bb-search-row">
+        <input class="bb-search-input" id="hero-input" type="text"
+          placeholder="예) 부산시 해운대구 우동 123-45 오피스텔 1203호"/>
+        <button class="bb-search-btn" id="hero-btn" onclick="startAnalysis()">분석 시작</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bb-chips">
+    <button class="bb-chip" onclick="fillAddr('부산 해운대구 우동 센텀시티 오피스텔 1203호')">📍 해운대 오피스텔</button>
+    <button class="bb-chip" onclick="fillAddr('부산 수영구 광안동 광안리빌라 302호')">📍 광안리 빌라</button>
+    <button class="bb-chip" onclick="fillAddr('부산 동래구 온천동 한양아파트 504호')">📍 동래 아파트</button>
+  </div>
+
+  <!-- 분석 결과 프리뷰 -->
+  <div class="bb-result-preview" id="result-preview">
+    <div class="result-header">
+      <div class="result-addr" id="result-addr">-</div>
+      <div class="risk-pill">⚠ 고위험</div>
+    </div>
+    <div class="result-bars">
+      <div class="rbar-row">
+        <div class="rbar-label">선순위 채권</div>
+        <div class="rbar-bg"><div class="rbar-fill" style="width:82%;background:#E24B4A;"></div></div>
+        <div class="rbar-val" style="color:#A32D2D;">위험</div>
+      </div>
+      <div class="rbar-row">
+        <div class="rbar-label">전세가율</div>
+        <div class="rbar-bg"><div class="rbar-fill" style="width:91%;background:#E24B4A;"></div></div>
+        <div class="rbar-val" style="color:#A32D2D;">91%</div>
+      </div>
+      <div class="rbar-row">
+        <div class="rbar-label">HUG 보증보험</div>
+        <div class="rbar-bg"><div class="rbar-fill" style="width:5%;background:#E24B4A;"></div></div>
+        <div class="rbar-val" style="color:#A32D2D;">불가</div>
+      </div>
+      <div class="rbar-row">
+        <div class="rbar-label">임대인 체납</div>
+        <div class="rbar-bg"><div class="rbar-fill" style="width:40%;background:#EF9F27;"></div></div>
+        <div class="rbar-val" style="color:#854F0B;">확인 필요</div>
+      </div>
+    </div>
+    <div class="result-alerts">
+      <div class="mini-alert mia-danger">⚠ 근저당 2건, 채권최고액 1억 8천만 원 — 보증금 회수 위험 높음</div>
+      <div class="mini-alert mia-warn">△ 전세가율 91% 초과 — 역전세 위험 구간, HUG 가입 불가</div>
+    </div>
+    <button class="result-cta" onclick="goToDetail()">상세 분석 리포트 전체 보기 →</button>
+  </div>
+
+  <!-- 신뢰 수치 -->
+  <div class="bb-stats-row" id="stats-row">
+    <div class="bb-stat-cell">
+      <div class="bb-stat-num">91%</div>
+      <div class="bb-stat-desc">전세사기 주요 유형<br>사전 감지율</div>
+    </div>
+    <div class="bb-stat-cell">
+      <div class="bb-stat-num">3분</div>
+      <div class="bb-stat-desc">주소 입력부터<br>리포트 완성까지</div>
+    </div>
+    <div class="bb-stat-cell">
+      <div class="bb-stat-num">무료</div>
+      <div class="bb-stat-desc">기본 분석은<br>완전 무료 제공</div>
+    </div>
+  </div>
+
+  <!-- 핵심 기능 3개 -->
+  <div class="bb-features">
+    <div class="bb-feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <rect x="2" y="2" width="12" height="12" rx="2.5" stroke="white" stroke-width="1.3"/>
+          <path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">등기부 자동 분석</div>
+      <div class="feat-desc">갑구·을구 위험 신호를 AI가 즉시 판독해 시각화합니다</div>
+    </div>
+    <div class="bb-feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="white" stroke-width="1.3"/>
+          <path d="M8 5v3l2.2 1.3" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">위험도 종합 점수</div>
+      <div class="feat-desc">전세가율·체납·보증보험을 종합한 위험 스코어 제공</div>
+    </div>
+    <div class="bb-feat-card">
+      <div class="feat-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 13V7l5-4 5 4v6H10v-3.5H6V13H3z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">사후 모니터링</div>
+      <div class="feat-desc">계약 후 등기 변동·경매 개시를 실시간 알림으로 발송</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fillAddr(addr) {
+  document.getElementById('hero-input').value = addr;
+  document.getElementById('hero-input').focus();
+}
+
+function startAnalysis() {
+  const input = document.getElementById('hero-input');
+  const btn = document.getElementById('hero-btn');
+  const addr = input.value.trim();
+  if (!addr) {
+    input.style.outline = '2px solid #E24B4A';
+    input.placeholder = '주소를 입력해주세요';
+    setTimeout(() => { input.style.outline = ''; }, 1600);
+    return;
+  }
+
+  btn.innerHTML = '<span class="spinner"></span> 분석 중...';
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.8';
+
+  setTimeout(() => {
+    btn.textContent = '✓ 분석 완료';
+    btn.style.background = '#3B6D11';
+    btn.style.opacity = '1';
+
+    const preview = document.getElementById('result-preview');
+    const statsRow = document.getElementById('stats-row');
+    const label = addr.length > 24 ? addr.slice(0, 24) + '…' : addr;
+    document.getElementById('result-addr').textContent = label;
+
+    statsRow.style.display = 'none';
+    preview.style.display = 'block';
+    preview.classList.add('fade-up');
+  }, 1800);
+}
+
+function goToDetail() { window.location.href='/pages/report.html'; return; // original below
+  alert('상세 분석 화면으로 이동합니다.\n(다음 단계 화면을 개발 중입니다)');
+}
+
+document.getElementById('hero-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') startAnalysis();
+});
+</script>
+</body>
+</html>
