@@ -80,7 +80,7 @@ body {
   border-bottom: 4px solid #111; padding-bottom: 2px;
 }
 .bb-hero-sub {
-  font-size: 15px; color: #666; line-height: 1.8;
+  font-size: 17px; color: #666; line-height: 1.8;
   max-width: 440px; margin-bottom: 32px;
 }
 
@@ -134,7 +134,7 @@ body {
 }
 .bb-stat-cell:last-child { border-right: none; }
 .bb-stat-num { font-size: 22px; font-weight: 700; color: #111; }
-.bb-stat-desc { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.5; }
+.bb-stat-desc { font-size: 13px; color: #888; margin-top: 5px; line-height: 1.5; }
 
 /* 결과 프리뷰 */
 .bb-result-preview {
@@ -188,7 +188,7 @@ body {
   margin-bottom: 10px;
 }
 .feat-title { font-size: 13px; font-weight: 500; color: #111; margin-bottom: 4px; }
-.feat-desc { font-size: 11px; color: #888; line-height: 1.6; }
+.feat-desc { font-size: 13px; color: #888; line-height: 1.65; }
 
 /* 로딩 스피너 */
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -249,10 +249,7 @@ body {
       <div class="bb-logo-eng">REAL ESTATE BLACKBOX</div>
     </div>
   </div>
-  <div class="bb-top-btns">
-    <button class="btn-ghost" onclick="window.location.href='/pages/dashboard.html'">중개사 로그인</button>
-    <button class="btn-dark" onclick="document.getElementById('hero-input').focus();document.getElementById('hero-input').scrollIntoView({behavior:'smooth'});">무료 시작하기</button>
-  </div>
+
 </div>
 
 <!-- 히어로 -->
@@ -270,52 +267,20 @@ body {
     HUG 보증보험 가능 여부까지 AI가 3분 안에 판단합니다
   </div>
 
-  <!-- 주소 입력 -->
-  <div class="bb-search-wrap">
-    <div class="bb-search-box">
-      <div class="bb-search-label">STEP 1 &nbsp;도로명 주소 검색</div>
-      <div class="bb-search-row" style="margin-bottom:0;">
-        <input class="bb-search-input" id="hero-input" type="text"
-          placeholder="도로명 주소 입력 (예: 역삼로 123)"
-          autocomplete="off"
-          oninput="onAddrInput(this.value)"
-          onkeydown="onAddrKeydown(event)"/>
-      </div>
-      <!-- 상세주소 입력 (자동완성 선택 후 표시) -->
-      <div id="detail-addr-wrap" style="display:none;margin-top:10px;border-top:0.5px solid #e4e7ec;padding-top:10px;">
-        <div class="bb-search-label" style="margin-bottom:6px;">STEP 2 &nbsp;상세 주소 입력 <span style="color:#dc2626;">*필수</span></div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <div id="selected-road-addr" style="font-size:12px;color:#041627;font-weight:600;flex:1;padding:6px 0;"></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <input id="detail-input" type="text"
-            placeholder="동/층/호수 입력 (예: 102동 1203호)"
-            style="flex:1;border:1px solid #c4c6cd;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;"
-            onkeydown="if(event.key==='Enter') startAnalysis()"
-            oninput="validateDetailAddr()"/>
-          <button class="bb-search-btn" id="hero-btn" onclick="startAnalysis()"
-            style="opacity:0.4;pointer-events:none;">
-            분석 시작
-          </button>
-        </div>
-        <div id="detail-hint" style="font-size:11px;color:#8192a7;margin-top:4px;">
-          아파트·오피스텔은 동·호수, 빌라·단독주택은 층·호수를 입력하세요
-        </div>
-      </div>
-      <!-- 자동완성 전 분석 버튼 (주소 미선택 상태) -->
-      <div id="pre-select-btn-wrap" style="margin-top:10px;">
-        <button class="bb-search-btn" style="width:100%;opacity:0.35;pointer-events:none;" id="pre-select-btn">
-          위 주소를 검색하세요
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 주소 자동완성 드롭다운 -->
-  <div id="addr-suggestions" style="display:none;position:relative;max-width:540px;margin:-24px auto 8px;z-index:100;">
-    <div style="background:#fff;border:1px solid #c4c6cd;border-top:none;box-shadow:0 4px 12px rgba(0,0,0,.08);">
-      <div id="suggestions-list"></div>
-    </div>
+  <!-- CTA 버튼 2열 -->
+  <div style="display:flex;gap:14px;max-width:480px;width:100%;margin:0 auto;">
+    <button onclick="window.location.href='/pages/dashboard.html'"
+      style="flex:1;padding:16px 20px;background:transparent;color:#fff;font-size:16px;font-weight:700;border:2px solid rgba(255,255,255,.5);border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;"
+      onmouseover="this.style.background='rgba(255,255,255,.1)';this.style.borderColor='rgba(255,255,255,.85)'"
+      onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,.5)'">
+      💼 중개사 로그인
+    </button>
+    <button onclick="window.location.href='/pages/analyze.html'"
+      style="flex:1;padding:16px 20px;background:#fff;color:#041627;font-size:16px;font-weight:900;border:none;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 20px rgba(0,0,0,.2);"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(0,0,0,.25)'"
+      onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(0,0,0,.2)'">
+      🔍 무료 분석 시작
+    </button>
   </div>
 
   <!-- 분석 결과 프리뷰 -->
