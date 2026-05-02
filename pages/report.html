@@ -462,7 +462,7 @@ tailwind.config = {
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">auto_fix_high</span>
       <span class="sec-head-title">계약 시 유의사항</span>
-      <span class="ml-auto text-xs text-on-surface-variant">계약서 자동 삽입 가능</span>
+      
     </div>
     <!-- 미리보기 1개 -->
     <div class="p-5 flex gap-3 items-start">
@@ -501,25 +501,6 @@ tailwind.config = {
     </div>
     <!-- 액션 버튼 -->
     <div class="flex gap-3 p-5 bg-surface-container-low border-t border-outline-variant">
-      <button onclick="alert('PDF 출력 기능 준비 중입니다.')" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-base">picture_as_pdf</span> 리포트 PDF 출력
-      </button>
-      <button onclick="alert('공유 링크가 클립보드에 복사되었습니다.')" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-base">link</span> 공유 링크 복사
-      </button>
-      <button onclick="(function(){
-        var p = new URLSearchParams(window.location.search);
-        var params = new URLSearchParams({
-          address:  p.get('address')  || '',
-          score:    p.get('score')    || '78',
-          risk:     p.get('risk')     || 'warning',
-          contract: p.get('contract') || '전세',
-          deposit:  p.get('deposit')  || ''
-        });
-        window.location.href = '/pages/monitoring.html?' + params.toString();
-      })()" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold bg-primary text-white hover:opacity-90 transition-opacity">
-        <span class="material-symbols-outlined text-base">notifications_active</span> 모니터링 등록
-      </button>
     </div>
   </section>
 
@@ -605,17 +586,19 @@ if ('serviceWorker' in navigator) {
   const _score   = p.get('score')    || sessionStorage.getItem('bb_score')   || '';
   const _risk    = p.get('risk')      || sessionStorage.getItem('bb_risk')    || '';
 
-  // 분석 결과 없으면 안내 화면 표시
-  if (!address) {
-    document.querySelector('main')?.insertAdjacentHTML('afterbegin',
-      '<div style="text-align:center;padding:60px 20px;background:#fff;border:1px solid #dde0e6;border-radius:12px;margin-bottom:20px;">' +
-      '<div style="font-size:48px;margin-bottom:16px;">📋</div>' +
+  // 분석 결과 없으면 안내 화면 표시 (주소 파라미터 + 세션 둘 다 없을 때만)
+  if (!address && !sessionStorage.getItem('bb_address')) {
+    var emptyDiv = document.createElement('div');
+    emptyDiv.style.cssText = 'text-align:center;padding:60px 20px;background:#fff;border:1px solid #dde0e6;border-radius:12px;margin-bottom:20px;';
+    emptyDiv.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">📋</div>' +
       '<div style="font-size:20px;font-weight:900;color:#041627;margin-bottom:8px;">분석 결과가 없습니다</div>' +
-      '<div style="font-size:14px;color:#74777d;margin-bottom:24px;">먼저 매물 주소를 입력하고 분석을 시작해주세요</div>' +
-      '<button onclick="window.location.href='/pages/analyze.html'" ' +
-      'style="padding:12px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">🔍 분석 시작하기</button>' +
-      '</div>'
-    );
+      '<div style="font-size:14px;color:#74777d;margin-bottom:24px;">먼저 매물 주소를 입력하고 분석을 시작해주세요</div>';
+    var goBtn = document.createElement('button');
+    goBtn.textContent = '🔍 분석 시작하기';
+    goBtn.style.cssText = 'padding:12px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;';
+    goBtn.onclick = function(){ location.href = '/pages/analyze.html'; };
+    emptyDiv.appendChild(goBtn);
+    document.querySelector('main').insertBefore(emptyDiv, document.querySelector('main').firstChild);
   }
   const score    = parseInt(_score || '78');
   const risk     = _risk || 'warning';
@@ -624,12 +607,16 @@ if ('serviceWorker' in navigator) {
 
   // ── 주소 파싱 ──
   const addrEl = document.getElementById('meta-addr-val');
-  if (addrEl && address) {
-    // 앞 2단어(시도+구) / 나머지 줄바꿈
-    const parts = address.trim().split(' ');
-    const line1 = parts.slice(0, 2).join(' ');
-    const line2 = parts.slice(2).join(' ');
-    addrEl.innerHTML = line2 ? line1 + '<br>' + line2 : line1;
+  if (addrEl) {
+    if (address) {
+      const parts = address.trim().split(' ');
+      const line1 = parts.slice(0, 2).join(' ');
+      const line2 = parts.slice(2).join(' ');
+      addrEl.innerHTML = line2 ? line1 + '<br>' + line2 : line1;
+    } else {
+      addrEl.textContent = '주소 정보 없음';
+      addrEl.style.color = '#8192a7';
+    }
   }
 
   // ── 유형 추정 (주소 키워드로) ──
@@ -643,11 +630,17 @@ if ('serviceWorker' in navigator) {
 
   // ── 계약 유형 ──
   const contractEl = document.getElementById('meta-contract-val');
-  if (contractEl) contractEl.textContent = contract || sessionStorage.getItem('bb_contract') || '—';
-  const _contract = contract || sessionStorage.getItem('bb_contract') || '';
+  const _contractFinal = contract || sessionStorage.getItem('bb_contract') || '';
+  if (contractEl) contractEl.textContent = _contractFinal || '정보 없음';
+  const _contract = contract || sessionStorage.getItem('bb_contract') || '전세';
 
   // ── 계약유형별 체크리스트 동적 적용 ──
-  applyContractChecklist(_contract);
+  // applyContractChecklist는 하단 script에 정의되므로 window.onload 후 실행
+  window.addEventListener('load', function() {
+    if (typeof applyContractChecklist === 'function') {
+      applyContractChecklist(_contract);
+    }
+  });
 
   // ── 계약유형 배지 표시 ──
   const typeBadge = document.getElementById('contract-type-badge');
@@ -667,8 +660,24 @@ if ('serviceWorker' in navigator) {
   }
 
   // ── 보증금 ──
+  const _depositFinal = deposit || sessionStorage.getItem('bb_deposit') || '';
   const depositEl = document.getElementById('meta-deposit-val');
-  if (depositEl) depositEl.textContent = deposit || '입력 정보 없음';
+  if (depositEl) {
+    if (_depositFinal) {
+      // 만원 단위 → 억/만 표시
+      const num = parseInt(_depositFinal);
+      if (!isNaN(num)) {
+        const uk = Math.floor(num / 10000);
+        const man = num % 10000;
+        depositEl.textContent = uk > 0 ? (man > 0 ? uk + '억 ' + man + '만원' : uk + '억원') : num + '만원';
+      } else {
+        depositEl.textContent = _depositFinal;
+      }
+    } else {
+      depositEl.textContent = '입력 정보 없음';
+      depositEl.style.color = '#8192a7';
+    }
+  }
 
   // ── KB 시세 (Mock — 실제 API 연동 후 대체) ──
   const priceEl = document.getElementById('meta-price-val');
@@ -841,24 +850,32 @@ function applyContractChecklist(contract) {
   if (!container) return;
 
   container.innerHTML = items.map((item, i) => {
-    const statusText = item.done ? '✓ 검증됨' : '✗ 미확인';
-    const statusClass = item.done ? 'text-xs font-bold text-green-700' : 'text-xs font-bold text-red-700';
-    const iconHtml = item.done
-      ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect width="20" height="20" rx="4" fill="#166534"/><path d="M6 10l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-      : `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="1" width="18" height="18" rx="3.5" stroke="#c4c6cd" stroke-width="1.5" fill="none"/></svg>`;
+    const icon = item.done
+      ? `<span class="material-symbols-outlined fill-icon text-green-600">check_box</span>`
+      : `<span class="material-symbols-outlined text-outline">check_box_outline_blank</span>`;
     const reqBadge = item.req
-      ? `<span style="font-size:10px;font-weight:700;color:#dc2626;margin-right:4px;">필수</span>`
-      : `<span style="font-size:10px;font-weight:600;color:#74777d;margin-right:4px;">권장</span>`;
+      ? `<span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full" style="font-size:10px;">필수</span>`
+      : `<span class="mono text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant" style="font-size:10px;">권장</span>`;
+    const statusText = item.done ? '✓ 검증됨' : '✗ 미확인';
+    const statusColor = item.done ? 'text-green-700' : 'text-red-700';
     return `<div class="chk-row" onclick="toggleCheck(this)">
       <div class="flex items-center gap-3">
-        ${iconHtml}
-        <span class="text-sm ${item.done ? 'font-medium text-primary' : 'text-on-surface-variant'}">${reqBadge}${item.text}</span>
+        ${icon}
+        <span class="text-sm ${item.done ? 'font-medium text-primary' : 'text-on-surface-variant'}">${item.text}</span>
       </div>
       <div class="flex items-center gap-3">
-        <span class="${statusClass}">${statusText}</span>
+        ${reqBadge}
+        <span class="text-xs font-bold ${statusColor}">${statusText}</span>
       </div>
     </div>`;
   }).join('');
+
+  // 섹션 제목 업데이트
+  const titleEl = document.getElementById('chk-section-title');
+  if (titleEl) {
+    const typeNames = { '전세':'전세 계약', '월세':'월세 계약', '매매':'매매 계약' };
+    titleEl.textContent = (typeNames[contract] || '블랙박스') + ' 체크리스트';
+  }
 
   updateProgress();
 }
