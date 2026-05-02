@@ -1,822 +1,1454 @@
 <!DOCTYPE html>
-<html class="light" lang="ko">
+<html lang="ko">
 <head>
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#041627"/>
-  <meta name="mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="블랙박스"/>
-  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/icon-32.png"/>
-  <link rel="shortcut icon" href="/assets/icons/favicon.ico"/>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>부동산 블랙박스 — 중개사 대시보드</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>
-tailwind.config = {
-  darkMode:"class",
-  theme:{extend:{
-    colors:{
-      "primary":"#041627","primary-container":"#1a2b3c",
-      "on-primary":"#ffffff","on-primary-container":"#8192a7",
-      "secondary":"#505f76","surface":"#fbf9fa",
-      "surface-container-lowest":"#ffffff","surface-container-low":"#f5f3f4",
-      "surface-container":"#efedef","surface-container-high":"#e9e7e9",
-      "surface-container-highest":"#e4e2e3","on-surface":"#1b1c1d",
-      "on-surface-variant":"#44474c","outline":"#74777d",
-      "outline-variant":"#c4c6cd","background":"#fbf9fa",
-      "error":"#ba1a1a",
-    },
-    fontFamily:{
-      "sans":["Noto Sans KR","Inter","sans-serif"],
-      "mono":["IBM Plex Mono","monospace"],
-    },
-    borderRadius:{"DEFAULT":"0","lg":"0","xl":"4px","full":"9999px"},
-  }}
-}
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>부동산 블랙박스 — 중개사 수첩</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#041627"/>
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/icon-32.png"/>
 <style>
-*{font-family:'Noto Sans KR','Inter',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#041627; --navy-mid:#1a2b3c; --navy-light:#2d4a6a;
+  --bg:#f8f9fb; --white:#fff; --border:#dde0e6; --border2:#eaecf0;
+  --text:#1b1c1d; --text2:#44474c; --text3:#74777d;
+  --danger-bg:#fff1f1; --danger:#991b1b;
+  --warn-bg:#fffbeb;   --warn:#92400e;
+  --safe-bg:#f0fdf4;   --safe:#166534;
+  --info-bg:#eff6ff;   --info:#1e40af;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 .mono{font-family:'IBM Plex Mono',monospace;}
-.material-symbols-outlined{
-  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
-  display:inline-block;vertical-align:middle;
-}
-.fill-icon{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
 
-/* 사이드바 */
-.sidebar{width:220px;flex-shrink:0;}
-.nav-item{
+/* ── 레이아웃 ── */
+.app{display:flex;min-height:100vh;}
+
+/* ── 사이드바 ── */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:40;
+}
+.sb-logo{
   display:flex;align-items:center;gap:10px;
-  padding:10px 16px;font-size:13px;font-weight:500;
-  color:#8192a7;cursor:pointer;transition:all .15s;
+  padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sb-logo-icon{
+  width:32px;height:32px;border-radius:7px;
+  background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;
+}
+.sb-logo-name{font-size:14px;font-weight:900;color:#fff;letter-spacing:-0.3px;}
+.sb-logo-sub{font-size:9px;color:#8192a7;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;}
+
+.sb-agency{
+  margin:12px;padding:10px 12px;
+  background:rgba(255,255,255,.06);
+  border-radius:8px;border:1px solid rgba(255,255,255,.08);
+}
+.sb-agency-label{font-size:10px;color:#8192a7;margin-bottom:2px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;}
+.sb-agency-name{font-size:13px;font-weight:700;color:#fff;}
+.sb-agency-id{font-size:10px;color:#8192a7;font-family:'IBM Plex Mono',monospace;}
+
+.sb-nav{flex:1;padding:8px 0;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  font-size:13px;font-weight:500;color:#8192a7;
+  cursor:pointer;transition:all .12s;
   border-left:3px solid transparent;
+  border:none;background:none;width:100%;text-align:left;font-family:inherit;
 }
-.nav-item:hover{color:#fff;background:rgba(255,255,255,.06);}
-.nav-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:#fff;}
-.nav-item .material-symbols-outlined{font-size:18px;}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.06);}
+.sb-item.active{color:#fff;background:rgba(255,255,255,.1);border-left:3px solid #fff;}
+.sb-item .material-symbols-outlined{font-size:18px;}
+.sb-badge{
+  margin-left:auto;min-width:18px;height:18px;
+  background:rgba(220,38,38,.8);color:#fff;
+  border-radius:9px;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 5px;font-family:'IBM Plex Mono',monospace;
+}
+.sb-badge.green{background:rgba(22,163,74,.8);}
 
-/* 섹션 헤더 */
-.sec-head{
+.sb-bottom{
+  padding:12px;border-top:1px solid rgba(255,255,255,.08);
+}
+.sb-settings{
   display:flex;align-items:center;gap:8px;
-  padding:10px 16px;background:#e9e7e9;
-  border-bottom:1px solid #c4c6cd;
+  padding:8px 12px;border-radius:7px;
+  font-size:12px;color:#8192a7;cursor:pointer;
+  border:none;background:none;width:100%;font-family:inherit;
+  transition:all .12s;
 }
-.sec-title{font-size:11px;font-weight:700;letter-spacing:1.8px;color:#041627;text-transform:uppercase;}
+.sb-settings:hover{color:#fff;background:rgba(255,255,255,.06);}
 
-/* 상태 칩 */
-.chip-safe   {background:rgba(34,197,94,.1); color:#166534;}
-.chip-warn   {background:rgba(245,158,11,.1);color:#92400e;}
-.chip-danger {background:rgba(220,38,38,.1); color:#991b1b;}
-.chip-info   {background:rgba(37,99,235,.1); color:#1e40af;}
+/* ── 메인 콘텐츠 ── */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;}
 
-/* 위험 점수 바 */
-.score-bar{height:5px;border-radius:2px;}
-
-/* 파이프라인 단계 */
-.pipe-stage{
-  flex:1;padding:12px 10px;text-align:center;
-  border-right:1px solid #c4c6cd;position:relative;cursor:pointer;
-  transition:background .12s;
+/* ── 탑바 ── */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  background:var(--white);border-bottom:1px solid var(--border);
+  height:56px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 24px;
 }
-.pipe-stage:last-child{border-right:none;}
-.pipe-stage:hover{background:#f5f3f4;}
-.pipe-stage.active-stage{background:#041627;}
-.pipe-stage.active-stage *{color:#fff!important;}
-
-/* 카드 호버 */
-.prop-card{cursor:pointer;transition:box-shadow .15s;}
-.prop-card:hover{box-shadow:0 4px 20px rgba(4,22,39,.1);}
-
-/* 펄스 */
-@keyframes pulse-green{
-  0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}
-  70%{box-shadow:0 0 0 6px rgba(34,197,94,0);}
-  100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+.topbar-title{font-size:16px;font-weight:700;color:var(--navy);}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.btn-primary{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;background:var(--navy);color:#fff;
+  border:none;border-radius:8px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:opacity .12s;
 }
-.pulse-dot{animation:pulse-green 2s infinite;border-radius:50%;}
+.btn-primary:hover{opacity:.88;}
+.btn-ghost{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;background:var(--white);color:var(--text);
+  border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .12s;
+}
+.btn-ghost:hover{border-color:var(--navy);}
 
-/* 토스트 */
-@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.toast{animation:toastIn .3s ease forwards;}
+/* ── 페이지 컨텐츠 ── */
+.page{display:none;padding:20px 24px;}
+.page.active{display:block;}
 
-/* 피드 등장 */
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-.fade-up{animation:fadeUp .4s ease forwards;}
+/* ── 섹션 카드 ── */
+.card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:16px;
+}
+.card-head{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 16px;background:#f5f3f4;
+  border-bottom:1px solid var(--border);
+}
+.card-head-title{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--navy);text-transform:uppercase;}
 
-body{min-height:100dvh;background:#fbf9fa;}
-::-webkit-scrollbar{width:5px;}
-::-webkit-scrollbar-thumb{background:#c4c6cd;border-radius:3px;}
+/* ── KPI 그리드 ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.kpi{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:10px;padding:16px;
+}
+.kpi-label{font-size:11px;color:var(--text3);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;}
+.kpi-val{font-size:28px;font-weight:900;color:var(--navy);line-height:1;font-family:'IBM Plex Mono',monospace;}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px;}
 
-  /* ── 공통 모바일 반응형 ── */
-  @media (max-width: 768px) {
-    /* 헤더 네비 숨김 */
-    nav.flex.items-center.gap-1.ml-6 { display: none !important; }
+/* ── 오늘 일정 ── */
+.schedule-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--border2);
+  cursor:pointer;transition:background .1s;
+}
+.schedule-item:last-child{border-bottom:none;}
+.schedule-item:hover{background:#fafafa;}
+.schedule-time{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;
+  color:var(--navy);min-width:40px;margin-top:2px;
+}
+.schedule-type{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px;
+}
+.st-visit{background:#3b82f6;}
+.st-contract{background:#22c55e;}
+.st-consult{background:#f59e0b;}
+.st-other{background:#8192a7;}
+.schedule-content{flex:1;}
+.schedule-client{font-size:13px;font-weight:600;color:var(--navy);}
+.schedule-addr{font-size:11px;color:var(--text3);margin-top:1px;}
+.schedule-memo{font-size:11px;color:var(--text2);margin-top:3px;}
 
-    /* 메인 패딩 */
-    .wrap, main { padding-left: 12px !important; padding-right: 12px !important; }
+/* ── 할 일 ── */
+.todo-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;border-bottom:1px solid var(--border2);
+  cursor:pointer;transition:background .1s;
+}
+.todo-item:last-child{border-bottom:none;}
+.todo-item:hover{background:#fafafa;}
+.todo-check{
+  width:18px;height:18px;border-radius:4px;flex-shrink:0;
+  border:1.5px solid #c4c6cd;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.todo-check.done{background:var(--navy);border-color:var(--navy);}
+.todo-text{font-size:13px;color:var(--text);flex:1;}
+.todo-text.done{text-decoration:line-through;color:var(--text3);}
+.todo-tag{
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.tag-urgent{background:var(--danger-bg);color:var(--danger);}
+.tag-normal{background:var(--info-bg);color:var(--info);}
 
-    /* 히어로 그리드 1열 */
-    .hero-grid,
-    .grid.grid-cols-1.md\:grid-cols-12 {
-      grid-template-columns: 1fr !important;
-    }
-
-    /* 테이블 가로 스크롤 */
-    table { display: block; overflow-x: auto; white-space: nowrap; }
-
-    /* 플래그 그리드 */
-    .flags-grid,
-    .grid.grid-cols-1.md\:grid-cols-2 {
-      grid-template-columns: 1fr !important;
-    }
-
-    /* 특약 액션 버튼 세로 */
-    .action-bar,
-    .bb-actions,
-    .flex.gap-3 {
-      flex-wrap: wrap;
-    }
-    .act-btn { min-width: 100%; }
-
-    /* 모니터링 그리드 */
-    .monitor-grid,
-    .grid.grid-cols-3 {
-      grid-template-columns: 1fr !important;
-    }
-    .monitor-item { border-right: none !important; border-bottom: 0.5px solid #c4c6cd; }
-
-    /* 대시보드 사이드바 숨김 → 상단 탭으로 */
-    .sidebar { display: none !important; }
-    body.flex { flex-direction: column !important; }
-  }
-
-  @media (max-width: 480px) {
-    .bb-stats, .grid.grid-cols-4 {
-      grid-template-columns: 1fr 1fr !important;
-    }
-    .pipe-stage { padding: 8px 6px; }
-    .pipe-stage .mono { font-size: 9px; }
-  }
-</style>
-</head>
-
-<body class="text-on-background flex flex-col" style="min-height:100vh;">
-
-<!-- ══════════════════ HEADER ══════════════════ -->
-<header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;">
-  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-    <div style="width:34px;height:34px;border-radius:8px;background:#041627;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <svg viewBox="0 0 22 22" fill="none" width="20" height="20">
-        <path d="M11 2.5L2.5 9.5V20H8.5V15H13.5V20H19.5V9.5L11 2.5Z" fill="white"/>
-        <rect x="8.5" y="12" width="5" height="6" rx="1" fill="#041627"/>
-        <rect x="9.3" y="13.5" width="3.4" height="2.8" rx="0.5" fill="white"/>
-        <path d="M10.2 13.5V12.6a0.8 0.8 0 011.6 0v0.9" stroke="white" stroke-width="1" stroke-linecap="round" fill="none"/>
-        <circle cx="11" cy="14.9" r="0.5" fill="#041627"/>
-      </svg>
-    </div>
-    <div>
-      <div style="font-size:15px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
-      <div style="font-size:9px;color:#8192a7;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;">REAL ESTATE BLACKBOX</div>
-    </div>
-  </a>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <button onclick="doShare()" style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
-      🔗 공유
-    </button>
-    <button onclick="window.location.href='/pages/dashboard.html'" style="padding:7px 16px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-      💼 중개사
-    </button>
-  </div>
-</header>
-
-<!-- ══════════════════ BODY = SIDEBAR + MAIN ══════════════════ -->
-<div class="flex flex-1" style="min-height:calc(100vh - 56px);">
-
-  <!-- ── 사이드바 ── -->
-  <aside class="sidebar bg-primary flex flex-col py-6" style="min-height:100%;">
-    <div class="px-4 mb-6">
-      <p class="mono text-xs tracking-widest mb-1" style="color:#4f6073;">MENU</p>
-    </div>
-
-    <div class="nav-item active" onclick="setPage('overview',this)">
-      <span class="material-symbols-outlined">dashboard</span> 대시보드 홈
-    </div>
-    <div class="nav-item" onclick="setPage('properties',this)">
-      <span class="material-symbols-outlined">home_work</span> 담당 매물
-      <span class="ml-auto mono text-xs px-1.5 py-0.5 rounded-full" style="background:rgba(255,255,255,.15);color:#fff;">8</span>
-    </div>
-    <div class="nav-item" onclick="setPage('contracts',this)">
-      <span class="material-symbols-outlined">description</span> 계약 진행
-      <span class="ml-auto mono text-xs px-1.5 py-0.5 rounded-full" style="background:rgba(239,68,68,.8);color:#fff;">3</span>
-    </div>
-    <div class="nav-item" onclick="setPage('clients',this)">
-      <span class="material-symbols-outlined">people</span> 고객 관리
-    </div>
-    <div class="nav-item" onclick="setPage('alerts',this)">
-      <span class="material-symbols-outlined">notifications</span> 위험 알림
-      <span class="ml-auto mono text-xs px-1.5 py-0.5 rounded-full" style="background:rgba(239,68,68,.8);color:#fff;">2</span>
-    </div>
-    <div class="nav-item" onclick="setPage('checklist',this)">
-      <span class="material-symbols-outlined">fact_check</span> 체크리스트
-    </div>
-
-    <div class="mt-auto px-4">
-      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px;">
-        <div class="nav-item" style="padding-left:0;">
-          <span class="material-symbols-outlined">settings</span> 설정
-        </div>
-        <div class="nav-item" style="padding-left:0;">
-          <span class="material-symbols-outlined">help_outline</span> 도움말
-        </div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- ── 메인 콘텐츠 ── -->
-  <main class="flex-1 overflow-y-auto p-6 space-y-5" style="background:#fbf9fa;">
-
-    <!-- ════ 페이지: 대시보드 홈 ════ -->
-    <div id="page-overview">
-
-      <!-- KPI 4개 -->
-      <div class="grid grid-cols-4 gap-4 mb-5">
-        <div class="bg-white border border-outline-variant p-4 fade-up">
-          <p class="mono text-xs tracking-widest text-on-surface-variant mb-2">담당 매물</p>
-          <p class="text-3xl font-black text-primary mono">8</p>
-          <p class="text-xs text-on-surface-variant mt-1">전월 대비 <span class="text-green-600 font-bold">+2</span></p>
-        </div>
-        <div class="bg-white border border-outline-variant p-4 fade-up">
-          <p class="mono text-xs tracking-widest text-on-surface-variant mb-2">진행 중 계약</p>
-          <p class="text-3xl font-black text-primary mono">3</p>
-          <p class="text-xs text-on-surface-variant mt-1">이번 달 완료 <span class="font-bold">2건</span></p>
-        </div>
-        <div class="bg-white border border-outline-variant p-4 fade-up">
-          <p class="mono text-xs tracking-widest text-on-surface-variant mb-2">위험 매물</p>
-          <p class="text-3xl font-black mono" style="color:#dc2626;">2</p>
-          <p class="text-xs mt-1" style="color:#dc2626;">즉시 확인 필요</p>
-        </div>
-        <div class="bg-white border border-outline-variant p-4 fade-up">
-          <p class="mono text-xs tracking-widest text-on-surface-variant mb-2">이번 달 수수료</p>
-          <p class="text-3xl font-black text-primary mono">580<span class="text-lg">만</span></p>
-          <p class="text-xs text-on-surface-variant mt-1">목표 대비 <span class="text-green-600 font-bold">87%</span></p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-3 gap-5">
-
-        <!-- 왼쪽: 매물 목록 + 오늘 할 일 -->
-        <div class="col-span-2 space-y-5">
-
-          <!-- 담당 매물 리스트 -->
-          <div class="bg-white border border-outline-variant">
-            <div class="sec-head">
-              <span class="material-symbols-outlined text-primary text-base">home_work</span>
-              <span class="sec-title">담당 매물 현황</span>
-              <button onclick="setPage('properties', document.querySelector('.nav-item:nth-child(2)') )" class="ml-auto text-xs text-on-surface-variant hover:text-primary transition-colors">전체 보기 →</button>
-            </div>
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-surface-container-low border-b border-outline-variant">
-                  <th class="px-4 py-2 mono text-xs font-bold text-primary tracking-widest">주소</th>
-                  <th class="px-4 py-2 mono text-xs font-bold text-primary tracking-widest">유형</th>
-                  <th class="px-4 py-2 mono text-xs font-bold text-primary tracking-widest">보증금</th>
-                  <th class="px-4 py-2 mono text-xs font-bold text-primary tracking-widest">안전점수</th>
-                  <th class="px-4 py-2 mono text-xs font-bold text-primary tracking-widest">상태</th>
-                  <th class="px-4 py-2 mono text-xs font-bold text-primary tracking-widest"></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-outline-variant text-sm" id="prop-table-body">
-              </tbody>
-            </table>
-          </div>
-
-          <!-- 계약 파이프라인 -->
-          <div class="bg-white border border-outline-variant">
-            <div class="sec-head">
-              <span class="material-symbols-outlined text-primary text-base">account_tree</span>
-              <span class="sec-title">계약 진행 파이프라인</span>
-            </div>
-            <!-- 단계 헤더 -->
-            <div class="flex border-b border-outline-variant">
-              <div class="pipe-stage active-stage" onclick="filterPipeline('검토')">
-                <p class="mono text-xs font-bold tracking-widest">01 · 검토</p>
-                <p class="text-2xl font-black mono mt-1">3</p>
-                <p class="text-xs mt-0.5" style="color:#8192a7;">매물 분석 중</p>
-              </div>
-              <div class="pipe-stage" onclick="filterPipeline('협의')">
-                <p class="mono text-xs font-bold tracking-widest text-on-surface-variant">02 · 협의</p>
-                <p class="text-2xl font-black mono mt-1 text-primary">2</p>
-                <p class="text-xs mt-0.5 text-on-surface-variant">조건 협의 중</p>
-              </div>
-              <div class="pipe-stage" onclick="filterPipeline('계약')">
-                <p class="mono text-xs font-bold tracking-widest text-on-surface-variant">03 · 계약</p>
-                <p class="text-2xl font-black mono mt-1 text-primary">1</p>
-                <p class="text-xs mt-0.5 text-on-surface-variant">서류 준비 중</p>
-              </div>
-              <div class="pipe-stage" onclick="filterPipeline('완료')">
-                <p class="mono text-xs font-bold tracking-widest text-on-surface-variant">04 · 완료</p>
-                <p class="text-2xl font-black mono mt-1 text-primary">2</p>
-                <p class="text-xs mt-0.5 text-on-surface-variant">이번 달 완료</p>
-              </div>
-            </div>
-            <!-- 계약 목록 -->
-            <div class="divide-y divide-outline-variant" id="pipeline-list">
-            </div>
-          </div>
-
-        </div>
-
-        <!-- 오른쪽: 위험 알림 + 할 일 -->
-        <div class="col-span-1 space-y-5">
-
-          <!-- 위험 알림 -->
-          <div class="bg-white border border-outline-variant">
-            <div class="sec-head">
-              <span class="material-symbols-outlined text-error text-base">warning</span>
-              <span class="sec-title">위험 알림</span>
-              <span class="ml-auto chip-danger text-xs font-bold px-2 py-0.5 rounded-full">2건</span>
-            </div>
-            <div class="divide-y divide-outline-variant">
-              <div class="p-4 hover:bg-surface-container-low transition-colors cursor-pointer" onclick="showToast('강남구 역삼동 매물 상세 리포트로 이동합니다.')">
-                <div class="flex items-start gap-3">
-                  <div style="width:8px;height:8px;border-radius:50%;background:#dc2626;flex-shrink:0;margin-top:4px;" class="pulse-dot"></div>
-                  <div>
-                    <p class="text-xs font-black text-primary mb-0.5">근저당 신규 설정</p>
-                    <p class="text-xs text-on-surface-variant leading-relaxed">강남구 역삼동 825-13<br>을구 5,000만 원 추가</p>
-                    <p class="mono text-xs text-on-surface-variant mt-1.5">오늘 09:14 · 임차인: 이○○</p>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 hover:bg-surface-container-low transition-colors cursor-pointer" onclick="showToast('해운대구 우동 매물 상세 리포트로 이동합니다.')">
-                <div class="flex items-start gap-3">
-                  <div style="width:8px;height:8px;border-radius:50%;background:#d97706;flex-shrink:0;margin-top:4px;"></div>
-                  <div>
-                    <p class="text-xs font-black text-primary mb-0.5">전세가율 위험선 근접</p>
-                    <p class="text-xs text-on-surface-variant leading-relaxed">해운대구 우동 오피스텔<br>전세가율 91.2% (위험)</p>
-                    <p class="mono text-xs text-on-surface-variant mt-1.5">어제 16:30 · 임차인: 박○○</p>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4">
-                <button onclick="showToast('모니터링 화면으로 이동합니다.')" class="w-full py-2 text-xs font-bold text-primary hover:bg-surface-container-low transition-colors border border-outline-variant">
-                  전체 알림 보기 →
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 오늘 할 일 -->
-          <div class="bg-white border border-outline-variant">
-            <div class="sec-head">
-              <span class="material-symbols-outlined text-primary text-base">checklist</span>
-              <span class="sec-title">오늘 할 일</span>
-              <span class="ml-auto mono text-xs text-on-surface-variant" id="todo-label">2 / 5</span>
-            </div>
-            <div class="divide-y divide-outline-variant" id="todo-list">
-            </div>
-          </div>
-
-          <!-- 빠른 체크리스트 실행 -->
-          <div class="bg-primary p-5">
-            <p class="mono text-xs tracking-widest mb-2" style="color:#8192a7;">QUICK ACTION</p>
-            <p class="text-sm font-bold text-white mb-3">신규 매물 안전 분석</p>
-            <input id="quick-addr" type="text" placeholder="주소 입력..."
-              class="w-full bg-primary-container text-white text-xs px-3 py-2 border border-outline-variant placeholder-on-primary-container outline-none mb-2"
-              style="color:#fff;"/>
-            <button onclick="quickAnalyze()" class="w-full py-2 text-xs font-bold bg-white text-primary hover:opacity-90 transition-opacity">
-              즉시 분석 시작 →
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ════ 페이지: 담당 매물 (전체) ════ -->
-    <div id="page-properties" class="hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-black text-primary">담당 매물 전체</h2>
-        <div class="flex gap-2">
-          <select class="text-xs border border-outline-variant px-3 py-2 bg-white text-on-surface outline-none">
-            <option>전체 유형</option><option>전세</option><option>월세</option>
-          </select>
-          <select class="text-xs border border-outline-variant px-3 py-2 bg-white text-on-surface outline-none">
-            <option>위험도 전체</option><option>위험</option><option>주의</option><option>안전</option>
-          </select>
-          <button onclick="showToast('새 매물 등록 화면으로 이동합니다.')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-primary text-white">
-            <span class="material-symbols-outlined text-sm">add</span> 매물 추가
-          </button>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-4" id="prop-cards">
-      </div>
-    </div>
-
-    <!-- ════ 페이지: 계약 진행 ════ -->
-    <div id="page-contracts" class="hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-black text-primary">계약 진행 현황</h2>
-      </div>
-      <div class="space-y-4" id="contracts-list">
-      </div>
-    </div>
-
-    <!-- ════ 페이지: 고객 관리 ════ -->
-    <div id="page-clients" class="hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-black text-primary">고객 관리</h2>
-        <button onclick="showToast('고객 추가 기능 준비 중입니다.')" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-primary text-white">
-          <span class="material-symbols-outlined text-sm">person_add</span> 고객 추가
-        </button>
-      </div>
-      <div class="bg-white border border-outline-variant overflow-hidden">
-        <div class="sec-head">
-          <span class="material-symbols-outlined text-primary text-base">people</span>
-          <span class="sec-title">담당 고객 목록</span>
-        </div>
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-surface-container-low border-b border-outline-variant">
-              <th class="px-4 py-2.5 mono text-xs font-bold text-primary tracking-widest">고객명</th>
-              <th class="px-4 py-2.5 mono text-xs font-bold text-primary tracking-widest">계약 유형</th>
-              <th class="px-4 py-2.5 mono text-xs font-bold text-primary tracking-widest">담당 매물</th>
-              <th class="px-4 py-2.5 mono text-xs font-bold text-primary tracking-widest">계약 상태</th>
-              <th class="px-4 py-2.5 mono text-xs font-bold text-primary tracking-widest">모니터링</th>
-              <th class="px-4 py-2.5 mono text-xs font-bold text-primary tracking-widest">연락처</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant text-sm">
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-4 py-3 font-bold text-primary">이○○</td>
-              <td class="px-4 py-3"><span class="chip-info text-xs font-bold px-2 py-0.5 rounded-full">전세</span></td>
-              <td class="px-4 py-3 text-xs text-on-surface-variant">강남구 역삼동 825-13</td>
-              <td class="px-4 py-3"><span class="chip-warn text-xs font-bold px-2 py-0.5 rounded-full">계약 진행</span></td>
-              <td class="px-4 py-3"><span class="chip-safe text-xs font-bold px-2 py-0.5 rounded-full">● 활성</span></td>
-              <td class="px-4 py-3 mono text-xs">010-1234-5678</td>
-            </tr>
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-4 py-3 font-bold text-primary">박○○</td>
-              <td class="px-4 py-3"><span class="chip-info text-xs font-bold px-2 py-0.5 rounded-full">전세</span></td>
-              <td class="px-4 py-3 text-xs text-on-surface-variant">해운대구 우동 오피스텔</td>
-              <td class="px-4 py-3"><span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full">위험 감지</span></td>
-              <td class="px-4 py-3"><span class="chip-safe text-xs font-bold px-2 py-0.5 rounded-full">● 활성</span></td>
-              <td class="px-4 py-3 mono text-xs">010-9876-5432</td>
-            </tr>
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-4 py-3 font-bold text-primary">최○○</td>
-              <td class="px-4 py-3"><span class="mono text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">월세</span></td>
-              <td class="px-4 py-3 text-xs text-on-surface-variant">동래구 온천동 아파트</td>
-              <td class="px-4 py-3"><span class="chip-safe text-xs font-bold px-2 py-0.5 rounded-full">계약 완료</span></td>
-              <td class="px-4 py-3"><span class="chip-safe text-xs font-bold px-2 py-0.5 rounded-full">● 활성</span></td>
-              <td class="px-4 py-3 mono text-xs">010-5555-1234</td>
-            </tr>
-            <tr class="hover:bg-surface-container-low transition-colors">
-              <td class="px-4 py-3 font-bold text-primary">정○○</td>
-              <td class="px-4 py-3"><span class="chip-info text-xs font-bold px-2 py-0.5 rounded-full">전세</span></td>
-              <td class="px-4 py-3 text-xs text-on-surface-variant">수영구 광안동 빌라</td>
-              <td class="px-4 py-3"><span class="mono text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">검토 중</span></td>
-              <td class="px-4 py-3"><span class="mono text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">미등록</span></td>
-              <td class="px-4 py-3 mono text-xs">010-3333-7890</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ════ 페이지: 체크리스트 ════ -->
-    <div id="page-checklist" class="hidden">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-black text-primary">매물별 체크리스트</h2>
-        <select id="chk-prop-sel" class="text-xs border border-outline-variant px-3 py-2 bg-white outline-none" onchange="renderChecklist()">
-          <option value="0">강남구 역삼동 825-13 (이○○)</option>
-          <option value="1">해운대구 우동 오피스텔 (박○○)</option>
-        </select>
-      </div>
-      <div id="checklist-content"></div>
-    </div>
-
-  </main>
-</div>
-
-<!-- 토스트 -->
-<div id="toast-wrap" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] flex flex-col gap-2 items-center pointer-events-none"></div>
-
-<!-- ══════════ JS ══════════ -->
-<script>
-
-/* ── 데이터 ── */
-const PROPS = [
-  {id:1,addr:'강남구 역삼동 825-13',type:'아파트',contract:'전세',amount:'3.2억',score:78,status:'계약진행',client:'이○○',danger:'warn'},
-  {id:2,addr:'해운대구 우동 센텀오피스텔',type:'오피스텔',contract:'전세',amount:'2.5억',score:32,status:'위험감지',client:'박○○',danger:'danger'},
-  {id:3,addr:'동래구 온천동 한양아파트',type:'아파트',contract:'월세',amount:'500/65',score:91,status:'계약완료',client:'최○○',danger:'safe'},
-  {id:4,addr:'수영구 광안동 광안빌라',type:'빌라',contract:'전세',amount:'1.2억',score:65,status:'검토중',client:'정○○',danger:'warn'},
-  {id:5,addr:'북구 화명동 롯데캐슬',type:'아파트',contract:'전세',amount:'2.8억',score:88,status:'모니터링',client:'강○○',danger:'safe'},
-  {id:6,addr:'부산진구 부전동 오피스텔',type:'오피스텔',contract:'월세',amount:'300/55',score:72,status:'검토중',client:'윤○○',danger:'warn'},
-  {id:7,addr:'연제구 연산동 연산아파트',type:'아파트',contract:'전세',amount:'1.9억',score:85,status:'계약완료',client:'임○○',danger:'safe'},
-  {id:8,addr:'사하구 당리동 부영아파트',type:'아파트',contract:'전세',amount:'1.5억',score:79,status:'모니터링',client:'한○○',danger:'safe'},
-];
-
-const PIPELINE = [
-  {stage:'검토',addr:'수영구 광안동 광안빌라',client:'정○○',contract:'전세 1.2억',score:65,next:'등기부 분석 완료 대기'},
-  {stage:'검토',addr:'부산진구 부전동 오피스텔',client:'윤○○',contract:'월세 300/55',score:72,next:'임대인 서류 수집 중'},
-  {stage:'검토',addr:'연제구 신설 빌라',client:'조○○',contract:'전세 0.9억',score:55,next:'현장 방문 예정'},
-  {stage:'협의',addr:'강남구 역삼동 825-13',client:'이○○',contract:'전세 3.2억',score:78,next:'특약 조건 협의 중'},
-  {stage:'협의',addr:'사하구 당리동 부영아파트',client:'한○○',contract:'전세 1.5억',score:79,next:'보증보험 가입 확인'},
-  {stage:'계약',addr:'해운대구 우동 센텀오피스텔',client:'박○○',contract:'전세 2.5억',score:32,next:'⚠ 근저당 말소 확인 필요'},
-  {stage:'완료',addr:'동래구 온천동 한양아파트',client:'최○○',contract:'월세 500/65',score:91,next:'2026.04.28 완료'},
-  {stage:'완료',addr:'북구 화명동 롯데캐슬',client:'강○○',contract:'전세 2.8억',score:88,next:'2026.04.15 완료'},
-];
-
-const TODOS = [
-  {done:true, text:'강남 역삼동 — 근저당 말소 확인 요청', tag:'긴급'},
-  {done:true, text:'이○○ 고객 특약 조건 문자 발송', tag:'연락'},
-  {done:false, text:'해운대 오피스텔 — HUG 보증보험 가입 여부 확인', tag:'긴급'},
-  {done:false, text:'정○○ 고객 등기부 분석 리포트 공유', tag:'리포트'},
-  {done:false, text:'광안빌라 현장 방문 일정 확인', tag:'방문'},
-];
-
-const CHECKLISTS = [
-  {
-    addr:'강남구 역삼동 825-13 (이○○)',
-    items:[
-      {done:true,  text:'임대인 신분증 대조 및 등기부 소유자 일치 확인'},
-      {done:true,  text:'국세 / 지방세 완납 증명서 수령'},
-      {done:true,  text:'공인중개사 자격 및 공제증서 확인'},
-      {done:false, text:'근저당권 잔금 전 말소 조건 계약서 명시'},
-      {done:false, text:'HUG 전세보증금 반환보증 가입 확인'},
-      {done:false, text:'확정일자 및 전입신고 이행 계획 확인'},
-    ]
-  },
-  {
-    addr:'해운대구 우동 센텀오피스텔 (박○○)',
-    items:[
-      {done:true,  text:'임대인 신분증 대조 및 등기부 소유자 일치 확인'},
-      {done:false, text:'국세 / 지방세 완납 증명서 수령'},
-      {done:true,  text:'공인중개사 자격 및 공제증서 확인'},
-      {done:false, text:'근저당권 잔금 전 말소 조건 계약서 명시'},
-      {done:false, text:'HUG 전세보증금 반환보증 가입 확인'},
-      {done:false, text:'확정일자 및 전입신고 이행 계획 확인'},
-    ]
-  }
-];
-
-/* ── 렌더링: 매물 테이블 ── */
-function renderPropTable(){
-  const tb = document.getElementById('prop-table-body');
-  if(!tb) return;
-  const chipClass = {danger:'chip-danger',warn:'chip-warn',safe:'chip-safe'};
-  const scoreColor = s => s>=80?'#166534':s>=60?'#92400e':'#991b1b';
-  tb.innerHTML = PROPS.slice(0,5).map(p=>`
-    <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="showToast('${p.addr} 리포트로 이동합니다.')">
-      <td class="px-4 py-3 text-xs font-medium text-primary">${p.addr}</td>
-      <td class="px-4 py-3"><span class="mono text-xs">${p.contract}</span></td>
-      <td class="px-4 py-3 mono text-xs font-bold">${p.amount}</td>
-      <td class="px-4 py-3">
-        <div class="flex items-center gap-2">
-          <span class="mono text-xs font-black" style="color:${scoreColor(p.score)};min-width:24px;">${p.score}</span>
-          <div class="w-16 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
-            <div class="h-full rounded-full" style="width:${p.score}%;background:${scoreColor(p.score)};"></div>
-          </div>
-        </div>
-      </td>
-      <td class="px-4 py-3"><span class="${chipClass[p.danger]} text-xs font-bold px-2 py-0.5 rounded-full">${p.status}</span></td>
-      <td class="px-4 py-3"><button class="mono text-xs text-primary hover:underline">상세 →</button></td>
-    </tr>`).join('');
+/* ── 매물 카드 ── */
+.prop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.prop-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;cursor:pointer;
+  transition:box-shadow .15s;
+}
+.prop-card:hover{box-shadow:0 4px 16px rgba(4,22,39,.08);}
+.prop-card-bar{height:4px;}
+.prop-card-bar.danger{background:#ef4444;}
+.prop-card-bar.warning{background:#f59e0b;}
+.prop-card-bar.safe{background:#22c55e;}
+.prop-card-body{padding:14px;}
+.prop-addr{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.prop-meta{font-size:11px;color:var(--text3);}
+.prop-score-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+.prop-score{font-size:22px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
+.prop-score.danger{color:#ef4444;}
+.prop-score.warning{color:#f59e0b;}
+.prop-score.safe{color:#22c55e;}
+.prop-history{
+  padding:10px 14px;
+  background:#fafafa;border-top:1px solid var(--border2);
+  font-size:11px;color:var(--text3);line-height:1.6;
 }
 
-/* ── 렌더링: 파이프라인 ── */
-let activePipeStage = '검토';
-function renderPipeline(stage){
-  activePipeStage = stage;
-  const el = document.getElementById('pipeline-list');
-  if(!el) return;
-  const filtered = PIPELINE.filter(p=>p.stage===stage);
-  const scoreColor = s => s>=80?'#166534':s>=60?'#92400e':'#991b1b';
-  el.innerHTML = filtered.map(p=>`
-    <div class="flex items-center gap-4 px-5 py-3 hover:bg-surface-container-low transition-colors cursor-pointer" onclick="showToast('${p.addr} 계약 상세로 이동합니다.')">
-      <div class="flex-1">
-        <p class="text-sm font-bold text-primary">${p.addr}</p>
-        <p class="text-xs text-on-surface-variant">${p.client} · ${p.contract}</p>
-      </div>
-      <div class="text-right">
-        <p class="mono text-xs font-black" style="color:${scoreColor(p.score)};">${p.score}점</p>
-      </div>
-      <div class="flex-1 text-right">
-        <p class="text-xs ${p.next.startsWith('⚠')?'text-red-600 font-bold':'text-on-surface-variant'}">${p.next}</p>
-      </div>
-      <span class="material-symbols-outlined text-on-surface-variant text-base">chevron_right</span>
-    </div>`).join('') || `<p class="px-5 py-4 text-sm text-on-surface-variant">해당 단계 항목 없음</p>`;
+/* ── 계약 파이프라인 ── */
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:16px;}
+.pipe-col{border-right:1px solid var(--border);}
+.pipe-col:last-child{border-right:none;}
+.pipe-head{
+  padding:10px 14px;background:#f5f3f4;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
 }
-
-function filterPipeline(stage){
-  document.querySelectorAll('.pipe-stage').forEach(s=>{
-    s.classList.remove('active-stage');
-    s.querySelectorAll('*').forEach(c=>c.style.color='');
-  });
-  event.currentTarget.classList.add('active-stage');
-  renderPipeline(stage);
+.pipe-head-title{font-size:11px;font-weight:700;color:var(--navy);font-family:'IBM Plex Mono',monospace;}
+.pipe-count{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--navy);color:#fff;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
 }
-
-/* ── 렌더링: 할 일 ── */
-function renderTodos(){
-  const el = document.getElementById('todo-list');
-  if(!el) return;
-  const tagColors = {긴급:'chip-danger',연락:'chip-info',리포트:'chip-warn',방문:'chip-safe'};
-  el.innerHTML = TODOS.map((t,i)=>`
-    <div class="flex items-start gap-3 px-4 py-3 hover:bg-surface-container-low transition-colors cursor-pointer ${t.done?'opacity-50':''}" onclick="toggleTodo(${i})">
-      <svg class="flex-shrink-0 mt-0.5" width="18" height="18" viewBox="0 0 18 18" fill="none">
-        ${t.done
-          ? `<rect width="18" height="18" rx="3" fill="#041627"/><path d="M5 9l3 3 5-5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`
-          : `<rect x="1" y="1" width="16" height="16" rx="3" stroke="#c4c6cd" stroke-width="1.5" fill="none"/>`}
-      </svg>
-      <div class="flex-1 min-w-0">
-        <p class="text-xs ${t.done?'line-through text-on-surface-variant':'text-primary font-medium'}">${t.text}</p>
-        <span class="${tagColors[t.tag]||'chip-info'} text-xs font-bold px-1.5 py-0.5 rounded mt-1 inline-block">${t.tag}</span>
-      </div>
-    </div>`).join('');
-  const done = TODOS.filter(t=>t.done).length;
-  const lbl = document.getElementById('todo-label');
-  if(lbl) lbl.textContent = `${done} / ${TODOS.length}`;
+.pipe-items{padding:8px;min-height:120px;}
+.pipe-item{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:7px;padding:10px;margin-bottom:8px;
+  cursor:pointer;transition:all .12s;
 }
+.pipe-item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(4,22,39,.06);}
+.pipe-item-addr{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.pipe-item-client{font-size:11px;color:var(--text3);}
+.pipe-item-memo{font-size:11px;color:var(--text2);margin-top:4px;padding-top:4px;border-top:1px solid var(--border2);}
 
-function toggleTodo(i){
-  TODOS[i].done = !TODOS[i].done;
-  renderTodos();
+/* ── 위험 알림 ── */
+.alert-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 16px;border-bottom:1px solid var(--border2);
 }
+.alert-item:last-child{border-bottom:none;}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.alert-dot.danger{background:#ef4444;}
+.alert-dot.warning{background:#f59e0b;}
+.alert-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;}
+.alert-desc{font-size:11px;color:var(--text3);}
 
-/* ── 렌더링: 매물 카드 (전체 보기) ── */
-function renderPropCards(){
-  const el = document.getElementById('prop-cards');
-  if(!el) return;
-  const chipClass = {danger:'chip-danger',warn:'chip-warn',safe:'chip-safe'};
-  const scoreColor = s => s>=80?'#166534':s>=60?'#92400e':'#991b1b';
-  el.innerHTML = PROPS.map(p=>`
-    <div class="prop-card bg-white border border-outline-variant overflow-hidden" onclick="showToast('${p.addr} 상세 리포트로 이동합니다.')">
-      <div class="h-2 w-full" style="background:${p.score>=80?'#16a34a':p.score>=60?'#d97706':'#dc2626'};"></div>
-      <div class="p-5">
-        <div class="flex items-start justify-between mb-3">
-          <div>
-            <p class="text-sm font-black text-primary leading-tight">${p.addr}</p>
-            <p class="text-xs text-on-surface-variant mt-0.5">${p.type} · ${p.contract} ${p.amount} · ${p.client}</p>
-          </div>
-          <span class="mono text-2xl font-black ml-3 flex-shrink-0" style="color:${scoreColor(p.score)};">${p.score}</span>
-        </div>
-        <div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden mb-3">
-          <div class="h-full rounded-full transition-all" style="width:${p.score}%;background:${scoreColor(p.score)};"></div>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="${chipClass[p.danger]} text-xs font-bold px-2 py-0.5 rounded-full">${p.status}</span>
-          <button class="text-xs font-bold text-primary hover:underline mono">리포트 →</button>
-        </div>
-      </div>
-    </div>`).join('');
+/* ── 모달 ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(4,22,39,.4);
+  z-index:200;display:flex;align-items:center;justify-content:center;
+  display:none;
 }
-
-/* ── 렌더링: 계약 목록 ── */
-function renderContracts(){
-  const el = document.getElementById('contracts-list');
-  if(!el) return;
-  const stageColor = {검토:'chip-info',협의:'chip-warn',계약:'chip-danger',완료:'chip-safe'};
-  el.innerHTML = PIPELINE.map(p=>`
-    <div class="bg-white border border-outline-variant p-5 flex items-center gap-5 hover:shadow-md transition-shadow cursor-pointer" onclick="showToast('${p.addr} 계약 상세 화면으로 이동합니다.')">
-      <div class="${stageColor[p.stage]} text-xs font-black px-3 py-1.5 rounded-full flex-shrink-0">${p.stage}</div>
-      <div class="flex-1">
-        <p class="text-sm font-black text-primary">${p.addr}</p>
-        <p class="text-xs text-on-surface-variant">${p.client} · ${p.contract}</p>
-      </div>
-      <div class="text-right flex-shrink-0">
-        <p class="text-xs ${p.next.startsWith('⚠')?'text-red-600 font-bold':'text-on-surface-variant'}">${p.next}</p>
-      </div>
-      <div class="flex-shrink-0">
-        <span class="mono text-lg font-black" style="color:${p.score>=80?'#166534':p.score>=60?'#92400e':'#991b1b'};">${p.score}</span>
-      </div>
-      <span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
-    </div>`).join('');
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--white);border-radius:12px;
+  width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(4,22,39,.2);
 }
-
-/* ── 렌더링: 체크리스트 ── */
-function renderChecklist(){
-  const idx = parseInt(document.getElementById('chk-prop-sel')?.value||0);
-  const data = CHECKLISTS[idx];
-  const el = document.getElementById('checklist-content');
-  if(!el||!data) return;
-  const done = data.items.filter(i=>i.done).length;
-  el.innerHTML = `
-    <div class="bg-white border border-outline-variant">
-      <div class="sec-head">
-        <span class="material-symbols-outlined text-primary text-base">fact_check</span>
-        <span class="sec-title">${data.addr}</span>
-        <span class="ml-auto mono text-xs text-on-surface-variant">${done} / ${data.items.length} 완료</span>
-      </div>
-      <div class="divide-y divide-outline-variant">
-        ${data.items.map((item,i)=>`
-          <div class="flex items-center justify-between px-5 py-3.5 hover:bg-surface-container-low transition-colors cursor-pointer" onclick="toggleChk(${idx},${i})">
-            <div class="flex items-center gap-3">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                ${item.done
-                  ? `<rect width="20" height="20" rx="4" fill="#041627"/><path d="M6 10l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`
-                  : `<rect x="1" y="1" width="18" height="18" rx="3.5" stroke="#c4c6cd" stroke-width="1.5" fill="none"/>`}
-              </svg>
-              <span class="text-sm ${item.done?'line-through text-on-surface-variant':'text-primary font-medium'}">${item.text}</span>
-            </div>
-            <span class="text-xs font-bold ${item.done?'text-green-700':'text-red-700'}">${item.done?'✓ 완료':'✗ 미완료'}</span>
-          </div>`).join('')}
-      </div>
-      <div class="px-5 py-3 bg-surface-container-low border-t border-outline-variant">
-        <div class="flex justify-between text-xs text-on-surface-variant mb-1.5">
-          <span>완료율</span><span class="font-bold text-primary">${Math.round(done/data.items.length*100)}%</span>
-        </div>
-        <div class="h-2 bg-surface-container-high rounded-full overflow-hidden">
-          <div class="h-full bg-primary rounded-full transition-all" style="width:${Math.round(done/data.items.length*100)}%;"></div>
-        </div>
-      </div>
-    </div>`;
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);
 }
-
-function toggleChk(propIdx, itemIdx){
-  CHECKLISTS[propIdx].items[itemIdx].done = !CHECKLISTS[propIdx].items[itemIdx].done;
-  renderChecklist();
+.modal-title{font-size:15px;font-weight:700;color:var(--navy);}
+.modal-close{
+  width:28px;height:28px;border-radius:6px;border:none;
+  background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;
 }
-
-/* ── 페이지 전환 ── */
-const PAGES = ['overview','properties','contracts','clients','alerts','checklist'];
-function setPage(page, navEl){
-  PAGES.forEach(p=>{
-    const el = document.getElementById('page-'+p);
-    if(el) el.classList.toggle('hidden', p!==page);
-  });
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  if(navEl) navEl.classList.add('active');
-
-  // 각 페이지 렌더
-  if(page==='overview'){ renderPropTable(); renderPipeline('검토'); renderTodos(); }
-  if(page==='properties') renderPropCards();
-  if(page==='contracts') renderContracts();
-  if(page==='checklist') renderChecklist();
+.modal-body{padding:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;}
+.form-input{
+  width:100%;padding:9px 12px;
+  border:1px solid var(--border);border-radius:7px;
+  font-size:13px;font-family:inherit;outline:none;color:var(--text);
+  transition:border .12s;
 }
-
-/* ── 빠른 분석 ── */
-function quickAnalyze(){
-  const v = document.getElementById('quick-addr').value.trim();
-  if(!v){ showToast('주소를 입력해주세요.'); return; }
-  showToast(`"${v}" 분석을 시작합니다...`);
-  setTimeout(()=>showToast('분석 리포트 화면으로 이동합니다.'), 1500);
+.form-input:focus{border-color:var(--navy);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-select{
+  width:100%;padding:9px 12px;
+  border:1px solid var(--border);border-radius:7px;
+  font-size:13px;font-family:inherit;outline:none;
+  background:var(--white);cursor:pointer;
+}
+.form-textarea{
+  width:100%;padding:9px 12px;
+  border:1px solid var(--border);border-radius:7px;
+  font-size:13px;font-family:inherit;outline:none;
+  resize:vertical;min-height:80px;
+}
+.modal-footer{
+  padding:12px 20px;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-end;
 }
 
 /* ── 토스트 ── */
-function showToast(msg){
-  const wrap = document.getElementById('toast-wrap');
-  const div = document.createElement('div');
-  div.className = 'toast bg-primary text-white px-5 py-2.5 text-xs font-bold shadow-xl mono pointer-events-auto';
-  div.textContent = msg;
-  wrap.appendChild(div);
-  setTimeout(()=>{div.style.opacity='0';div.style.transition='opacity .3s';},2500);
-  setTimeout(()=>div.remove(),2800);
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;
+  font-size:13px;font-weight:600;z-index:300;
+  animation:fadeUp .25s ease;font-family:inherit;
+  white-space:nowrap;box-shadow:0 4px 16px rgba(4,22,39,.2);
 }
 
-/* ── 초기화 ── */
-window.addEventListener('load',()=>{
-  renderPropTable();
-  renderPipeline('검토');
-  renderTodos();
-});
-</script>
+/* ── 설정 패널 ── */
+.setting-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border2);
+}
+.setting-item:last-child{border-bottom:none;}
+.setting-label{font-size:13px;color:var(--text);}
+.toggle{
+  width:36px;height:20px;border-radius:10px;background:#ddd;
+  position:relative;cursor:pointer;transition:background .2s;border:none;
+}
+.toggle.on{background:var(--navy);}
+.toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  transition:left .2s;
+}
+.toggle.on::after{left:19px;}
+
+/* ── 반응형 ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .2s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  .prop-grid{grid-template-columns:1fr;}
+  .pipeline{grid-template-columns:1fr 1fr;}
+  .page{padding:16px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ 사이드바 ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">
+      <span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">security</span>
+    </div>
+    <div>
+      <div class="sb-logo-name">블랙박스</div>
+      <div class="sb-logo-sub">중개사 수첩</div>
+    </div>
+  </div>
+
+  <div class="sb-agency" id="agency-info">
+    <div class="sb-agency-label">AGENCY</div>
+    <div class="sb-agency-name" id="agency-name">하나부동산</div>
+    <div class="sb-agency-id mono" id="agency-id">로그인 필요</div>
+  </div>
+
+  <nav class="sb-nav">
+    <button class="sb-item active" onclick="showPage('today',this)">
+      <span class="material-symbols-outlined">today</span>
+      오늘
+      <span class="sb-badge" id="badge-today">2</span>
+    </button>
+    <button class="sb-item" onclick="showPage('props',this)">
+      <span class="material-symbols-outlined">home_work</span>
+      담당 매물
+      <span class="sb-badge green" id="badge-props">0</span>
+    </button>
+    <button class="sb-item" onclick="showPage('clients',this)">
+      <span class="material-symbols-outlined">people</span>
+      고객 수첩
+    </button>
+    <button class="sb-item" onclick="showPage('contracts',this)">
+      <span class="material-symbols-outlined">description</span>
+      계약 진행
+      <span class="sb-badge" id="badge-contracts">0</span>
+    </button>
+    <button class="sb-item" onclick="showPage('alerts',this)">
+      <span class="material-symbols-outlined">notifications</span>
+      위험 알림
+      <span class="sb-badge" id="badge-alerts">0</span>
+    </button>
+  </nav>
+
+  <div class="sb-bottom">
+    <button class="sb-settings" onclick="showPage('settings',this)">
+      <span class="material-symbols-outlined" style="font-size:16px;">settings</span>
+      설정 · 대시보드 구성
+    </button>
+    <button class="sb-settings" onclick="doLogout()" style="color:#ef4444;">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>
+      로그아웃
+    </button>
+  </div>
+</aside>
+
+<!-- ══ 메인 ══ -->
+<div class="main">
+
+  <!-- 탑바 -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button onclick="toggleSidebar()" style="display:none;border:none;background:none;cursor:pointer;" id="menu-btn">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="topbar-title" id="topbar-title">오늘 현황</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-ghost" onclick="openModal('schedule')">
+        <span class="material-symbols-outlined" style="font-size:16px;">event</span>
+        일정 추가
+      </button>
+      <button class="btn-primary" onclick="openModal('property')">
+        <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+        매물 등록
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════ 로그인 화면 ══════ -->
+  <div id="page-login" style="display:flex;align-items:center;justify-content:center;flex:1;padding:40px;">
+    <div style="width:100%;max-width:360px;">
+      <div style="text-align:center;margin-bottom:32px;">
+        <span class="material-symbols-outlined" style="font-size:48px;color:var(--navy);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">security</span>
+        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-top:8px;">중개사 로그인</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px;">부동산 블랙박스 수첩</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">사무소명 (ID)</label>
+        <input class="form-input" id="login-id" type="text" placeholder="예: hana_busan_01"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input class="form-input" id="login-pw" type="password" placeholder="비밀번호 입력"/>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;" onclick="doLogin()">
+        <span class="material-symbols-outlined" style="font-size:16px;">login</span>
+        로그인
+      </button>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="showRegister()" class="btn-ghost" style="flex:1;justify-content:center;font-size:13px;">
+          사무소 등록
+        </button>
+        <button onclick="doDemo()" class="btn-ghost" style="flex:1;justify-content:center;font-size:13px;">
+          데모 체험
+        </button>
+      </div>
+      <!-- 회원가입 폼 -->
+      <div id="register-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">사무소 신규 등록</div>
+        <div class="form-group">
+          <label class="form-label">사무소 ID (영문/숫자)</label>
+          <input class="form-input" id="reg-id" type="text" placeholder="예: hana_busan_01"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">사무소명</label>
+          <input class="form-input" id="reg-name" type="text" placeholder="예: 하나부동산"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">비밀번호</label>
+          <input class="form-input" id="reg-pw" type="password" placeholder="비밀번호 설정"/>
+        </div>
+        <button class="btn-primary" style="width:100%;justify-content:center;" onclick="doRegister()">
+          <span class="material-symbols-outlined" style="font-size:16px;">how_to_reg</span>
+          등록하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ 오늘 탭 ══════ -->
+  <div class="page" id="page-today">
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">오늘 일정</div>
+        <div class="kpi-val" id="kpi-today-schedule">0</div>
+        <div class="kpi-sub">약속·방문·계약</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">담당 매물</div>
+        <div class="kpi-val" id="kpi-props">0</div>
+        <div class="kpi-sub">등록된 매물</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">진행 중 계약</div>
+        <div class="kpi-val" id="kpi-contracts">0</div>
+        <div class="kpi-sub">검토~계약 단계</div>
+      </div>
+      <div class="kpi" style="border-left:3px solid #ef4444;">
+        <div class="kpi-label">위험 알림</div>
+        <div class="kpi-val" id="kpi-alerts" style="color:#ef4444;">0</div>
+        <div class="kpi-sub">즉시 확인 필요</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <!-- 오늘 일정 -->
+      <div class="card">
+        <div class="card-head">
+          <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">event</span>
+          <span class="card-head-title">오늘 일정</span>
+          <button onclick="openModal('schedule')" style="margin-left:auto;border:none;background:none;cursor:pointer;color:var(--text3);">
+            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+          </button>
+        </div>
+        <div id="today-schedule-list">
+          <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
+            <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">event_available</span>
+            오늘 일정이 없습니다
+          </div>
+        </div>
+      </div>
+
+      <!-- 할 일 -->
+      <div class="card">
+        <div class="card-head">
+          <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">checklist</span>
+          <span class="card-head-title">오늘 할 일</span>
+          <button onclick="openModal('todo')" style="margin-left:auto;border:none;background:none;cursor:pointer;color:var(--text3);">
+            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+          </button>
+        </div>
+        <div id="todo-list">
+          <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
+            <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">task_alt</span>
+            할 일이 없습니다
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ 매물 탭 ══════ -->
+  <div class="page" id="page-props">
+    <div id="props-empty" style="text-align:center;padding:60px 20px;">
+      <span class="material-symbols-outlined" style="font-size:48px;color:var(--text3);display:block;margin-bottom:12px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 48;">home_work</span>
+      <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;">등록된 매물이 없습니다</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">주소를 입력하면 AI가 자동으로 분석합니다</div>
+      <button class="btn-primary" onclick="openModal('property')">
+        <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+        첫 매물 등록하기
+      </button>
+    </div>
+    <div class="prop-grid" id="props-grid" style="display:none;"></div>
+  </div>
+
+  <!-- ══════ 고객 탭 ══════ -->
+  <div class="page" id="page-clients">
+    <div style="background:var(--info-bg);border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;">
+      <span class="material-symbols-outlined" style="color:var(--info);font-size:18px;flex-shrink:0;">lock</span>
+      <div style="font-size:12px;color:var(--info);line-height:1.6;">
+        <strong>개인정보 보호</strong> — 고객 정보는 이 기기에만 저장됩니다. 서버에 전송되지 않습니다.
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn-primary" onclick="openModal('client')">
+        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
+        고객 추가
+      </button>
+    </div>
+    <div class="card">
+      <div id="clients-list">
+        <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
+          <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">people</span>
+          등록된 고객이 없습니다
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ 계약 탭 ══════ -->
+  <div class="page" id="page-contracts">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn-primary" onclick="openModal('contract')">
+        <span class="material-symbols-outlined" style="font-size:16px;">add</span>
+        계약 추가
+      </button>
+    </div>
+    <div class="card" style="overflow:visible;">
+      <div class="pipeline" id="pipeline-board">
+        <!-- JS로 렌더링 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ 위험 알림 탭 ══════ -->
+  <div class="page" id="page-alerts">
+    <div class="card">
+      <div id="alerts-list">
+        <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
+          <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;color:#22c55e;">check_circle</span>
+          위험 알림이 없습니다
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ 설정 탭 ══════ -->
+  <div class="page" id="page-settings">
+    <div class="card" style="max-width:480px;">
+      <div class="card-head">
+        <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">dashboard_customize</span>
+        <span class="card-head-title">대시보드 구성</span>
+      </div>
+      <div id="settings-list">
+        <!-- JS로 렌더링 -->
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ 모달들 ══ -->
+<!-- 매물 등록 -->
+<div class="modal-bg" id="modal-property">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">매물 등록</div>
+      <button class="modal-close" onclick="closeModal('property')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">도로명 주소 *</label>
+        <input class="form-input" id="prop-addr" type="text" placeholder="예: 역삼로 123"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">상세주소</label>
+          <input class="form-input" id="prop-detail" type="text" placeholder="101동 502호"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">계약 유형</label>
+          <select class="form-select" id="prop-contract">
+            <option value="전세">전세</option>
+            <option value="월세">월세</option>
+            <option value="매매">매매</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">보증금 (만원)</label>
+          <input class="form-input" id="prop-deposit" type="number" placeholder="32000"/>
+        </div>
+        <div class="form-group" id="prop-monthly-wrap">
+          <label class="form-label">월세 (만원)</label>
+          <input class="form-input" id="prop-monthly" type="number" placeholder="65"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">메모</label>
+        <textarea class="form-textarea" id="prop-memo" placeholder="매물 특이사항, 임대인 정보 등"></textarea>
+      </div>
+      <div style="background:var(--info-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--info);">
+        <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">smart_toy</span>
+        등록 후 AI가 자동으로 위험도를 분석합니다
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('property')">취소</button>
+      <button class="btn-primary" onclick="submitProperty()">
+        <span class="material-symbols-outlined" style="font-size:16px;">add_home</span>
+        등록 & 분석
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 일정 추가 -->
+<div class="modal-bg" id="modal-schedule">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">일정 추가</div>
+      <button class="modal-close" onclick="closeModal('schedule')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">날짜 *</label>
+          <input class="form-input" id="sch-date" type="date"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">시간</label>
+          <input class="form-input" id="sch-time" type="time"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">유형</label>
+          <select class="form-select" id="sch-type">
+            <option value="방문">매물 방문</option>
+            <option value="계약">계약 체결</option>
+            <option value="상담">고객 상담</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">고객명</label>
+          <input class="form-input" id="sch-client" type="text" placeholder="김○○"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">매물 주소</label>
+        <input class="form-input" id="sch-addr" type="text" placeholder="역삼로 123 (선택)"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">메모</label>
+        <textarea class="form-textarea" id="sch-memo" placeholder="미팅 내용, 협의 금액 등" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('schedule')">취소</button>
+      <button class="btn-primary" onclick="submitSchedule()">
+        <span class="material-symbols-outlined" style="font-size:16px;">event</span>
+        일정 저장
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 고객 추가 -->
+<div class="modal-bg" id="modal-client">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">고객 추가 (로컬 저장)</div>
+      <button class="modal-close" onclick="closeModal('client')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--safe-bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--safe);margin-bottom:14px;">
+        <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">lock</span>
+        이 기기에만 저장 · 서버 전송 없음
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">고객명 *</label>
+          <input class="form-input" id="cli-name" type="text" placeholder="홍○○"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input class="form-input" id="cli-phone" type="tel" placeholder="010-0000-0000"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">희망 유형</label>
+          <select class="form-select" id="cli-type">
+            <option>전세</option><option>월세</option><option>매매</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">예산 (만원)</label>
+          <input class="form-input" id="cli-budget" type="number" placeholder="30000"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">희망 지역 / 조건</label>
+        <input class="form-input" id="cli-area" type="text" placeholder="강남구 역삼동, 방 2개 이상"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">메모</label>
+        <textarea class="form-textarea" id="cli-memo" placeholder="상담 내용, 특이사항" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('client')">취소</button>
+      <button class="btn-primary" onclick="submitClient()">
+        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
+        고객 저장
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 계약 추가 -->
+<div class="modal-bg" id="modal-contract">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">계약 추가</div>
+      <button class="modal-close" onclick="closeModal('contract')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">매물 주소 *</label>
+        <input class="form-input" id="con-addr" type="text" placeholder="역삼로 123 502호"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">고객명</label>
+          <input class="form-input" id="con-client" type="text" placeholder="김○○"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input class="form-input" id="con-phone" type="tel" placeholder="010-0000-0000"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">계약 유형</label>
+          <select class="form-select" id="con-type">
+            <option>전세</option><option>월세</option><option>매매</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">보증금 (만원)</label>
+          <input class="form-input" id="con-deposit" type="number" placeholder="32000"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">단계</label>
+        <select class="form-select" id="con-stage">
+          <option value="검토">검토 중</option>
+          <option value="협의">조건 협의</option>
+          <option value="계약">계약 진행</option>
+          <option value="완료">완료</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">메모 / 히스토리</label>
+        <textarea class="form-textarea" id="con-memo" placeholder="협의 내용, 특약 사항, 진행 상황 등"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('contract')">취소</button>
+      <button class="btn-primary" onclick="submitContract()">
+        <span class="material-symbols-outlined" style="font-size:16px;">description</span>
+        계약 저장
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 할 일 추가 -->
+<div class="modal-bg" id="modal-todo">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-head">
+      <div class="modal-title">할 일 추가</div>
+      <button class="modal-close" onclick="closeModal('todo')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">내용 *</label>
+        <input class="form-input" id="todo-text" type="text" placeholder="예: 역삼동 매물 서류 확인"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">중요도</label>
+        <select class="form-select" id="todo-priority">
+          <option value="urgent">긴급</option>
+          <option value="normal">일반</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('todo')">취소</button>
+      <button class="btn-primary" onclick="submitTodo()">추가</button>
+    </div>
+  </div>
+</div>
+
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js');
+
+// ════════════════════════════════
+// Apps Script DB 레이어
+// ════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8CFdJNXRRbW58waE8cLQcirhgJiwrjnrsUYEbbd7P4WSBlNxIrbCYX9nAFy04sgPFkA/exec';
+
+async function dbGet(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function dbPost(body) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
   });
+  return res.json();
 }
-</script>
 
-<!-- 모바일 하단 네비바 -->
-<nav style="display:none;" id="mobile-nav"
-  class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-14 bg-white border-t border-outline-variant">
-  <a href="/" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-xs">
-    <span class="material-symbols-outlined text-xl">search</span>분석
-  </a>
-  <a href="/pages/report.html" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-xs">
-    <span class="material-symbols-outlined text-xl">analytics</span>리포트
-  </a>
-  <a href="/pages/monitoring.html" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-xs">
-    <span class="material-symbols-outlined text-xl">visibility</span>모니터링
-  </a>
-  <a href="/pages/dashboard.html" class="flex flex-col items-center justify-center text-primary px-3 py-1 text-xs">
-    <span class="material-symbols-outlined fill-icon text-xl">business_center</span>대시보드
-  </a>
-</nav>
-<script>
-  // 모바일에서만 하단 네비 표시
-  if (window.innerWidth <= 768) {
-    document.getElementById('mobile-nav').style.display = 'flex';
-    document.body.style.paddingBottom = '56px';
+// ── 실제 로그인 (Apps Script) ──
+async function doLoginRemote(id, pw) {
+  try {
+    const data = await dbGet({ action: 'login', agencyId: id, pw });
+    return data;
+  } catch(e) {
+    return { ok: false, error: '서버 연결 실패: ' + e.message };
   }
+}
+
+// ── 회원가입 (Apps Script) ──
+async function doRegisterRemote(id, name, pw) {
+  try {
+    const data = await dbPost({ action: 'register', agencyId: id, agencyName: name, pw });
+    return data;
+  } catch(e) {
+    return { ok: false, error: '서버 연결 실패: ' + e.message };
+  }
+}
+
+// ── 매물 서버 동기화 ──
+async function syncPropsFromServer(agencyId) {
+  try {
+    const data = await dbGet({ action: 'read', sheet: '매물', agencyId });
+    if (data.ok && data.data.length) {
+      _props = data.data;
+      saveLocal('props', _props);
+      renderProps(); updateKPIs();
+    }
+  } catch(e) {
+    console.log('서버 동기화 실패, 로컬 데이터 사용');
+  }
+}
+
+// ── 매물 서버 저장 ──
+async function savePropToServer(prop) {
+  try {
+    await dbPost({ action: 'append', sheet: '매물', agencyId: _agencyId, data: prop });
+  } catch(e) {
+    console.log('서버 저장 실패, 로컬만 저장됨');
+  }
+}
+
+// ── 계약 서버 동기화 ──
+async function syncContractsFromServer(agencyId) {
+  try {
+    const data = await dbGet({ action: 'read', sheet: '계약', agencyId });
+    if (data.ok && data.data.length) {
+      _contracts = data.data;
+      saveLocal('contracts', _contracts);
+      renderPipeline(); updateKPIs();
+    }
+  } catch(e) {
+    console.log('계약 서버 동기화 실패');
+  }
+}
+
+// ── 계약 서버 저장 ──
+async function saveContractToServer(contract) {
+  try {
+    await dbPost({ action: 'append', sheet: '계약', agencyId: _agencyId, data: contract });
+  } catch(e) {
+    console.log('계약 서버 저장 실패');
+  }
+}
+
+// ════════════════════════════════
+// 상태
+// ════════════════════════════════
+let _agencyId   = '';
+let _props      = [];
+let _contracts  = [];
+let _schedule   = [];
+let _clients    = [];   // 로컬 전용
+let _todos      = [];   // 로컬 전용
+let _settings   = { today:true, props:true, clients:true, contracts:true, alerts:true };
+
+// ════════════════════════════════
+// 로그인
+// ════════════════════════════════
+function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value.trim();
+  if (!id || !pw) { toast('ID와 비밀번호를 입력하세요'); return; }
+  // MVP: 간단한 로컬 인증 (추후 Supabase/백엔드 교체)
+  const stored = localStorage.getItem('bb_agency_' + id);
+  if (stored) {
+    const data = JSON.parse(stored);
+    if (data.pw !== btoa(pw)) { toast('비밀번호가 틀렸습니다'); return; }
+  } else {
+    // 첫 로그인 = 계정 생성
+    localStorage.setItem('bb_agency_' + id, JSON.stringify({ pw: btoa(pw), name: id, createdAt: new Date().toISOString() }));
+  }
+  _agencyId = id;
+  localStorage.setItem('bb_current_agency', id);
+  enterDashboard(id);
+}
+
+function doDemo() {
+  _agencyId = 'demo';
+  localStorage.setItem('bb_current_agency', 'demo');
+  _props     = DEMO_PROPS;
+  _contracts = DEMO_CONTRACTS;
+  _schedule  = DEMO_SCHEDULE;
+  _todos     = DEMO_TODOS;
+  enterDashboard('demo');
+}
+
+function doLogout() {
+  localStorage.removeItem('bb_current_agency');
+  _agencyId = '';
+  document.getElementById('page-login').style.display = 'flex';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  showPage('today', document.querySelector('.sb-item'));
+}
+
+function enterDashboard(id) {
+  document.getElementById('page-login').style.display = 'none';
+  document.getElementById('agency-id').textContent = id;
+  const savedName = localStorage.getItem('bb_agency_name_' + id);
+  document.getElementById('agency-name').textContent = savedName || id;
+  loadLocalData();
+  showPage('today', document.querySelector('.sb-item.active') || document.querySelector('.sb-item'));
+  renderAll();
+}
+
+// 자동 로그인
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('bb_current_agency');
+  if (saved) { _agencyId = saved; enterDashboard(saved); }
+  else { document.getElementById('page-login').style.display = 'flex'; }
+  renderPipeline();
+  renderSettings();
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sch-date').value = today;
+});
+
+// ════════════════════════════════
+// 로컬 데이터 관리
+// ════════════════════════════════
+function loadLocalData() {
+  _clients   = JSON.parse(localStorage.getItem('bb_clients_'   + _agencyId) || '[]');
+  _todos     = JSON.parse(localStorage.getItem('bb_todos_'     + _agencyId) || '[]');
+  _schedule  = JSON.parse(localStorage.getItem('bb_schedule_'  + _agencyId) || '[]');
+  _props     = JSON.parse(localStorage.getItem('bb_props_'     + _agencyId) || '[]');
+  _contracts = JSON.parse(localStorage.getItem('bb_contracts_' + _agencyId) || '[]');
+}
+function saveLocal(key, data) {
+  localStorage.setItem('bb_' + key + '_' + _agencyId, JSON.stringify(data));
+}
+
+// ════════════════════════════════
+// 렌더링
+// ════════════════════════════════
+function renderAll() {
+  renderTodaySchedule();
+  renderTodos();
+  renderProps();
+  renderClients();
+  renderPipeline();
+  renderAlerts();
+  updateKPIs();
+}
+
+function updateKPIs() {
+  const today = new Date().toISOString().split('T')[0];
+  const todayCount = _schedule.filter(s => s.date === today).length;
+  document.getElementById('kpi-today-schedule').textContent = todayCount;
+  document.getElementById('kpi-props').textContent          = _props.length;
+  document.getElementById('kpi-contracts').textContent      = _contracts.filter(c => c.stage !== '완료').length;
+  const alerts = _props.filter(p => parseInt(p.score) < 60).length;
+  document.getElementById('kpi-alerts').textContent         = alerts;
+  document.getElementById('badge-today').textContent        = todayCount || '';
+  document.getElementById('badge-today').style.display      = todayCount ? 'flex' : 'none';
+  document.getElementById('badge-props').textContent        = _props.length || '';
+  document.getElementById('badge-contracts').textContent    = _contracts.filter(c=>c.stage!=='완료').length || '';
+  document.getElementById('badge-alerts').textContent       = alerts || '';
+  document.getElementById('badge-alerts').style.display     = alerts ? 'flex' : 'none';
+}
+
+function renderTodaySchedule() {
+  const today = new Date().toISOString().split('T')[0];
+  const items = _schedule.filter(s => s.date === today).sort((a,b) => a.time > b.time ? 1 : -1);
+  const el    = document.getElementById('today-schedule-list');
+  if (!items.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;"><span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">event_available</span>오늘 일정이 없습니다</div>';
+    return;
+  }
+  const typeColor = { 방문:'st-visit', 계약:'st-contract', 상담:'st-consult', 기타:'st-other' };
+  el.innerHTML = items.map(s => `
+    <div class="schedule-item">
+      <div class="schedule-time">${s.time || '—'}</div>
+      <div class="schedule-type ${typeColor[s.type] || 'st-other'}"></div>
+      <div class="schedule-content">
+        <div class="schedule-client">${s.clientName || '—'} · ${s.type}</div>
+        ${s.address ? `<div class="schedule-addr">${s.address}</div>` : ''}
+        ${s.memo ? `<div class="schedule-memo">${s.memo}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function renderTodos() {
+  const el = document.getElementById('todo-list');
+  if (!_todos.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;"><span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">task_alt</span>할 일이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = _todos.map((t,i) => `
+    <div class="todo-item" onclick="toggleTodo(${i})">
+      <div class="todo-check ${t.done ? 'done' : ''}">
+        ${t.done ? '<span class="material-symbols-outlined" style="font-size:12px;color:#fff;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 24;">check</span>' : ''}
+      </div>
+      <span class="todo-text ${t.done ? 'done' : ''}">${t.text}</span>
+      <span class="todo-tag ${t.priority === 'urgent' ? 'tag-urgent' : 'tag-normal'}">${t.priority === 'urgent' ? '긴급' : '일반'}</span>
+    </div>`).join('');
+}
+
+function renderProps() {
+  const grid  = document.getElementById('props-grid');
+  const empty = document.getElementById('props-empty');
+  if (!_props.length) { grid.style.display='none'; empty.style.display='block'; return; }
+  empty.style.display = 'none'; grid.style.display = 'grid';
+  const riskClass = s => parseInt(s) >= 80 ? 'safe' : parseInt(s) >= 60 ? 'warning' : 'danger';
+  grid.innerHTML = _props.map((p,i) => `
+    <div class="prop-card" onclick="openPropDetail(${i})">
+      <div class="prop-card-bar ${riskClass(p.score)}"></div>
+      <div class="prop-card-body">
+        <div class="prop-addr">${p.address} ${p.detail || ''}</div>
+        <div class="prop-meta">${p.contract} · ${p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—'}</div>
+        <div class="prop-score-row">
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">SAFE SCORE</div>
+            <div class="prop-score ${riskClass(p.score)}">${p.score || '—'}</div>
+          </div>
+          <span class="material-symbols-outlined" style="color:var(--text3);">chevron_right</span>
+        </div>
+      </div>
+      ${p.memo ? `<div class="prop-history">${p.memo}</div>` : ''}
+    </div>`).join('');
+}
+
+function renderClients() {
+  const el = document.getElementById('clients-list');
+  if (!_clients.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;"><span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">people</span>등록된 고객이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = _clients.map((c,i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border2);cursor:pointer;" onclick="openClientDetail(${i})">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${c.name?.[0] || '?'}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:var(--navy);">${c.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${c.phone || '—'} · ${c.type} · ${c.budget ? parseInt(c.budget).toLocaleString()+'만원' : '예산미정'}</div>
+        ${c.area ? `<div style="font-size:11px;color:var(--text2);margin-top:2px;">${c.area}</div>` : ''}
+      </div>
+      <span class="material-symbols-outlined" style="color:var(--text3);">chevron_right</span>
+    </div>`).join('');
+}
+
+function renderPipeline() {
+  const stages = ['검토','협의','계약','완료'];
+  const el = document.getElementById('pipeline-board');
+  el.innerHTML = stages.map(stage => {
+    const items = _contracts.filter(c => c.stage === stage);
+    return `
+    <div class="pipe-col">
+      <div class="pipe-head">
+        <span class="pipe-head-title">${stage}</span>
+        <span class="pipe-count">${items.length}</span>
+      </div>
+      <div class="pipe-items">
+        ${items.length ? items.map((c,i) => `
+          <div class="pipe-item" onclick="openContractDetail('${c.id}')">
+            <div class="pipe-item-addr">${c.address}</div>
+            <div class="pipe-item-client">${c.clientName || '—'} · ${c.contract} ${c.deposit ? parseInt(c.deposit).toLocaleString()+'만' : ''}</div>
+            ${c.memo ? `<div class="pipe-item-memo">${c.memo}</div>` : ''}
+          </div>`).join('')
+        : `<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px;">없음</div>`}
+        <button onclick="openContractStage('${stage}')" style="width:100%;padding:6px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:inherit;margin-top:4px;">
+          + 추가
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAlerts() {
+  const el = document.getElementById('alerts-list');
+  const dangers = _props.filter(p => parseInt(p.score) < 60);
+  const warnings = _props.filter(p => parseInt(p.score) >= 60 && parseInt(p.score) < 80);
+  if (!dangers.length && !warnings.length) {
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;"><span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;color:#22c55e;font-variation-settings:\'FILL\' 1,\'wght\' 400,\'GRAD\' 0,\'opsz\' 48;">check_circle</span>위험 알림이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = [
+    ...dangers.map(p => `
+      <div class="alert-item">
+        <div class="alert-dot danger"></div>
+        <div>
+          <div class="alert-title">⚠ 고위험 — ${p.address}</div>
+          <div class="alert-desc">안전점수 ${p.score}점 · ${p.contract} · 즉시 확인 필요</div>
+        </div>
+      </div>`),
+    ...warnings.map(p => `
+      <div class="alert-item">
+        <div class="alert-dot warning"></div>
+        <div>
+          <div class="alert-title">△ 주의 — ${p.address}</div>
+          <div class="alert-desc">안전점수 ${p.score}점 · ${p.contract} · 추가 확인 권장</div>
+        </div>
+      </div>`)
+  ].join('');
+}
+
+function renderSettings() {
+  const items = [
+    { key:'today',     label:'오늘 현황 탭' },
+    { key:'props',     label:'담당 매물 탭' },
+    { key:'clients',   label:'고객 수첩 탭' },
+    { key:'contracts', label:'계약 진행 탭' },
+    { key:'alerts',    label:'위험 알림 탭' },
+  ];
+  const el = document.getElementById('settings-list');
+  el.innerHTML = items.map(item => `
+    <div class="setting-item">
+      <span class="setting-label">${item.label}</span>
+      <button class="toggle ${_settings[item.key] ? 'on' : ''}" onclick="toggleSetting('${item.key}',this)"></button>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// 액션
+// ════════════════════════════════
+function submitProperty() {
+  const addr     = document.getElementById('prop-addr').value.trim();
+  const detail   = document.getElementById('prop-detail').value.trim();
+  const contract = document.getElementById('prop-contract').value;
+  const deposit  = document.getElementById('prop-deposit').value;
+  const memo     = document.getElementById('prop-memo').value.trim();
+  if (!addr) { toast('주소를 입력하세요'); return; }
+
+  const prop = { id: Date.now().toString(), address: addr, detail, contract, deposit, memo, score: '', risk: '', createdAt: new Date().toISOString() };
+  _props.push(prop);
+  saveLocal('props', _props);
+  closeModal('property');
+  renderProps(); updateKPIs();
+  toast('매물 등록 완료 · AI 분석 중...');
+  // 서버에도 저장
+  savePropToServer(prop);
+
+  // AI 분석 호출
+  fetch('/api/analyze?address=' + encodeURIComponent(addr + ' ' + detail) + '&contract=' + contract + '&deposit=' + deposit)
+    .then(r => r.json()).then(data => {
+      if (data.ok) {
+        prop.score = data.score;
+        prop.risk  = data.riskLevel;
+        prop.analysis = JSON.stringify(data);
+        saveLocal('props', _props);
+        renderProps(); renderAlerts(); updateKPIs();
+        toast('AI 분석 완료 · 점수: ' + data.score + '점');
+      }
+    }).catch(() => {
+      prop.score = '—'; saveLocal('props', _props); renderProps();
+    });
+}
+
+function submitSchedule() {
+  const date   = document.getElementById('sch-date').value;
+  const time   = document.getElementById('sch-time').value;
+  const type   = document.getElementById('sch-type').value;
+  const client = document.getElementById('sch-client').value.trim();
+  const addr   = document.getElementById('sch-addr').value.trim();
+  const memo   = document.getElementById('sch-memo').value.trim();
+  if (!date) { toast('날짜를 선택하세요'); return; }
+
+  _schedule.push({ id: Date.now().toString(), date, time, type, clientName: client, address: addr, memo });
+  saveLocal('schedule', _schedule);
+  closeModal('schedule');
+  renderTodaySchedule(); updateKPIs();
+  toast('일정 저장 완료');
+}
+
+function submitClient() {
+  const name   = document.getElementById('cli-name').value.trim();
+  const phone  = document.getElementById('cli-phone').value.trim();
+  const type   = document.getElementById('cli-type').value;
+  const budget = document.getElementById('cli-budget').value;
+  const area   = document.getElementById('cli-area').value.trim();
+  const memo   = document.getElementById('cli-memo').value.trim();
+  if (!name) { toast('고객명을 입력하세요'); return; }
+
+  _clients.push({ id: Date.now().toString(), name, phone, type, budget, area, memo, createdAt: new Date().toISOString() });
+  saveLocal('clients', _clients);
+  closeModal('client');
+  renderClients();
+  toast('고객 저장 완료 (로컬)');
+}
+
+function submitContract() {
+  const addr    = document.getElementById('con-addr').value.trim();
+  const client  = document.getElementById('con-client').value.trim();
+  const phone   = document.getElementById('con-phone').value.trim();
+  const type    = document.getElementById('con-type').value;
+  const deposit = document.getElementById('con-deposit').value;
+  const stage   = document.getElementById('con-stage').value;
+  const memo    = document.getElementById('con-memo').value.trim();
+  if (!addr) { toast('주소를 입력하세요'); return; }
+
+  const newContract = { id: Date.now().toString(), agencyId: _agencyId, address: addr, clientName: client, clientPhone: phone, contract: type, deposit, stage, memo, history: '[]', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+  _contracts.push(newContract);
+  saveLocal('contracts', _contracts);
+  closeModal('contract');
+  renderPipeline(); updateKPIs();
+  toast('계약 저장 완료');
+  saveContractToServer(newContract);
+}
+
+function submitTodo() {
+  const text     = document.getElementById('todo-text').value.trim();
+  const priority = document.getElementById('todo-priority').value;
+  if (!text) { toast('내용을 입력하세요'); return; }
+
+  _todos.unshift({ id: Date.now().toString(), text, priority, done: false });
+  saveLocal('todos', _todos);
+  closeModal('todo');
+  renderTodos();
+  toast('할 일 추가 완료');
+}
+
+function toggleTodo(i) {
+  _todos[i].done = !_todos[i].done;
+  saveLocal('todos', _todos);
+  renderTodos();
+}
+
+function toggleSetting(key, btn) {
+  _settings[key] = !_settings[key];
+  btn.classList.toggle('on', _settings[key]);
+  localStorage.setItem('bb_settings_' + _agencyId, JSON.stringify(_settings));
+}
+
+function openPropDetail(i) {
+  const p = _props[i];
+  const url = '/pages/report.html?address=' + encodeURIComponent(p.address + ' ' + (p.detail||''))
+    + '&score=' + (p.score||75) + '&risk=' + (p.risk||'warning')
+    + '&contract=' + (p.contract||'전세') + '&deposit=' + (p.deposit||'');
+  window.open(url, '_blank');
+}
+
+function openClientDetail(i) { toast('고객 상세 기능 준비 중'); }
+function openContractDetail(id) { toast('계약 상세 기능 준비 중'); }
+function openContractStage(stage) {
+  document.getElementById('con-stage').value = stage;
+  openModal('contract');
+}
+
+// ════════════════════════════════
+// 페이지 전환
+// ════════════════════════════════
+const PAGE_TITLES = { today:'오늘 현황', props:'담당 매물', clients:'고객 수첩', contracts:'계약 진행', alerts:'위험 알림', settings:'설정' };
+
+function showRegister() {
+  const f = document.getElementById('register-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+async function doRegister() {
+  const id   = document.getElementById('reg-id').value.trim();
+  const name = document.getElementById('reg-name').value.trim();
+  const pw   = document.getElementById('reg-pw').value.trim();
+  if (!id || !pw) { toast('ID와 비밀번호를 입력하세요'); return; }
+
+  const result = await doRegisterRemote(id, name, pw);
+  if (!result.ok) { toast('❌ ' + (result.error || '등록 실패')); return; }
+
+  toast('✅ 등록 완료! 로그인해주세요');
+  document.getElementById('register-form').style.display = 'none';
+  document.getElementById('login-id').value = id;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[id] || '';
+}
+
+// ════════════════════════════════
+// 모달
+// ════════════════════════════════
+function openModal(name) {
+  document.getElementById('modal-' + name).classList.add('open');
+}
+function closeModal(name) {
+  document.getElementById('modal-' + name).classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-bg')) {
+    e.target.classList.remove('open');
+  }
+});
+
+// ════════════════════════════════
+// 유틸
+// ════════════════════════════════
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; }, 2200);
+  setTimeout(() => el.remove(), 2500);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+if (window.innerWidth <= 768) {
+  document.getElementById('menu-btn').style.display = 'flex';
+}
+
+// ════════════════════════════════
+// 데모 데이터
+// ════════════════════════════════
+const DEMO_PROPS = [
+  { id:'1', address:'서울시 강남구 역삼동 825-13', detail:'502호', contract:'전세', deposit:'32000', score:'78', risk:'warning', memo:'임대인 홍○○ · 근저당 1건 주의', createdAt:'2026-05-01' },
+  { id:'2', address:'부산시 해운대구 우동 센텀시티', detail:'1203호', contract:'전세', deposit:'25000', score:'42', risk:'danger', memo:'전세가율 91% 위험 · HUG 불가', createdAt:'2026-04-28' },
+  { id:'3', address:'부산시 동래구 온천동 한양아파트', detail:'304호', contract:'월세', deposit:'5000', score:'91', risk:'safe', memo:'이상 없음', createdAt:'2026-04-20' },
+];
+const DEMO_CONTRACTS = [
+  { id:'1', address:'역삼동 825-13 502호', clientName:'이○○', contract:'전세', deposit:'32000', stage:'협의', memo:'보증금 3.2억 협의 중', createdAt:'2026-05-01' },
+  { id:'2', address:'해운대 센텀시티 1203호', clientName:'박○○', contract:'전세', deposit:'25000', stage:'계약', memo:'⚠ 근저당 말소 특약 확인 필요', createdAt:'2026-04-28' },
+  { id:'3', address:'온천동 한양아파트 304호', clientName:'최○○', contract:'월세', deposit:'5000', stage:'완료', memo:'2026.04.30 계약 완료', createdAt:'2026-04-20' },
+];
+const DEMO_SCHEDULE = [
+  { id:'1', date: new Date().toISOString().split('T')[0], time:'10:00', type:'방문', clientName:'이○○', address:'역삼동 825-13', memo:'전세 조건 재협의' },
+  { id:'2', date: new Date().toISOString().split('T')[0], time:'14:30', type:'계약', clientName:'박○○', address:'해운대 센텀 1203호', memo:'근저당 말소 확인 후 계약 진행' },
+];
+const DEMO_TODOS = [
+  { id:'1', text:'해운대 매물 근저당 말소 여부 임대인에게 확인', priority:'urgent', done:false },
+  { id:'2', text:'이○○ 고객 특약 조건 문자 발송', priority:'normal', done:true },
+  { id:'3', text:'강남 역삼동 등기부 재확인', priority:'urgent', done:false },
+];
 </script>
 </body>
 </html>
