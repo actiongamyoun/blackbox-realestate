@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html class="light" lang="ko">
 <head>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#041627"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="블랙박스"/>
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/icon-32.png"/>
+  <link rel="shortcut icon" href="/assets/icons/favicon.ico"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>부동산 블랙박스 — 분석 리포트</title>
@@ -579,6 +589,13 @@ function updateProgress() {
   const pct   = Math.round(done / total * 100);
   document.getElementById('progress-label').textContent = `${done} / ${total} (${pct}%)`;
   document.getElementById('progress-bar').style.width = pct + '%';
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
 }
 </script>
 </body>

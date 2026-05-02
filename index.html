@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#041627"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="블랙박스"/>
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/icon-32.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/icon-16.png"/>
+  <link rel="shortcut icon" href="/assets/icons/favicon.ico"/>
+  <!-- OG -->
+  <meta property="og:title" content="부동산 블랙박스"/>
+  <meta property="og:description" content="전세사기 제로를 향해 — 임대차 계약 안전 분석 플랫폼"/>
+  <meta property="og:image" content="/assets/icons/icon-512.png"/>
+  <meta property="og:type" content="website"/>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>부동산 블랙박스</title>
@@ -373,6 +389,16 @@ function goToDetail() { window.location.href='/pages/report.html'; return; // or
 document.getElementById('hero-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') startAnalysis();
 });
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registered'))
+      .catch(e => console.log('SW error', e));
+  });
+}
 </script>
 </body>
 </html>
