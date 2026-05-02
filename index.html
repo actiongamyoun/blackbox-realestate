@@ -29,34 +29,16 @@ body {
   min-height: 100vh;
 }
 
-/* 네비 */
-.bb-top {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 32px;
-  background: #fff;
-  border-bottom: 0.5px solid #e0e0da;
-  position: sticky; top: 0; z-index: 10;
-}
-.bb-logo-row { display: flex; align-items: center; gap: 10px; }
-.bb-logo-box {
-  width: 34px; height: 34px; background: #111;
-  border-radius: 8px; display: flex; align-items: center; justify-content: center;
-}
-.bb-logo-name { font-size: 16px; font-weight: 700; color: #111; letter-spacing: -0.4px; }
-.bb-logo-eng { font-size: 10px; color: #888; letter-spacing: 0.5px; }
-.bb-top-btns { display: flex; gap: 8px; }
-.btn-ghost {
-  padding: 8px 18px; border-radius: 8px; font-size: 13px;
-  border: 0.5px solid #ccc; background: transparent; color: #333; cursor: pointer;
-  font-family: inherit;
-}
-.btn-ghost:hover { background: #f5f5f3; }
-.btn-dark {
-  padding: 8px 18px; border-radius: 8px; font-size: 13px;
-  border: none; background: #111; color: #fff; cursor: pointer;
-  font-family: inherit;
-}
-.btn-dark:hover { opacity: 0.85; }
+
+
+
+
+
+
+
+
+
+
 
 /* 히어로 */
 .bb-hero {
@@ -76,11 +58,9 @@ body {
   color: #111; line-height: 1.25; letter-spacing: -1.2px;
   margin-bottom: 14px;
 }
-.title-underline {
-  border-bottom: 4px solid #111; padding-bottom: 2px;
-}
+.title-underline {}
 .bb-hero-sub {
-  font-size: 17px; color: #666; line-height: 1.8;
+  font-size: 17px; color: #44474c; line-height: 1.8;
   max-width: 440px; margin-bottom: 32px;
 }
 
@@ -232,23 +212,13 @@ body {
   <link rel="apple-touch-startup-image" media="(device-width:834px) and (device-height:1194px) and (-webkit-device-pixel-ratio:2)" href="/assets/icons/splash-1668x2388.png"/>
   <!-- iPad Pro 12.9 -->
   <link rel="apple-touch-startup-image" media="(device-width:1024px) and (device-height:1366px) and (-webkit-device-pixel-ratio:2)" href="/assets/icons/splash-2048x2732.png"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 </head>
 <body>
 
 <!-- 네비 -->
-<div class="bb-top">
-  <div class="bb-logo-row">
-    <div class="bb-logo-box">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="2" y="2" width="14" height="14" rx="3" stroke="white" stroke-width="1.4"/>
-        <path d="M5 9h8M5 6h8M5 12h5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-      </svg>
-    </div>
     <div>
-      <div class="bb-logo-name">부동산 블랙박스</div>
-      <div class="bb-logo-eng">REAL ESTATE BLACKBOX</div>
-    </div>
-  </div>
+        </div>
 
 </div>
 
@@ -260,7 +230,12 @@ body {
   </div>
 
   <div class="bb-hero-title">
-    계약 전 <span class="title-underline">모든 위험</span>을<br>데이터로 확인하세요
+    계약 전 모든 위험은<br>
+    <span style="display:inline-flex;align-items:center;gap:10px;background:#041627;color:#fff;padding:8px 20px;border-radius:12px;font-size:inherit;letter-spacing:-1px;margin-top:8px;">
+      <span class="material-symbols-outlined" style="font-size:36px;color:#fff;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 40;">security</span>
+      부동산 블랙박스
+    </span>
+    로 확인하세요
   </div>
   <div class="bb-hero-sub">
     등기부등본 자동 분석, 전세가율 위험 감지,<br>
@@ -270,13 +245,13 @@ body {
   <!-- CTA 버튼 2열 -->
   <div style="display:flex;gap:12px;max-width:480px;width:100%;margin:0 auto 36px;">
     <button onclick="window.location.href='/pages/dashboard.html'"
-      style="flex:1;padding:16px 20px;background:#1a2b3c;color:#fff;font-size:16px;font-weight:800;border:2px solid rgba(255,255,255,.6);border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 16px rgba(0,0,0,.25);"
+      style="flex:1;padding:16px 20px;background:#1a2b3c;color:#fff;font-size:16px;font-weight:800;border:2px solid #041627;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 12px rgba(4,22,39,.15);"
       onmouseover="this.style.background='#2d4a6a';this.style.transform='translateY(-2px)'"
       onmouseout="this.style.background='#1a2b3c';this.style.transform='translateY(0)'">
       💼 중개사 로그인
     </button>
     <button onclick="window.location.href='/pages/analyze.html'"
-      style="flex:1;padding:16px 20px;background:#fff;color:#041627;font-size:16px;font-weight:900;border:2px solid #fff;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 20px rgba(0,0,0,.2);"
+      style="flex:1;padding:16px 20px;background:#041627;color:#fff;font-size:16px;font-weight:900;border:2px solid #041627;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 20px rgba(4,22,39,.2);"
       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(0,0,0,.3)'"
       onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 20px rgba(0,0,0,.2)'">
       🔍 무료 분석 시작
