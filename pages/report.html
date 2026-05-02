@@ -182,9 +182,12 @@ tailwind.config = {
     <!-- 로고 -->
     <div class="flex items-center gap-2">
       <div style="width:30px;height:30px;background:#041627;border-radius:6px;display:flex;align-items:center;justify-content:center;">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <rect x="1.5" y="1.5" width="13" height="13" rx="2.5" stroke="white" stroke-width="1.3"/>
-          <path d="M4 8h8M4 5.5h8M4 10.5h5" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        <svg viewBox="0 0 22 22" fill="none" width="18" height="18">
+          <path d="M11 2.5L2.5 9.5V20H8.5V15H13.5V20H19.5V9.5L11 2.5Z" fill="white"/>
+          <rect x="8.5" y="12" width="5" height="6" rx="1" fill="#041627"/>
+          <rect x="9.3" y="13.5" width="3.4" height="2.8" rx="0.5" fill="white"/>
+          <path d="M10.2 13.5V12.6a0.8 0.8 0 011.6 0v0.9" stroke="white" stroke-width="1" stroke-linecap="round" fill="none"/>
+          <circle cx="11" cy="14.9" r="0.5" fill="#041627"/>
         </svg>
       </div>
       <div>
@@ -194,10 +197,9 @@ tailwind.config = {
     </div>
     <!-- 네비 탭 -->
     <nav class="flex items-center gap-1 ml-6">
-      <a href="/" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container rounded transition-colors">매물 분석</a>
+      <a href="/pages/analyze.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container rounded transition-colors">매물 분석</a>
       <span class="px-3 py-1.5 text-xs font-bold text-primary bg-surface-container-high rounded" style="border-bottom:2px solid #041627;">분석 리포트</span>
       <a href="/pages/monitoring.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container rounded transition-colors">모니터링</a>
-      <a href="/pages/dashboard.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container rounded transition-colors">중개사 대시보드</a>
     </nav>
   </div>
   <div class="flex items-center gap-4">
@@ -270,39 +272,40 @@ tailwind.config = {
         <div class="space-y-0 flex-1">
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
             <span class="text-xs" style="color:#8192a7;">주소</span>
-            <span class="mono text-xs text-right text-white max-w-[180px]">서울시 강남구<br>역삼동 825-13</span>
+            <span class="mono text-xs text-right text-white max-w-[180px]" id="meta-addr-val">분석 중...</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
             <span class="text-xs" style="color:#8192a7;">유형</span>
-            <span class="mono text-xs text-white">공동주택 (아파트)</span>
+            <span class="mono text-xs text-white" id="meta-type-val">—</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
             <span class="text-xs" style="color:#8192a7;">계약 유형</span>
-            <span class="mono text-xs text-white">전세 · 3억 2천만 원</span>
+            <span class="mono text-xs text-white" id="meta-contract-val">—</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">전용면적</span>
-            <span class="mono text-xs text-white">84.27㎡</span>
+            <span class="text-xs" style="color:#8192a7;">보증금</span>
+            <span class="mono text-xs text-white" id="meta-deposit-val">—</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">KB 시세</span>
-            <span class="mono text-xs text-white">4억 1,200만 원</span>
+            <span class="text-xs" style="color:#8192a7;">KB 시세 (추정)</span>
+            <span class="mono text-xs text-white" id="meta-price-val">조회 중...</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
             <span class="text-xs" style="color:#8192a7;">전세가율</span>
-            <span class="mono text-xs font-bold" style="color:#fcd34d;">77.7% ⚠</span>
+            <span class="mono text-xs font-bold" style="color:#fcd34d;" id="meta-ratio-val">—</span>
           </div>
           <div class="flex justify-between py-3">
             <span class="text-xs" style="color:#8192a7;">분석 일시</span>
-            <span class="mono text-xs text-white">2026.05.02 14:32</span>
+            <span class="mono text-xs text-white" id="meta-date">—</span>
           </div>
         </div>
         <!-- 지도 영역 -->
-        <div class="mt-5 relative overflow-hidden" style="height:96px;background:#1a2b3c;border:1px solid rgba(255,255,255,.1);">
+        <div class="mt-5 relative overflow-hidden" style="height:96px;background:#1a2b3c;border:1px solid rgba(255,255,255,.1);cursor:pointer;" id="map-area" onclick="openMap()">
           <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:18px 18px;"></div>
-          <div class="absolute inset-0 flex items-center justify-center flex-col gap-1">
+          <div class="absolute inset-0 flex items-center justify-center flex-col gap-2">
             <span style="font-size:22px;">📍</span>
-            <span class="mono text-xs" style="color:#8192a7;">37.4979° N · 127.0276° E</span>
+            <span class="mono text-xs" style="color:#8192a7;" id="map-addr-label">주소 로딩 중...</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px;">탭하여 지도에서 보기</span>
           </div>
         </div>
       </div>
@@ -533,25 +536,42 @@ tailwind.config = {
   <section class="bg-white border border-outline-variant fade-up-4">
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">auto_fix_high</span>
-      <span class="sec-head-title">AI 추천 특약 사항</span>
+      <span class="sec-head-title">계약 시 유의사항</span>
       <span class="ml-auto text-xs text-on-surface-variant">계약서 자동 삽입 가능</span>
     </div>
-    <div class="divide-y divide-outline-variant">
-      <div class="p-5 flex gap-3 items-start hover:bg-surface-container-low transition-colors">
-        <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
-        <p class="text-sm leading-relaxed text-on-surface">잔금 지급 전 을구 기재 선순위 근저당권 및 가압류를 전액 말소할 것을 조건으로 한다. 미이행 시 임차인은 계약을 해제하고 계약금의 배액을 청구할 수 있다.</p>
+    <!-- 미리보기 1개 -->
+    <div class="p-5 flex gap-3 items-start">
+      <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
+      <p class="text-sm leading-relaxed text-on-surface">잔금 지급 전 을구 기재 선순위 근저당권 및 가압류를 전액 말소할 것을 조건으로 한다...</p>
+    </div>
+    <!-- 블러 잠금 영역 -->
+    <div style="position:relative;border-top:0.5px solid #c4c6cd;">
+      <!-- 블러 콘텐츠 -->
+      <div style="filter:blur(4px);pointer-events:none;padding:12px 0;">
+        <div class="p-5 flex gap-3 items-start">
+          <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
+          <p class="text-sm text-on-surface">임차인은 잔금 지급 당일 전입신고 및 확정일자를 즉시 이행하며...</p>
+        </div>
+        <div class="p-5 flex gap-3 items-start border-t border-outline-variant">
+          <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">권장</span>
+          <p class="text-sm text-on-surface">계약 체결 후 30일 이내 전세보증금 반환보증(HUG)에 가입하고...</p>
+        </div>
+        <div class="p-5 flex gap-3 items-start border-t border-outline-variant">
+          <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">권장</span>
+          <p class="text-sm text-on-surface">임대 기간 중 임대인의 국세·지방세 체납 사실이 확인될 경우...</p>
+        </div>
       </div>
-      <div class="p-5 flex gap-3 items-start hover:bg-surface-container-low transition-colors">
-        <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
-        <p class="text-sm leading-relaxed text-on-surface">임차인은 잔금 지급 당일 전입신고 및 확정일자를 즉시 이행하며, 임대인은 잔금 지급 익일부터 담보대출 추가 설정을 금지한다.</p>
-      </div>
-      <div class="p-5 flex gap-3 items-start hover:bg-surface-container-low transition-colors">
-        <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">권장</span>
-        <p class="text-sm leading-relaxed text-on-surface">계약 체결 후 30일 이내 전세보증금 반환보증(HUG 또는 SGI)에 가입하고, 임대인에게 가입 확인증 사본을 제출한다.</p>
-      </div>
-      <div class="p-5 flex gap-3 items-start hover:bg-surface-container-low transition-colors">
-        <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">권장</span>
-        <p class="text-sm leading-relaxed text-on-surface">임대 기간 중 임대인의 국세·지방세 체납 사실이 확인될 경우, 임차인은 계약을 즉시 해제할 수 있으며 임대인은 보증금을 즉시 반환하여야 한다.</p>
+      <!-- 잠금 오버레이 -->
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);backdrop-filter:blur(2px);">
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:28px;margin-bottom:10px;">🔒</div>
+          <div style="font-size:15px;font-weight:700;color:#041627;margin-bottom:6px;">로그인 후 전체 열람 가능</div>
+          <div style="font-size:13px;color:#74777d;margin-bottom:16px;">계약 시 유의사항 전체 · AI 맞춤 특약 · 계약서 자동 작성</div>
+          <button onclick="alert('로그인 기능 준비 중입니다.')"
+            style="padding:11px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+            무료 로그인하기
+          </button>
+        </div>
       </div>
     </div>
     <!-- 액션 버튼 -->
@@ -647,6 +667,129 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js');
   });
+}
+</script>
+
+<!-- 하단 네비 (모바일/PC 공통) -->
+<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-around;align-items:center;height:56px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 8px rgba(0,0,0,.06);">
+  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L19 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    분석
+  </a>
+  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#041627;font-size:10px;font-weight:700;padding:6px 12px;border-top:2px solid #041627;font-family:'Noto Sans KR',sans-serif;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="#041627" stroke-width="1.8"/><path d="M7 11h8M7 7.5h8M7 14.5h5" stroke="#041627" stroke-width="1.8" stroke-linecap="round"/></svg>
+    리포트
+  </a>
+  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    모니터링
+  </a>
+</nav>
+<div style="height:56px;"></div>
+
+<script>
+(function() {
+  const p = new URLSearchParams(window.location.search);
+  const address  = p.get('address') || '';
+  const score    = parseInt(p.get('score') || '78');
+  const risk     = p.get('risk') || 'warning';
+  const deposit  = p.get('deposit') || '';
+  const contract = p.get('contract') || '전세';
+
+  // ── 주소 파싱 ──
+  const addrEl = document.getElementById('meta-addr-val');
+  if (addrEl && address) {
+    // 앞 2단어(시도+구) / 나머지 줄바꿈
+    const parts = address.trim().split(' ');
+    const line1 = parts.slice(0, 2).join(' ');
+    const line2 = parts.slice(2).join(' ');
+    addrEl.innerHTML = line2 ? line1 + '<br>' + line2 : line1;
+  }
+
+  // ── 유형 추정 (주소 키워드로) ──
+  const typeEl = document.getElementById('meta-type-val');
+  if (typeEl && address) {
+    if (/오피스텔/.test(address))      typeEl.textContent = '업무시설 (오피스텔)';
+    else if (/빌라|다세대|연립/.test(address)) typeEl.textContent = '다세대주택 (빌라)';
+    else if (/아파트/.test(address))   typeEl.textContent = '공동주택 (아파트)';
+    else                               typeEl.textContent = '주거시설';
+  }
+
+  // ── 계약 유형 ──
+  const contractEl = document.getElementById('meta-contract-val');
+  if (contractEl) contractEl.textContent = contract;
+
+  // ── 보증금 ──
+  const depositEl = document.getElementById('meta-deposit-val');
+  if (depositEl) depositEl.textContent = deposit || '입력 정보 없음';
+
+  // ── KB 시세 (Mock — 실제 API 연동 후 대체) ──
+  const priceEl = document.getElementById('meta-price-val');
+  if (priceEl) priceEl.textContent = 'API 연동 후 표시';
+
+  // ── 전세가율 ──
+  const ratioEl = document.getElementById('meta-ratio-val');
+  if (ratioEl) ratioEl.textContent = '— (시세 조회 후 계산)';
+
+  // ── 지도 라벨 ──
+  const mapLbl = document.getElementById('map-addr-label');
+  if (mapLbl && address) {
+    mapLbl.textContent = address.length > 20 ? address.slice(0,20)+'…' : address;
+  }
+
+  // ── 날짜 ──
+  const dateEl = document.getElementById('meta-date');
+  if (dateEl) {
+    const now = new Date();
+    dateEl.textContent = now.getFullYear() + '.' +
+      String(now.getMonth()+1).padStart(2,'0') + '.' +
+      String(now.getDate()).padStart(2,'0') + ' ' +
+      String(now.getHours()).padStart(2,'0') + ':' +
+      String(now.getMinutes()).padStart(2,'0');
+  }
+
+  // ── 점수 게이지 ──
+  const scoreNum = document.querySelector('.gauge-num');
+  if (scoreNum) scoreNum.textContent = score;
+
+  const arc = document.querySelector('.gauge-arc');
+  if (arc) {
+    const offset = Math.round(490 - (score/100)*490);
+    arc.style.setProperty('--offset', offset);
+    arc.style.strokeDashoffset = 490;
+    arc.style.animation = 'none';
+    arc.getBoundingClientRect();
+    arc.style.animation = 'drawArc 1.2s cubic-bezier(.4,0,.2,1) forwards';
+  }
+
+  // ── 위험 칩 ──
+  const chip = document.querySelector('.score-chip');
+  const desc = document.querySelector('.score-desc');
+  if (chip) {
+    if (score >= 80) {
+      chip.className = 'score-chip chip-safe';
+      chip.textContent = '✓ 안전 (Safe)';
+      if(desc) desc.textContent = '주요 위험 요소가 발견되지 않았습니다.';
+    } else if (score >= 60) {
+      chip.className = 'score-chip chip-warn';
+      chip.textContent = '⚠ 보통 (Caution)';
+      if(desc) desc.textContent = '일부 잠재적 위험 요소가 발견되었습니다. 아래 리포트를 면밀히 검토하십시오.';
+    } else {
+      chip.className = 'score-chip chip-danger';
+      chip.textContent = '⛔ 고위험 (Danger)';
+      if(desc) desc.textContent = '복수의 위험 요소가 발견되었습니다. 전문가 자문 후 계약 여부를 결정하십시오.';
+    }
+  }
+})();
+
+// ── 지도 외부 앱 열기 ──
+function openMap() {
+  const p = new URLSearchParams(window.location.search);
+  const address = p.get('address') || '';
+  if (!address) return;
+  const encoded = encodeURIComponent(address);
+  // 카카오맵 검색
+  window.open('https://map.kakao.com/?q=' + encoded, '_blank');
 }
 </script>
 </body>
