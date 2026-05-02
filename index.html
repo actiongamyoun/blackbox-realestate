@@ -250,8 +250,8 @@ body {
     </div>
   </div>
   <div class="bb-top-btns">
-    <button class="btn-ghost">중개사 로그인</button>
-    <button class="btn-dark">무료 시작하기</button>
+    <button class="btn-ghost" onclick="window.location.href='/pages/dashboard.html'">중개사 로그인</button>
+    <button class="btn-dark" onclick="document.getElementById('hero-input').focus();document.getElementById('hero-input').scrollIntoView({behavior:'smooth'});">무료 시작하기</button>
   </div>
 </div>
 
@@ -276,16 +276,20 @@ body {
       <div class="bb-search-label">매물 주소를 입력하면 AI가 즉시 분석합니다</div>
       <div class="bb-search-row">
         <input class="bb-search-input" id="hero-input" type="text"
-          placeholder="예) 부산시 해운대구 우동 123-45 오피스텔 1203호"/>
+          placeholder="도로명 주소를 입력하세요 (예: 역삼로 123)"
+          autocomplete="off"
+          oninput="onAddrInput(this.value)"
+          onkeydown="onAddrKeydown(event)"/>
         <button class="bb-search-btn" id="hero-btn" onclick="startAnalysis()">분석 시작</button>
       </div>
     </div>
   </div>
 
-  <div class="bb-chips">
-    <button class="bb-chip" onclick="fillAddr('부산 해운대구 우동 센텀시티 오피스텔 1203호')">📍 해운대 오피스텔</button>
-    <button class="bb-chip" onclick="fillAddr('부산 수영구 광안동 광안리빌라 302호')">📍 광안리 빌라</button>
-    <button class="bb-chip" onclick="fillAddr('부산 동래구 온천동 한양아파트 504호')">📍 동래 아파트</button>
+  <!-- 주소 자동완성 드롭다운 -->
+  <div id="addr-suggestions" style="display:none;position:relative;max-width:540px;margin:-24px auto 8px;z-index:100;">
+    <div style="background:#fff;border:1px solid #c4c6cd;border-top:none;box-shadow:0 4px 12px rgba(0,0,0,.08);">
+      <div id="suggestions-list"></div>
+    </div>
   </div>
 
   <!-- 분석 결과 프리뷰 -->
@@ -374,10 +378,89 @@ body {
 </div>
 
 <script>
-function fillAddr(addr) {
-  document.getElementById('hero-input').value = addr;
-  document.getElementById('hero-input').focus();
+// ── 주소 자동완성 ──────────────────────────────
+let _suggestions = [];
+let _selIdx = -1;
+let _debounce = null;
+
+function onAddrInput(val) {
+  clearTimeout(_debounce);
+  _selIdx = -1;
+  if (val.length < 2) { hideSuggestions(); return; }
+  _debounce = setTimeout(() => fetchSuggestions(val), 300);
 }
+
+async function fetchSuggestions(query) {
+  try {
+    const res  = await fetch('/api/address?query=' + encodeURIComponent(query));
+    const data = await res.json();
+    if (!data.ok || !data.results?.length) { hideSuggestions(); return; }
+    _suggestions = data.results;
+    renderSuggestions(_suggestions);
+  } catch(e) {
+    hideSuggestions();
+  }
+}
+
+function renderSuggestions(list) {
+  const box  = document.getElementById('addr-suggestions');
+  const ul   = document.getElementById('suggestions-list');
+  if (!list.length) { hideSuggestions(); return; }
+  ul.innerHTML = list.map((s, i) => `
+    <div class="suggestion-item" data-idx="${i}"
+      style="padding:10px 16px;font-size:13px;cursor:pointer;border-bottom:0.5px solid #f0f0ee;display:flex;gap:8px;align-items:flex-start;"
+      onmouseenter="this.style.background='#f5f3f4'"
+      onmouseleave="this.style.background=''"
+      onclick="selectSuggestion(${i})">
+      <span style="color:#8192a7;font-size:11px;margin-top:1px;flex-shrink:0;">📍</span>
+      <div>
+        <div style="font-weight:500;color:#041627;">${s.roadAddr}</div>
+        <div style="font-size:11px;color:#8192a7;margin-top:2px;">${s.jibunAddr}${s.bdNm ? ' · ' + s.bdNm : ''}</div>
+      </div>
+    </div>`).join('');
+  box.style.display = 'block';
+}
+
+function selectSuggestion(idx) {
+  const s = _suggestions[idx];
+  if (!s) return;
+  document.getElementById('hero-input').value = s.roadAddr;
+  window._selectedAddr = s;
+  hideSuggestions();
+}
+
+function hideSuggestions() {
+  document.getElementById('addr-suggestions').style.display = 'none';
+  _suggestions = [];
+}
+
+function onAddrKeydown(e) {
+  if (e.key === 'ArrowDown') {
+    _selIdx = Math.min(_selIdx + 1, _suggestions.length - 1);
+    highlightSuggestion(_selIdx);
+  } else if (e.key === 'ArrowUp') {
+    _selIdx = Math.max(_selIdx - 1, 0);
+    highlightSuggestion(_selIdx);
+  } else if (e.key === 'Enter') {
+    if (_selIdx >= 0) { selectSuggestion(_selIdx); }
+    else { startAnalysis(); }
+  } else if (e.key === 'Escape') {
+    hideSuggestions();
+  }
+}
+
+function highlightSuggestion(idx) {
+  document.querySelectorAll('.suggestion-item').forEach((el, i) => {
+    el.style.background = i === idx ? '#f5f3f4' : '';
+  });
+}
+
+// 외부 클릭 시 닫기
+document.addEventListener('click', e => {
+  if (!e.target.closest('#addr-suggestions') && e.target.id !== 'hero-input') {
+    hideSuggestions();
+  }
+});
 
 function startAnalysis() {
   const input = document.getElementById('hero-input');
@@ -446,7 +529,12 @@ async function startAnalysis(){
 
   try {
     // 실제 API 호출
-    const res = await fetch('/api/analyze?address=' + encodeURIComponent(addr));
+    // 자동완성에서 선택한 주소 정보 활용
+    const selected = window._selectedAddr;
+    const params = new URLSearchParams({ address: addr });
+    if (selected?.admCd) params.set('lawdCd', selected.admCd.slice(0,5));
+    if (selected?.bdMgtSn) params.set('bdMgtSn', selected.bdMgtSn);
+    const res = await fetch('/api/analyze?' + params.toString());
 
     if (!res.ok) throw new Error('서버 오류: ' + res.status);
 
