@@ -135,6 +135,41 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
   .analyze-card{padding:22px 18px;}
   .addr-input{font-size:14px;padding:12px 13px;}
 }
+
+  /* 계약 유형 선택 */
+  .contract-types { display:flex; gap:8px; margin-bottom:0; }
+  .contract-btn {
+    flex:1; padding:10px 8px; border:1.5px solid #dde0e6;
+    border-radius:8px; font-size:13px; font-weight:600;
+    color:#74777d; background:#fff; cursor:pointer;
+    font-family:inherit; transition:all .15s; text-align:center;
+  }
+  .contract-btn:hover { border-color:#041627; color:#041627; }
+  .contract-btn.selected { border-color:#041627; background:#041627; color:#fff; }
+
+  /* 보증금/월세 입력 */
+  .deposit-wrap { display:flex; gap:8px; align-items:center; }
+  .deposit-input {
+    flex:1; padding:11px 14px; border:1px solid #c4c6cd;
+    border-radius:8px; font-size:14px; font-family:inherit;
+    outline:none; color:#041627;
+  }
+  .deposit-input:focus { border-color:#041627; }
+  .deposit-unit {
+    font-size:13px; color:#74777d; font-weight:600;
+    white-space:nowrap;
+  }
+
+  /* 계약유형별 안내 배지 */
+  .contract-notice {
+    padding:10px 14px; border-radius:8px;
+    font-size:12px; line-height:1.6; margin-top:10px;
+    display:none;
+  }
+  .cn-jeonse  { background:#eff6ff; border-left:3px solid #3b82f6; color:#1e40af; }
+  .cn-monthly { background:#f0fdf4; border-left:3px solid #22c55e; color:#166534; }
+  .cn-sale    { background:#fff7ed; border-left:3px solid #f97316; color:#9a3412; }
+
 </style>
 </head>
 <body>
@@ -220,6 +255,61 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
       <div class="hint">아파트·오피스텔은 동·호수, 빌라·단독주택은 층·호수를 입력하세요</div>
     </div>
 
+    <!-- STEP 3: 계약 유형 (주소 선택 후 표시) -->
+    <div id="step3-wrap" style="display:none;">
+      <hr class="divider"/>
+      <div class="step-label">
+        <div class="step-circle" id="step3-circle">2</div>
+        계약 유형 선택 <span class="hint-red" style="font-size:11px;font-weight:700;">* 필수</span>
+      </div>
+      <div class="contract-types">
+        <button class="contract-btn" id="btn-jeonse"  onclick="selectContract('전세')">🏠 전세</button>
+        <button class="contract-btn" id="btn-monthly" onclick="selectContract('월세')">💳 월세</button>
+        <button class="contract-btn" id="btn-sale"    onclick="selectContract('매매')">🔑 매매</button>
+      </div>
+      <!-- 계약유형별 안내 -->
+      <div class="contract-notice cn-jeonse"  id="cn-jeonse">
+        <strong>전세</strong> — HUG 보증보험 가입 가능 여부, 전세가율(80% 이하 권장), 선순위 근저당을 중점 분석합니다.
+      </div>
+      <div class="contract-notice cn-monthly" id="cn-monthly">
+        <strong>월세</strong> — 임대인 변경 위험, 확정일자 효력, 임차권등기명령 요건을 중점 분석합니다.
+      </div>
+      <div class="contract-notice cn-sale"    id="cn-sale">
+        <strong>매매</strong> — 가압류·압류·신탁 등기, 소유권 이전 이력, 권리하자 전반을 중점 분석합니다.
+      </div>
+    </div>
+
+    <!-- STEP 4: 금액 입력 (계약 유형 선택 후 표시) -->
+    <div id="step4-wrap" style="display:none;">
+      <hr class="divider"/>
+      <div class="step-label">
+        <div class="step-circle" id="step4-circle">3</div>
+        <span id="step4-label">보증금 입력</span>
+        <span class="hint-red" style="font-size:11px;font-weight:700;margin-left:4px;">* 필수</span>
+      </div>
+      <!-- 전세/매매: 보증금/매매가 단일 입력 -->
+      <div id="deposit-single" class="deposit-wrap">
+        <input class="deposit-input" id="deposit-input" type="number"
+          placeholder="금액 입력 (만원 단위, 예: 32000)"
+          oninput="updateBtn()" min="0" step="100"/>
+        <span class="deposit-unit">만원</span>
+      </div>
+      <!-- 월세: 보증금 + 월세 분리 입력 -->
+      <div id="deposit-monthly" style="display:none;flex-direction:column;gap:8px;">
+        <div class="deposit-wrap">
+          <input class="deposit-input" id="deposit-m-input" type="number"
+            placeholder="보증금 (만원)" oninput="updateBtn()" min="0" step="100"/>
+          <span class="deposit-unit">만원</span>
+        </div>
+        <div class="deposit-wrap">
+          <input class="deposit-input" id="monthly-input" type="number"
+            placeholder="월세 (만원)" oninput="updateBtn()" min="0" step="1"/>
+          <span class="deposit-unit">만원/월</span>
+        </div>
+      </div>
+      <div class="hint" id="amount-hint">정확한 금액을 입력할수록 전세가율 분석이 정확해집니다</div>
+    </div>
+
     <!-- 분석 버튼 -->
     <button class="analyze-btn" id="analyze-btn" disabled onclick="doAnalyze()">
       주소를 먼저 검색하세요
@@ -283,9 +373,9 @@ function selectSugg(idx) {
   // STEP2 표시
   document.getElementById('selected-road-text').textContent = s.roadAddr;
   document.getElementById('step2-wrap').style.display = 'block';
+  document.getElementById('step3-wrap').style.display = 'block';
   document.getElementById('detail-input').focus();
 
-  // 버튼 상태 업데이트
   updateBtn();
 }
 
@@ -323,19 +413,75 @@ document.addEventListener('click', e => {
 // ── 상세주소 입력 ──
 function onDetailInput() { updateBtn(); }
 
+let _contractType = '';
+
+function selectContract(type) {
+  _contractType = type;
+  // 버튼 스타일
+  ['jeonse','monthly','sale'].forEach(k => {
+    document.getElementById('btn-' + k)?.classList.remove('selected');
+  });
+  const keyMap = { '전세':'jeonse', '월세':'monthly', '매매':'sale' };
+  document.getElementById('btn-' + keyMap[type])?.classList.add('selected');
+
+  // 안내 배지
+  ['cn-jeonse','cn-monthly','cn-sale'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  const noticeMap = { '전세':'cn-jeonse', '월세':'cn-monthly', '매매':'cn-sale' };
+  document.getElementById(noticeMap[type]).style.display = 'block';
+
+  // STEP4 표시 + 라벨 변경
+  document.getElementById('step4-wrap').style.display = 'block';
+  const lbl = document.getElementById('step4-label');
+  if (type === '전세')  { lbl.textContent = '전세 보증금'; }
+  if (type === '월세')  { lbl.textContent = '보증금 + 월세'; }
+  if (type === '매매')  { lbl.textContent = '매매 희망가'; }
+
+  // 월세 분리/단일 토글
+  document.getElementById('deposit-single').style.display  = type === '월세' ? 'none'  : 'flex';
+  document.getElementById('deposit-monthly').style.display = type === '월세' ? 'flex'  : 'none';
+
+  // 힌트 변경
+  const hint = document.getElementById('amount-hint');
+  if (type === '매매') hint.textContent = '매매 희망가 입력 시 주변 시세와 비교 분석합니다';
+  else hint.textContent = '정확한 금액을 입력할수록 전세가율 분석이 정확해집니다';
+
+  // STEP3 완료 표시
+  const c3 = document.getElementById('step3-circle');
+  c3.textContent = '✓'; c3.style.background = '#22c55e';
+
+  updateBtn();
+}
+
+function getDepositStr() {
+  if (_contractType === '월세') {
+    const d = document.getElementById('deposit-m-input')?.value || '';
+    const m = document.getElementById('monthly-input')?.value || '';
+    return d && m ? d + '만/월' + m + '만' : '';
+  }
+  return document.getElementById('deposit-input')?.value || '';
+}
+
 function updateBtn() {
   const btn    = document.getElementById('analyze-btn');
   const detail = document.getElementById('detail-input')?.value.trim() || '';
-  if (_selectedAddr && detail.length >= 2) {
-    btn.disabled = false;
-    btn.innerHTML = '🔍 분석 시작하기';
-  } else if (_selectedAddr) {
-    btn.disabled = true;
-    btn.innerHTML = '동·호수를 입력하세요';
-  } else {
-    btn.disabled = true;
-    btn.innerHTML = '주소를 먼저 검색하세요';
+  const deposit = getDepositStr();
+
+  if (!_selectedAddr) {
+    btn.disabled = true; btn.innerHTML = '주소를 먼저 검색하세요'; return;
   }
+  if (detail.length < 2) {
+    btn.disabled = true; btn.innerHTML = '동·호수를 입력하세요'; return;
+  }
+  if (!_contractType) {
+    btn.disabled = true; btn.innerHTML = '계약 유형을 선택하세요'; return;
+  }
+  if (!deposit) {
+    btn.disabled = true; btn.innerHTML = '금액을 입력하세요'; return;
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🔍 ' + _contractType + ' 분석 시작하기';
 }
 
 // ── 분석 실행 ──
@@ -356,8 +502,13 @@ async function doAnalyze() {
   btn.disabled = true;
 
   try {
-    const params = new URLSearchParams({ address: fullAddr });
-    if (_selectedAddr.admCd)  params.set('lawdCd',  _selectedAddr.admCd.slice(0, 5));
+    const depositVal = getDepositStr();
+    const params = new URLSearchParams({
+      address:  fullAddr,
+      contract: _contractType,
+      deposit:  depositVal,
+    });
+    if (_selectedAddr.admCd)   params.set('lawdCd',  _selectedAddr.admCd.slice(0, 5));
     if (_selectedAddr.bdMgtSn) params.set('bdMgtSn', _selectedAddr.bdMgtSn);
 
     const res  = await fetch('/api/analyze?' + params.toString());
@@ -366,15 +517,25 @@ async function doAnalyze() {
     if (!data || !data.ok) throw new Error((data && data.error) || '분석 실패');
 
     window._analysisResult = data;
+    // 세션에 결과 저장
+    sessionStorage.setItem('bb_address',  fullAddr);
+    sessionStorage.setItem('bb_score',    String(data.score || 78));
+    sessionStorage.setItem('bb_risk',     data.riskLevel || 'warning');
+    sessionStorage.setItem('bb_contract', _contractType);
+    sessionStorage.setItem('bb_deposit',  getDepositStr());
+    // 탭 활성화
+    if (typeof activateTabs === 'function') activateTabs();
 
     btn.innerHTML = '✓ 분석 완료!';
     btn.style.background = '#166534';
 
     setTimeout(() => {
       window.location.href = '/pages/report.html'
-        + '?address=' + encodeURIComponent(fullAddr)
-        + '&score='   + (data.score || 75)
-        + '&risk='    + (data.riskLevel || 'warning');
+        + '?address='  + encodeURIComponent(fullAddr)
+        + '&score='    + (data.score || 75)
+        + '&risk='     + (data.riskLevel || 'warning')
+        + '&contract=' + encodeURIComponent(_contractType)
+        + '&deposit='  + encodeURIComponent(getDepositStr());
     }, 600);
 
   } catch(err) {
@@ -383,6 +544,11 @@ async function doAnalyze() {
     btn.style.background = '';
     btn.innerHTML = '🔍 분석 시작하기';
     if (confirm('API 연결 중입니다. 샘플 리포트를 확인하시겠습니까?')) {
+      sessionStorage.setItem('bb_address',  fullAddr);
+      sessionStorage.setItem('bb_score',    '78');
+      sessionStorage.setItem('bb_risk',     'warning');
+      sessionStorage.setItem('bb_contract', _contractType);
+      sessionStorage.setItem('bb_deposit',  getDepositStr());
       window.location.href = '/pages/report.html?address=' + encodeURIComponent(fullAddr) + '&score=78&risk=warning';
     }
   }
@@ -395,10 +561,82 @@ if ('serviceWorker' in navigator) {
 
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
-  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">search</span>분석</a>
-  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>리포트</a>
-  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링</a>
+  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;">
+    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">search</span>분석
+  </a>
+  <button onclick="checkBeforeNav('report')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:#b0b3bb;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;cursor:pointer;opacity:0.5;" id="tab-report">
+    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>리포트
+  </button>
+  <button onclick="checkBeforeNav('monitor')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:#b0b3bb;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;cursor:pointer;opacity:0.5;" id="tab-monitor">
+    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링
+  </button>
 </nav>
 <div style="height:58px;"></div>
+<div style="height:58px;"></div>
+<script>
+function checkBeforeNav(tab) {
+  // 분석 완료 여부 확인
+  var hasResult = sessionStorage.getItem('bb_address') && sessionStorage.getItem('bb_score');
+
+  if (hasResult) {
+    // 분석 결과 있으면 바로 이동
+    var params = '?address=' + encodeURIComponent(sessionStorage.getItem('bb_address') || '')
+               + '&score='   + (sessionStorage.getItem('bb_score') || '78')
+               + '&risk='    + (sessionStorage.getItem('bb_risk')  || 'warning');
+    if (tab === 'report')  window.location.href = '/pages/report.html'      + params;
+    if (tab === 'monitor') window.location.href = '/pages/monitoring.html'  + params;
+  } else {
+    // 분석 결과 없으면 안내
+    showNoResultToast();
+  }
+}
+
+function showNoResultToast() {
+  var existing = document.getElementById('no-result-toast');
+  if (existing) return;
+
+  var toast = document.createElement('div');
+  toast.id = 'no-result-toast';
+  toast.style.cssText = [
+    'position:fixed', 'bottom:72px', 'left:50%', 'transform:translateX(-50%)',
+    'background:#041627', 'color:#fff', 'padding:12px 20px', 'border-radius:10px',
+    'font-size:13px', 'font-weight:600', 'z-index:200',
+    'white-space:nowrap', 'box-shadow:0 4px 16px rgba(0,0,0,.2)',
+    'font-family:Noto Sans KR,sans-serif',
+    'animation:fadeInUp .25s ease'
+  ].join(';');
+  toast.innerHTML = '🔍 먼저 주소를 입력하고 분석을 시작해주세요';
+  document.body.appendChild(toast);
+  setTimeout(function(){ toast.remove(); }, 2500);
+}
+
+// 분석 완료 후 탭 활성화
+function activateTabs() {
+  ['tab-report','tab-monitor'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.style.opacity = '1';
+      el.style.color   = '#74777d';
+    }
+  });
+}
+
+// 페이지 로드 시 기존 결과 있으면 탭 활성화
+window.addEventListener('load', function() {
+  if (sessionStorage.getItem('bb_address') && sessionStorage.getItem('bb_score')) {
+    activateTabs();
+  }
+});
+
+// 분석 완료 이벤트 감지 (doAnalyze 성공 후 호출)
+var _origDoAnalyze = window.doAnalyze;
+</script>
+
+<style>
+@keyframes fadeInUp {
+  from { opacity:0; transform:translateX(-50%) translateY(8px); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0); }
+}
+</style>
 </body>
 </html>

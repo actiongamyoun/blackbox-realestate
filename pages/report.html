@@ -357,90 +357,9 @@ tailwind.config = {
       <span class="ml-auto mono text-xs text-on-surface-variant">4 / 10 완료</span>
     </div>
 
-    <!-- 완료 항목 -->
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">임대인 신분증 대조 (등기부 소유자 일치 확인)</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">국세 / 지방세 완납 증명서 확인</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">공인중개사 자격증 및 공제증서 번호 확인</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">건물 관리비 / 공과금 체납 여부 확인</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-
-    <!-- 미완료 항목 -->
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">근저당권 잔금 전 전액 말소 조건 계약서 명시</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">확정일자 취득 및 전입신고 즉시 이행 계획 확인</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">전세보증금 반환보증 (HUG / SGI) 가입 확인</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">임대인 담보대출 추가 설정 금지 특약 삽입</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">신탁 등기 여부 확인 (수익자 동의 없는 임대 금지)</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">계약 후 모니터링 등록 (등기 변동 알림)</span>
-      </div>
-      <span class="text-xs font-bold text-yellow-700">△ 대기중</span>
+    <!-- 동적 체크리스트 -->
+    <div class="chk-container divide-y divide-outline-variant">
+      <!-- JS로 계약유형별 렌더링 -->
     </div>
 
     <!-- 진행률 바 -->
@@ -681,9 +600,25 @@ if ('serviceWorker' in navigator) {
 <script>
 (function() {
   const p = new URLSearchParams(window.location.search);
-  const address  = p.get('address') || '';
-  const score    = parseInt(p.get('score') || '78');
-  const risk     = p.get('risk') || 'warning';
+  // 파라미터 없으면 sessionStorage에서 복원
+  const address  = p.get('address')  || sessionStorage.getItem('bb_address') || '';
+  const _score   = p.get('score')    || sessionStorage.getItem('bb_score')   || '';
+  const _risk    = p.get('risk')      || sessionStorage.getItem('bb_risk')    || '';
+
+  // 분석 결과 없으면 안내 화면 표시
+  if (!address) {
+    document.querySelector('main')?.insertAdjacentHTML('afterbegin',
+      '<div style="text-align:center;padding:60px 20px;background:#fff;border:1px solid #dde0e6;border-radius:12px;margin-bottom:20px;">' +
+      '<div style="font-size:48px;margin-bottom:16px;">📋</div>' +
+      '<div style="font-size:20px;font-weight:900;color:#041627;margin-bottom:8px;">분석 결과가 없습니다</div>' +
+      '<div style="font-size:14px;color:#74777d;margin-bottom:24px;">먼저 매물 주소를 입력하고 분석을 시작해주세요</div>' +
+      '<button onclick="window.location.href='/pages/analyze.html'" ' +
+      'style="padding:12px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">🔍 분석 시작하기</button>' +
+      '</div>'
+    );
+  }
+  const score    = parseInt(_score || '78');
+  const risk     = _risk || 'warning';
   const deposit  = p.get('deposit') || '';
   const contract = p.get('contract') || '전세';
 
@@ -708,7 +643,28 @@ if ('serviceWorker' in navigator) {
 
   // ── 계약 유형 ──
   const contractEl = document.getElementById('meta-contract-val');
-  if (contractEl) contractEl.textContent = contract;
+  if (contractEl) contractEl.textContent = contract || sessionStorage.getItem('bb_contract') || '—';
+  const _contract = contract || sessionStorage.getItem('bb_contract') || '';
+
+  // ── 계약유형별 체크리스트 동적 적용 ──
+  applyContractChecklist(_contract);
+
+  // ── 계약유형 배지 표시 ──
+  const typeBadge = document.getElementById('contract-type-badge');
+  if (typeBadge && _contract) {
+    const badgeMap = {
+      '전세': { bg:'#eff6ff', color:'#1e40af', text:'🏠 전세 분석' },
+      '월세': { bg:'#f0fdf4', color:'#166534', text:'💳 월세 분석' },
+      '매매': { bg:'#fff7ed', color:'#9a3412', text:'🔑 매매 분석' },
+    };
+    const b = badgeMap[_contract];
+    if (b) {
+      typeBadge.style.background = b.bg;
+      typeBadge.style.color = b.color;
+      typeBadge.textContent = b.text;
+      typeBadge.style.display = 'inline-block';
+    }
+  }
 
   // ── 보증금 ──
   const depositEl = document.getElementById('meta-deposit-val');
@@ -837,5 +793,88 @@ function doShare() {
   <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링</a>
 </nav>
 <div style="height:58px;"></div>
+
+<script>
+// ── 계약유형별 체크리스트 ──
+const CHECKLISTS = {
+  '전세': [
+    { done:false, text:'임대인 신분증 대조 및 등기부 소유자 일치 확인',      req:true  },
+    { done:false, text:'등기부 을구 — 근저당·가압류 확인 및 말소 특약',       req:true  },
+    { done:false, text:'전세가율 확인 (80% 이하 권장)',                       req:true  },
+    { done:false, text:'국세 / 지방세 완납 증명서 수령',                      req:true  },
+    { done:false, text:'HUG / SGI 전세보증금 반환보증 가입 가능 여부 확인',   req:true  },
+    { done:false, text:'확정일자 취득 및 전입신고 즉시 이행 계획 확인',       req:true  },
+    { done:false, text:'임대인 담보대출 추가 설정 금지 특약 삽입',            req:true  },
+    { done:false, text:'신탁 등기 여부 확인 (수익자 동의 없는 임대 금지)',    req:false },
+    { done:false, text:'공인중개사 자격증 및 공제증서 번호 확인',             req:false },
+    { done:false, text:'계약 후 모니터링 등록 (등기 변동 알림)',              req:false },
+  ],
+  '월세': [
+    { done:false, text:'임대인 신분증 대조 및 등기부 소유자 일치 확인',      req:true  },
+    { done:false, text:'확정일자 취득 및 전입신고 즉시 이행',                req:true  },
+    { done:false, text:'국세 / 지방세 완납 증명서 수령',                     req:true  },
+    { done:false, text:'월세 입금 계좌가 임대인 본인 명의인지 확인',         req:true  },
+    { done:false, text:'임대차 계약 갱신 청구권 및 차임 인상률 상한 확인',   req:true  },
+    { done:false, text:'관리비 항목 및 포함 여부 계약서 명시',               req:true  },
+    { done:false, text:'등기부 을구 — 근저당·가압류 확인',                  req:false },
+    { done:false, text:'소액임차인 최우선변제금 요건 해당 여부 확인',        req:false },
+    { done:false, text:'공인중개사 자격증 및 공제증서 번호 확인',            req:false },
+    { done:false, text:'계약 후 모니터링 등록 (임대인 변경 알림)',           req:false },
+  ],
+  '매매': [
+    { done:false, text:'등기부 갑구 — 가압류·압류·경매 개시 여부 확인',     req:true  },
+    { done:false, text:'등기부 을구 — 근저당·전세권 말소 여부 확인',        req:true  },
+    { done:false, text:'신탁 등기 여부 확인',                               req:true  },
+    { done:false, text:'임대인(매도인) 신분증 대조 및 등기부 일치 확인',    req:true  },
+    { done:false, text:'취득세 / 등록세 계산 및 준비',                      req:true  },
+    { done:false, text:'건축물대장 — 위반건축물·용도변경 여부 확인',        req:true  },
+    { done:false, text:'실거래가 및 공시지가 대비 매매가 적정성 확인',      req:true  },
+    { done:false, text:'잔금일 소유권이전등기 동시 처리 계획 확인',         req:true  },
+    { done:false, text:'공인중개사 자격증 및 공제증서 번호 확인',           req:false },
+    { done:false, text:'하자담보책임 특약 계약서 명시',                     req:false },
+  ],
+};
+
+function applyContractChecklist(contract) {
+  const items = CHECKLISTS[contract] || CHECKLISTS['전세'];
+  const container = document.querySelector('.chk-container');
+  if (!container) return;
+
+  container.innerHTML = items.map((item, i) => {
+    const statusText = item.done ? '✓ 검증됨' : '✗ 미확인';
+    const statusClass = item.done ? 'text-xs font-bold text-green-700' : 'text-xs font-bold text-red-700';
+    const iconHtml = item.done
+      ? `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect width="20" height="20" rx="4" fill="#166534"/><path d="M6 10l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+      : `<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="1" width="18" height="18" rx="3.5" stroke="#c4c6cd" stroke-width="1.5" fill="none"/></svg>`;
+    const reqBadge = item.req
+      ? `<span style="font-size:10px;font-weight:700;color:#dc2626;margin-right:4px;">필수</span>`
+      : `<span style="font-size:10px;font-weight:600;color:#74777d;margin-right:4px;">권장</span>`;
+    return `<div class="chk-row" onclick="toggleCheck(this)">
+      <div class="flex items-center gap-3">
+        ${iconHtml}
+        <span class="text-sm ${item.done ? 'font-medium text-primary' : 'text-on-surface-variant'}">${reqBadge}${item.text}</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="${statusClass}">${statusText}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateProgress();
+}
+
+// 기존 updateProgress 오버라이드
+function updateProgress() {
+  const total = document.querySelectorAll('.chk-row').length;
+  const done  = document.querySelectorAll('.chk-row svg rect[fill="#166534"]').length;
+  const pct   = total > 0 ? Math.round(done / total * 100) : 0;
+  const lbl = document.getElementById('chk-progress-label');
+  if (lbl) lbl.textContent = `${done} / ${total} 완료`;
+  const bar = document.getElementById('progress-bar');
+  if (bar) bar.style.width = pct + '%';
+  const oldLbl = document.getElementById('progress-label');
+  if (oldLbl) oldLbl.textContent = `${done} / ${total} (${pct}%)`;
+}
+</script>
 </body>
 </html>
