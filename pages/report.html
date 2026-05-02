@@ -845,7 +845,53 @@ const CHECKLISTS = {
 };
 
 function applyContractChecklist(contract) {
-  const items = CHECKLISTS[contract] || CHECKLISTS['전세'];
+  const raw = CHECKLISTS[contract] || CHECKLISTS['전세'];
+
+  // ── URL 파라미터에서 AI 분석 결과 읽기 ──
+  const p = new URLSearchParams(window.location.search);
+  const score    = parseInt(p.get('score') || sessionStorage.getItem('bb_score') || '0');
+  const risk     = p.get('risk') || sessionStorage.getItem('bb_risk') || '';
+  const deposit  = parseInt(p.get('deposit') || sessionStorage.getItem('bb_deposit') || '0');
+
+  // ── AI 자동 판단 결과 (Mock → 실제 API 연동 후 대체) ──
+  // 실제 서비스에서는 /api/analyze 응답값을 sessionStorage에 저장 후 여기서 읽음
+  const analysisResult = JSON.parse(sessionStorage.getItem('bb_analysis') || 'null') || {
+    registryClean:    score >= 70,   // 등기부 갑구 이상 없음
+    mortgageDetected: score < 80,    // 근저당 감지 여부
+    trustDetected:    false,         // 신탁 등기 감지
+    jeonseRatioOk:    score >= 75,   // 전세가율 80% 이하
+    taxClearOk:       score >= 65,   // 세금 체납 없음 (Mock)
+    auctionClear:     score >= 60,   // 경매 없음
+  };
+
+  // ── 계약유형별 AI 자동 체크 항목 정의 ──
+  const AI_AUTO = {
+    '전세': {
+      '등기부 을구 — 근저당·가압류 확인 및 말소 특약':        !analysisResult.mortgageDetected,
+      '전세가율 확인 (80% 이하 권장)':                        analysisResult.jeonseRatioOk,
+      '신탁 등기 여부 확인 (수익자 동의 없는 임대 금지)':     !analysisResult.trustDetected,
+    },
+    '월세': {
+      '등기부 을구 — 근저당·가압류 확인':                     !analysisResult.mortgageDetected,
+      '소액임차인 최우선변제금 요건 해당 여부 확인':           score >= 70,
+    },
+    '매매': {
+      '등기부 갑구 — 가압류·압류·경매 개시 여부 확인':        analysisResult.registryClean,
+      '등기부 을구 — 근저당·전세권 말소 여부 확인':           !analysisResult.mortgageDetected,
+      '신탁 등기 여부 확인':                                  !analysisResult.trustDetected,
+      '실거래가 및 공시지가 대비 매매가 적정성 확인':          score >= 65,
+    },
+  };
+
+  const autoMap = AI_AUTO[contract] || AI_AUTO['전세'];
+
+  // ── 아이템에 AI 자동 체크 적용 ──
+  const items = raw.map(item => ({
+    ...item,
+    done:    autoMap[item.text] === true,   // AI가 확인한 항목
+    aiDone:  autoMap[item.text] === true,   // AI 자동 여부 표시
+  }));
+
   const container = document.querySelector('.chk-container');
   if (!container) return;
 
@@ -856,16 +902,29 @@ function applyContractChecklist(contract) {
     const reqBadge = item.req
       ? `<span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full" style="font-size:10px;">필수</span>`
       : `<span class="mono text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant" style="font-size:10px;">권장</span>`;
-    const statusText = item.done ? '✓ 검증됨' : '✗ 미확인';
-    const statusColor = item.done ? 'text-green-700' : 'text-red-700';
-    return `<div class="chk-row" onclick="toggleCheck(this)">
+
+    // AI 자동 체크 vs 미확인 표시
+    let statusHtml;
+    if (item.aiDone) {
+      statusHtml = `<span class="text-xs font-bold text-green-700" style="display:flex;align-items:center;gap:3px;">
+        <span class="material-symbols-outlined" style="font-size:13px;">smart_toy</span> AI 확인
+      </span>`;
+    } else {
+      statusHtml = `<span class="text-xs font-bold text-red-700">✗ 직접 확인 필요</span>`;
+    }
+
+    // AI 자동 체크 항목은 클릭 불가 (이미 확인됨)
+    const clickable = item.aiDone ? '' : 'onclick="toggleCheck(this)"';
+    const cursor    = item.aiDone ? 'default' : 'pointer';
+
+    return `<div class="chk-row" ${clickable} style="cursor:${cursor};">
       <div class="flex items-center gap-3">
         ${icon}
         <span class="text-sm ${item.done ? 'font-medium text-primary' : 'text-on-surface-variant'}">${item.text}</span>
       </div>
       <div class="flex items-center gap-3">
         ${reqBadge}
-        <span class="text-xs font-bold ${statusColor}">${statusText}</span>
+        ${statusHtml}
       </div>
     </div>`;
   }).join('');
