@@ -170,6 +170,7 @@ tailwind.config = {
     .pipe-stage .mono { font-size: 9px; }
   }
 </style>
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=52b23b080ca355ccf759fc1686d95d15&libraries=services"></script>
 </head>
 
 <body class="text-on-background flex flex-col">
@@ -299,14 +300,15 @@ tailwind.config = {
             <span class="mono text-xs text-white" id="meta-date">—</span>
           </div>
         </div>
-        <!-- 지도 영역 -->
-        <div class="mt-5 relative overflow-hidden" style="height:96px;background:#1a2b3c;border:1px solid rgba(255,255,255,.1);cursor:pointer;" id="map-area" onclick="openMap()">
-          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:18px 18px;"></div>
-          <div class="absolute inset-0 flex items-center justify-center flex-col gap-2">
-            <span style="font-size:22px;">📍</span>
-            <span class="mono text-xs" style="color:#8192a7;" id="map-addr-label">주소 로딩 중...</span>
-            <span style="font-size:10px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.08);padding:2px 8px;border-radius:4px;">탭하여 지도에서 보기</span>
-          </div>
+        <!-- 카카오맵 -->
+        <div class="mt-5" style="height:140px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.15);">
+          <div id="kakao-map" style="width:100%;height:100%;"></div>
+        </div>
+        <div style="margin-top:6px;display:flex;justify-content:flex-end;">
+          <button id="map-link-btn" onclick="openKakaoMapLink()"
+            style="font-size:10px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.06);border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;">
+            카카오맵에서 크게 보기 →
+          </button>
         </div>
       </div>
     </section>
@@ -469,7 +471,9 @@ tailwind.config = {
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">table_chart</span>
       <span class="sec-head-title">정밀 데이터 분석 — Forensic Data</span>
+      <span class="ml-auto text-xs" style="color:#dc2626;">⚠ 현재 샘플 데이터 · 실시간 데이터는 로그인 후 제공</span>
     </div>
+    <div style="position:relative;">
     <table class="w-full text-left border-collapse">
       <thead>
         <tr class="bg-surface-container-high border-b border-outline-variant">
@@ -530,9 +534,22 @@ tailwind.config = {
         </tr>
       </tbody>
     </table>
+    <!-- 하단 절반 블러 오버레이 -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.95) 40%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;">
+      <div style="text-align:center;">
+        <div style="font-size:20px;margin-bottom:6px;">🔒</div>
+        <div style="font-size:14px;font-weight:700;color:#041627;margin-bottom:4px;">실시간 정밀 데이터는 로그인 후 제공</div>
+        <div style="font-size:12px;color:#74777d;margin-bottom:14px;">등기부 실시간 조회 · 실거래가 비교 · 경매 현황</div>
+        <button onclick="alert('로그인 기능 준비 중입니다.')"
+          style="padding:10px 24px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+          무료 로그인하기
+        </button>
+      </div>
+    </div>
+    </div>
   </section>
 
-  <!-- ⑥ AI 추천 특약 -->
+  <!-- ⑥ 계약 시 유의사항 -->
   <section class="bg-white border border-outline-variant fade-up-4">
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">auto_fix_high</span>
@@ -619,33 +636,31 @@ window.addEventListener('load', () => {
 
 // 체크박스 토글
 function toggleCheck(row) {
-  const icon = row.querySelector('.material-symbols-outlined');
-  const status = row.querySelector('span:last-child');
+  const icon   = row.querySelector('.material-symbols-outlined');
+  const status = row.querySelector('.chk-status');  // 상태 배지만
   const isChecked = icon.classList.contains('fill-icon');
 
   if (isChecked) {
+    // 해제
     icon.classList.remove('fill-icon','text-green-600');
     icon.classList.add('text-outline');
     icon.textContent = 'check_box_outline_blank';
-    status.textContent = '✗ 미확인';
-    status.className = 'text-xs font-bold text-red-700';
-    // 날짜 숨기기
-    const dateEl = row.querySelector('.mono.text-xs.text-on-surface-variant');
-    if(dateEl) dateEl.style.display = 'none';
+    if (status) { status.textContent = '✗ 미확인'; status.className = 'chk-status text-xs font-bold text-red-700'; }
+    const dateEl = row.querySelector('.chk-date');
+    if (dateEl) dateEl.style.display = 'none';
   } else {
+    // 완료
     icon.classList.add('fill-icon','text-green-600');
     icon.classList.remove('text-outline');
     icon.textContent = 'check_box';
+    if (status) { status.textContent = '✓ 완료'; status.className = 'chk-status text-xs font-bold text-green-700'; }
     const today = new Date();
     const d = today.getFullYear()+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+String(today.getDate()).padStart(2,'0');
-    status.textContent = '✓ 검증됨';
-    status.className = 'text-xs font-bold text-green-700';
-    // 날짜 표시
-    let dateEl = row.querySelector('.mono.text-xs.text-on-surface-variant');
-    if(!dateEl) {
+    let dateEl = row.querySelector('.chk-date');
+    if (!dateEl) {
       dateEl = document.createElement('span');
-      dateEl.className = 'mono text-xs text-on-surface-variant';
-      row.querySelector('.flex.items-center.gap-3:last-child').prepend(dateEl);
+      dateEl.className = 'chk-date mono text-xs text-on-surface-variant';
+      row.querySelector('.flex.items-center.gap-3:last-child, .chk-right').appendChild(dateEl);
     }
     dateEl.textContent = d;
     dateEl.style.display = '';
@@ -731,10 +746,16 @@ if ('serviceWorker' in navigator) {
   const ratioEl = document.getElementById('meta-ratio-val');
   if (ratioEl) ratioEl.textContent = '— (시세 조회 후 계산)';
 
-  // ── 지도 라벨 ──
-  const mapLbl = document.getElementById('map-addr-label');
-  if (mapLbl && address) {
-    mapLbl.textContent = address.length > 20 ? address.slice(0,20)+'…' : address;
+  // ── 카카오맵 초기화 ──
+  if (address) {
+    // SDK 로드 완료 후 초기화
+    if (typeof kakao !== 'undefined' && kakao.maps) {
+      kakao.maps.load(() => initKakaoMap(address));
+    } else {
+      window.addEventListener('load', () => {
+        if (typeof kakao !== 'undefined') kakao.maps.load(() => initKakaoMap(address));
+      });
+    }
   }
 
   // ── 날짜 ──
@@ -782,14 +803,36 @@ if ('serviceWorker' in navigator) {
   }
 })();
 
-// ── 지도 외부 앱 열기 ──
-function openMap() {
+// ── 카카오맵 초기화 ──
+function initKakaoMap(address) {
+  if (!address || typeof kakao === 'undefined') return;
+  const container = document.getElementById('kakao-map');
+  if (!container) return;
+
+  const geocoder = new kakao.maps.services.Geocoder();
+  geocoder.addressSearch(address, function(result, status) {
+    if (status === kakao.maps.services.Status.OK) {
+      const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+      const map = new kakao.maps.Map(container, {
+        center: coords,
+        level: 4,
+        draggable: false,
+        scrollwheel: false,
+      });
+      const marker = new kakao.maps.Marker({ map, position: coords });
+      // 링크 버튼에 좌표 저장
+      window._mapCoords = { lat: result[0].y, lng: result[0].x };
+    } else {
+      // 주소 검색 실패 시 기본 UI
+      container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a2b3c;color:#8192a7;font-size:12px;">지도를 불러올 수 없습니다</div>';
+    }
+  });
+}
+
+function openKakaoMapLink() {
   const p = new URLSearchParams(window.location.search);
-  const address = p.get('address') || '';
-  if (!address) return;
-  const encoded = encodeURIComponent(address);
-  // 카카오맵 검색
-  window.open('https://map.kakao.com/?q=' + encoded, '_blank');
+  const address = encodeURIComponent(p.get('address') || '');
+  window.open('https://map.kakao.com/?q=' + address, '_blank');
 }
 </script>
 </body>
