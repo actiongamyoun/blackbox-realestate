@@ -112,6 +112,57 @@ tailwind.config = {
 body{min-height:100dvh;background:#fbf9fa;}
 ::-webkit-scrollbar{width:5px;}
 ::-webkit-scrollbar-thumb{background:#c4c6cd;border-radius:3px;}
+
+  /* ── 공통 모바일 반응형 ── */
+  @media (max-width: 768px) {
+    /* 헤더 네비 숨김 */
+    nav.flex.items-center.gap-1.ml-6 { display: none !important; }
+
+    /* 메인 패딩 */
+    .wrap, main { padding-left: 12px !important; padding-right: 12px !important; }
+
+    /* 히어로 그리드 1열 */
+    .hero-grid,
+    .grid.grid-cols-1.md\:grid-cols-12 {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* 테이블 가로 스크롤 */
+    table { display: block; overflow-x: auto; white-space: nowrap; }
+
+    /* 플래그 그리드 */
+    .flags-grid,
+    .grid.grid-cols-1.md\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* 특약 액션 버튼 세로 */
+    .action-bar,
+    .bb-actions,
+    .flex.gap-3 {
+      flex-wrap: wrap;
+    }
+    .act-btn { min-width: 100%; }
+
+    /* 모니터링 그리드 */
+    .monitor-grid,
+    .grid.grid-cols-3 {
+      grid-template-columns: 1fr !important;
+    }
+    .monitor-item { border-right: none !important; border-bottom: 0.5px solid #c4c6cd; }
+
+    /* 대시보드 사이드바 숨김 → 상단 탭으로 */
+    .sidebar { display: none !important; }
+    body.flex { flex-direction: column !important; }
+  }
+
+  @media (max-width: 480px) {
+    .bb-stats, .grid.grid-cols-4 {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .pipe-stage { padding: 8px 6px; }
+    .pipe-stage .mono { font-size: 9px; }
+  }
 </style>
 </head>
 
@@ -749,6 +800,30 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
   });
 }
+</script>
+
+<!-- 모바일 하단 네비바 -->
+<nav style="display:none;" id="mobile-nav"
+  class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-14 bg-white border-t border-outline-variant">
+  <a href="/" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-xs">
+    <span class="material-symbols-outlined text-xl">search</span>분석
+  </a>
+  <a href="/pages/report.html" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-xs">
+    <span class="material-symbols-outlined text-xl">analytics</span>리포트
+  </a>
+  <a href="/pages/monitoring.html" class="flex flex-col items-center justify-center text-on-surface-variant px-3 py-1 text-xs">
+    <span class="material-symbols-outlined text-xl">visibility</span>모니터링
+  </a>
+  <a href="/pages/dashboard.html" class="flex flex-col items-center justify-center text-primary px-3 py-1 text-xs">
+    <span class="material-symbols-outlined fill-icon text-xl">business_center</span>대시보드
+  </a>
+</nav>
+<script>
+  // 모바일에서만 하단 네비 표시
+  if (window.innerWidth <= 768) {
+    document.getElementById('mobile-nav').style.display = 'flex';
+    document.body.style.paddingBottom = '56px';
+  }
 </script>
 </body>
 </html>
