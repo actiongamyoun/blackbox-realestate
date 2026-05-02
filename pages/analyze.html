@@ -140,9 +140,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
 <body>
 
 <!-- 헤더 -->
-<header class="hd">
-  <a href="/" class="hd-logo">
-    <div class="hd-logo-icon">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <div style="width:34px;height:34px;border-radius:8px;background:#041627;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
       <svg viewBox="0 0 22 22" fill="none" width="20" height="20">
         <path d="M11 2.5L2.5 9.5V20H8.5V15H13.5V20H19.5V9.5L11 2.5Z" fill="white"/>
         <rect x="8.5" y="12" width="5" height="6" rx="1" fill="#041627"/>
@@ -152,13 +152,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
       </svg>
     </div>
     <div>
-      <div class="hd-logo-name">부동산 블랙박스</div>
-      <div class="hd-logo-eng">REAL ESTATE BLACKBOX</div>
+      <div style="font-size:15px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
+      <div style="font-size:9px;color:#8192a7;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;">REAL ESTATE BLACKBOX</div>
     </div>
   </a>
-  <button class="hd-back" onclick="history.back()">
-    ← 돌아가기
-  </button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="doShare()" style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
+      🔗 공유
+    </button>
+    <button onclick="window.location.href='/pages/dashboard.html'" style="padding:7px 16px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      💼 중개사
+    </button>
+  </div>
 </header>
 
 <!-- 메인 -->

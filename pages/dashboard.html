@@ -169,9 +169,9 @@ body{min-height:100dvh;background:#fbf9fa;}
 <body class="text-on-background flex flex-col" style="min-height:100vh;">
 
 <!-- ══════════════════ HEADER ══════════════════ -->
-<header class="flex justify-between items-center w-full px-6 h-14 bg-white border-b border-outline-variant sticky top-0 z-50">
-  <div class="flex items-center gap-3">
-    <div style="width:30px;height:30px;background:#041627;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <div style="width:34px;height:34px;border-radius:8px;background:#041627;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
       <svg viewBox="0 0 22 22" fill="none" width="20" height="20">
         <path d="M11 2.5L2.5 9.5V20H8.5V15H13.5V20H19.5V9.5L11 2.5Z" fill="white"/>
         <rect x="8.5" y="12" width="5" height="6" rx="1" fill="#041627"/>
@@ -181,27 +181,17 @@ body{min-height:100dvh;background:#fbf9fa;}
       </svg>
     </div>
     <div>
-      <div style="font-size:14px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
-      <div class="mono" style="font-size:9px;color:#8192a7;letter-spacing:1.5px;">REAL ESTATE BLACKBOX · 중개사 모드</div>
+      <div style="font-size:15px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
+      <div style="font-size:9px;color:#8192a7;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;">REAL ESTATE BLACKBOX</div>
     </div>
-    <nav class="flex items-center gap-1 ml-6">
-      <a href="/" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">매물 분석</a>
-      <a href="/pages/report.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">분석 리포트</a>
-      <a href="/pages/monitoring.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">모니터링</a>
-      <span class="px-3 py-1.5 text-xs font-bold text-primary bg-surface-container-high" style="border-bottom:2px solid #041627;">중개사 대시보드</span>
-    </nav>
-  </div>
-  <div class="flex items-center gap-3">
-    <button onclick="showToast('새 매물 등록 화면으로 이동합니다.')" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary text-white hover:opacity-90 transition-opacity">
-      <span class="material-symbols-outlined text-sm">add</span> 매물 등록
+  </a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="doShare()" style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
+      🔗 공유
     </button>
-    <div class="flex items-center gap-2 pl-3 border-l border-outline-variant">
-      <div style="width:30px;height:30px;border-radius:50%;background:#e9e7e9;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#041627;">김</div>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#041627;">김○○ 공인중개사</div>
-        <div class="mono" style="font-size:10px;color:#8192a7;">하나부동산 · 강남점</div>
-      </div>
-    </div>
+    <button onclick="window.location.href='/pages/dashboard.html'" style="padding:7px 16px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      💼 중개사
+    </button>
   </div>
 </header>
 

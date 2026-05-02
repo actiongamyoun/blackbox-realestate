@@ -13,7 +13,7 @@
   <link rel="shortcut icon" href="/assets/icons/favicon.ico"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>부동산 블랙박스 — 사후 모니터링</title>
+<title>부동산 블랙박스 — 모니터링</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -160,9 +160,9 @@ body{min-height:100dvh;background:#fbf9fa;padding-bottom:80px;}
 <!-- ══════════════════════════════════
      HEADER
 ══════════════════════════════════ -->
-<header class="flex justify-between items-center w-full px-6 h-14 bg-white border-b border-outline-variant fixed top-0 z-50">
-  <div class="flex items-center gap-3">
-    <div style="width:30px;height:30px;background:#041627;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+<header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <div style="width:34px;height:34px;border-radius:8px;background:#041627;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
       <svg viewBox="0 0 22 22" fill="none" width="20" height="20">
         <path d="M11 2.5L2.5 9.5V20H8.5V15H13.5V20H19.5V9.5L11 2.5Z" fill="white"/>
         <rect x="8.5" y="12" width="5" height="6" rx="1" fill="#041627"/>
@@ -172,24 +172,16 @@ body{min-height:100dvh;background:#fbf9fa;padding-bottom:80px;}
       </svg>
     </div>
     <div>
-      <div style="font-size:14px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
-      <div class="mono" style="font-size:9px;color:#8192a7;letter-spacing:1.5px;">REAL ESTATE BLACKBOX</div>
+      <div style="font-size:15px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
+      <div style="font-size:9px;color:#8192a7;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;">REAL ESTATE BLACKBOX</div>
     </div>
-    <nav class="flex items-center gap-1 ml-6">
-      <a href="/" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">매물 분석</a>
-      <a href="/pages/report.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">분석 리포트</a>
-      <span class="px-3 py-1.5 text-xs font-bold text-primary bg-surface-container-high" style="border-bottom:2px solid #041627;">사후 모니터링</span>
-      <a href="#" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">중개사 대시보드</a>
-    </nav>
-  </div>
-  <div class="flex items-center gap-3">
-    <!-- 알림 벨 -->
-    <button onclick="triggerTestPush()" class="relative p-2 hover:bg-surface-container-low transition-colors" title="테스트 알림 발생">
-      <span class="material-symbols-outlined text-primary">notifications</span>
-      <span id="bell-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center mono" style="font-size:9px;font-weight:700;">3</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="doShare()" style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
+      🔗 공유
     </button>
-    <button class="p-2 hover:bg-surface-container-low transition-colors">
-      <span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
+    <button onclick="window.location.href='/pages/dashboard.html'" style="padding:7px 16px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      💼 중개사
     </button>
   </div>
 </header>
@@ -202,7 +194,7 @@ body{min-height:100dvh;background:#fbf9fa;padding-bottom:80px;}
   <!-- 로그인 유도 배너 -->
   <div style="background:linear-gradient(135deg,#041627,#1a2b3c);border-radius:12px;padding:28px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <div style="font-size:13px;color:#8192a7;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">MONITORING · 사후 모니터링</div>
+      <div style="font-size:13px;color:#8192a7;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">MONITORING · 모니터링</div>
       <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px;">계약 후 안심하려면 로그인하세요</div>
       <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;">등기부 변동 · 경매 개시 · 임대인 체납 발생 시 즉시 알림</div>
     </div>
@@ -752,21 +744,30 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<!-- 하단 네비 -->
-<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-around;align-items:center;height:56px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 8px rgba(0,0,0,.06);">
-  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L19 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    분석
-  </a>
-  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M7 11h8M7 7.5h8M7 14.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    리포트
-  </a>
-  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#041627;font-size:10px;font-weight:700;padding:6px 12px;border-top:2px solid #041627;font-family:'Noto Sans KR',sans-serif;">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#041627" stroke-width="1.8"/><path d="M11 7v4l3 2" stroke="#041627" stroke-width="1.8" stroke-linecap="round"/></svg>
-    모니터링
-  </a>
+
+<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
+  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">🔍</span>분석</a>
+  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">📋</span>리포트</a>
+  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">🔔</span>모니터링</a>
 </nav>
-<div style="height:56px;"></div>
+<div style="height:58px;"></div>
+<script>
+function doShare() {
+  var isLoggedIn = localStorage.getItem("bb_logged_in") === "true";
+  if (!isLoggedIn) {
+    if (confirm("공유 기능은 로그인 후 이용할 수 있습니다.\n로그인하시겠습니까?")) {
+      alert("로그인 기능 준비 중입니다. 곧 카카오 로그인이 지원됩니다.");
+    }
+    return;
+  }
+  if (navigator.share) {
+    navigator.share({ title: "부동산 블랙박스 분석 리포트", url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+      .then(function(){ alert("링크가 복사되었습니다."); })
+      .catch(function(){ alert("주소창에서 직접 복사해주세요."); });
+  }
+}
+</script>
 </body>
 </html>
