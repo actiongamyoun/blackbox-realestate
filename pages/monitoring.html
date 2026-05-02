@@ -13,111 +13,89 @@
   <link rel="shortcut icon" href="/assets/icons/favicon.ico"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>부동산 블랙박스 — 분석 리포트</title>
+<title>부동산 블랙박스 — 사후 모니터링</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
 tailwind.config = {
-  darkMode: "class",
-  theme: {
-    extend: {
-      colors: {
-        "primary": "#041627",
-        "primary-container": "#1a2b3c",
-        "on-primary": "#ffffff",
-        "on-primary-container": "#8192a7",
-        "secondary": "#505f76",
-        "surface": "#fbf9fa",
-        "surface-container-lowest": "#ffffff",
-        "surface-container-low": "#f5f3f4",
-        "surface-container": "#efedef",
-        "surface-container-high": "#e9e7e9",
-        "surface-container-highest": "#e4e2e3",
-        "on-surface": "#1b1c1d",
-        "on-surface-variant": "#44474c",
-        "outline": "#74777d",
-        "outline-variant": "#c4c6cd",
-        "background": "#fbf9fa",
-        "on-background": "#1b1c1d",
-        "error": "#ba1a1a",
-        "on-error": "#ffffff",
-        "error-container": "#ffdad6",
+  darkMode:"class",
+  theme:{
+    extend:{
+      colors:{
+        "primary":"#041627","primary-container":"#1a2b3c",
+        "on-primary":"#ffffff","on-primary-container":"#8192a7",
+        "secondary":"#505f76","surface":"#fbf9fa",
+        "surface-container-lowest":"#ffffff","surface-container-low":"#f5f3f4",
+        "surface-container":"#efedef","surface-container-high":"#e9e7e9",
+        "surface-container-highest":"#e4e2e3","on-surface":"#1b1c1d",
+        "on-surface-variant":"#44474c","outline":"#74777d",
+        "outline-variant":"#c4c6cd","background":"#fbf9fa",
+        "on-background":"#1b1c1d","error":"#ba1a1a","on-error":"#ffffff",
       },
-      fontFamily: {
-        "mono": ["IBM Plex Mono", "monospace"],
-        "sans": ["Noto Sans KR", "Inter", "sans-serif"],
+      fontFamily:{
+        "sans":["Noto Sans KR","Inter","sans-serif"],
+        "mono":["IBM Plex Mono","monospace"],
       },
-      borderRadius: { "DEFAULT": "0", "lg": "0", "xl": "0", "full": "9999px" },
+      borderRadius:{"DEFAULT":"0","lg":"0","xl":"0.5rem","full":"9999px"},
     }
   }
 }
 </script>
 <style>
-  * { font-family: 'Noto Sans KR', 'Inter', sans-serif; }
-  .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    vertical-align: middle;
-  }
-  .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  .mono { font-family: 'IBM Plex Mono', monospace; }
+*{font-family:'Noto Sans KR','Inter',sans-serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.material-symbols-outlined{
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  display:inline-block;vertical-align:middle;
+}
+.fill-icon{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
 
-  /* 상태 칩 */
-  .chip-safe    { background:rgba(34,197,94,.1);  color:#166534; }
-  .chip-warning { background:rgba(245,158,11,.1); color:#92400e; }
-  .chip-danger  { background:rgba(220,38,38,.1);  color:#991b1b; }
-  .chip-info    { background:rgba(37,99,235,.1);  color:#1e40af; }
+/* 실시간 펄스 */
+@keyframes pulse-green{
+  0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(34,197,94,.7);}
+  70%{transform:scale(1);box-shadow:0 0 0 8px rgba(34,197,94,0);}
+  100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(34,197,94,0);}
+}
+@keyframes pulse-red{
+  0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(220,38,38,.7);}
+  70%{transform:scale(1);box-shadow:0 0 0 8px rgba(220,38,38,0);}
+  100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(220,38,38,0);}
+}
+.pulse-green{animation:pulse-green 2s infinite;}
+.pulse-red{animation:pulse-red 1.5s infinite;}
 
-  /* 위험바 */
-  .risk-bar-track { background:#e4e7ec; border-radius:2px; height:6px; }
-  .risk-bar-fill  { border-radius:2px; height:6px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
+/* 푸시 알림 팝업 */
+@keyframes slideIn{from{transform:translateX(120%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(120%);opacity:0;}}
+.push-popup{animation:slideIn .4s cubic-bezier(.4,0,.2,1) forwards;}
+.push-popup.hide{animation:slideOut .3s cubic-bezier(.4,0,.2,1) forwards;}
 
-  /* 게이지 */
-  @keyframes drawGauge { from{stroke-dashoffset:553} to{stroke-dashoffset:var(--offset)} }
-  .gauge-arc { animation: drawGauge 1.4s cubic-bezier(.4,0,.2,1) forwards; }
+/* 피드 아이템 등장 */
+@keyframes feedIn{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+.feed-new{animation:feedIn .4s ease forwards;}
 
-  /* 페이드업 */
-  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-  .fade-up { animation: fadeUp .5s ease forwards; }
-  .fade-up-2 { animation: fadeUp .5s .1s ease both; }
-  .fade-up-3 { animation: fadeUp .5s .2s ease both; }
-  .fade-up-4 { animation: fadeUp .5s .3s ease both; }
+/* 스캔 라인 */
+@keyframes scanLine{
+  0%{top:0%;opacity:.8;}
+  100%{top:100%;opacity:0;}
+}
+.scan-line{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(34,197,94,.6),transparent);
+  animation:scanLine 2.5s ease-in-out infinite;
+}
 
-  /* 섹션 공통 헤더 */
-  .sec-head {
-    display:flex; align-items:center; gap:8px;
-    padding:10px 20px;
-    background:#e9e7e9;
-    border-bottom:1px solid #c4c6cd;
-  }
-  .sec-head-title {
-    font-size:11px; font-weight:700; letter-spacing:1.8px;
-    color:#041627; text-transform:uppercase;
-  }
+/* 링 애니메이션 */
+@keyframes ringPulse{
+  0%,100%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.15);opacity:.6;}
+}
+.ring-anim{animation:ringPulse 2s ease-in-out infinite;}
 
-  /* 체크박스 행 */
-  .chk-row {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 20px; border-bottom:1px solid #c4c6cd;
-    cursor:pointer; transition:background .12s;
-  }
-  .chk-row:last-child { border-bottom:none; }
-  .chk-row:hover { background:#f5f3f4; }
-
-  /* 알림 배너 */
-  .alert-banner {
-    padding:12px 16px; border-left:4px solid;
-    display:flex; gap:10px; align-items:flex-start;
-  }
-
-  body { min-height:100dvh; background:#fbf9fa; }
-
-  /* 스크롤바 */
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:#c4c6cd; border-radius:3px; }
+body{min-height:100dvh;background:#fbf9fa;padding-bottom:80px;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-thumb{background:#c4c6cd;border-radius:3px;}
 
   /* ── 공통 모바일 반응형 ── */
   @media (max-width: 768px) {
@@ -172,40 +150,46 @@ tailwind.config = {
 </style>
 </head>
 
-<body class="text-on-background flex flex-col">
+<body class="text-on-background">
+
+<!-- ══════════════════════════════════
+     PUSH 알림 팝업 (우상단 고정)
+══════════════════════════════════ -->
+<div id="push-container" class="fixed top-4 right-4 z-[200] flex flex-col gap-2 w-80"></div>
 
 <!-- ══════════════════════════════════
      HEADER
 ══════════════════════════════════ -->
-<header class="flex items-center justify-between w-full px-6 py-0 sticky top-0 z-50 bg-white border-b border-outline-variant shadow-none" style="height:56px;">
+<header class="flex justify-between items-center w-full px-6 h-14 bg-white border-b border-outline-variant fixed top-0 z-50">
   <div class="flex items-center gap-3">
-    <!-- 로고 -->
-    <div class="flex items-center gap-2">
-      <div style="width:30px;height:30px;background:#041627;border-radius:6px;display:flex;align-items:center;justify-content:center;">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <rect x="1.5" y="1.5" width="13" height="13" rx="2.5" stroke="white" stroke-width="1.3"/>
-          <path d="M4 8h8M4 5.5h8M4 10.5h5" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div>
-        <div style="font-size:14px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
-        <div style="font-size:9px;color:#8192a7;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;">REAL ESTATE BLACKBOX</div>
-      </div>
+    <div style="width:30px;height:30px;background:#041627;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+      <svg viewBox="0 0 22 22" fill="none" width="20" height="20">
+        <path d="M11 2.5L2.5 9.5V20H8.5V15H13.5V20H19.5V9.5L11 2.5Z" fill="white"/>
+        <rect x="8.5" y="12" width="5" height="6" rx="1" fill="#041627"/>
+        <rect x="9.3" y="13.5" width="3.4" height="2.8" rx="0.5" fill="white"/>
+        <path d="M10.2 13.5V12.6a0.8 0.8 0 011.6 0v0.9" stroke="white" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <circle cx="11" cy="14.9" r="0.5" fill="#041627"/>
+      </svg>
     </div>
-    <!-- 네비 탭 -->
+    <div>
+      <div style="font-size:14px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;">부동산 블랙박스</div>
+      <div class="mono" style="font-size:9px;color:#8192a7;letter-spacing:1.5px;">REAL ESTATE BLACKBOX</div>
+    </div>
     <nav class="flex items-center gap-1 ml-6">
-      <a href="/pages/analyze.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container rounded transition-colors">매물 분석</a>
-      <span class="px-3 py-1.5 text-xs font-bold text-primary bg-surface-container-high rounded" style="border-bottom:2px solid #041627;">분석 리포트</span>
-      <a href="/pages/monitoring.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container rounded transition-colors">모니터링</a>
+      <a href="/" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">매물 분석</a>
+      <a href="/pages/report.html" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">분석 리포트</a>
+      <span class="px-3 py-1.5 text-xs font-bold text-primary bg-surface-container-high" style="border-bottom:2px solid #041627;">사후 모니터링</span>
+      <a href="#" class="px-3 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container transition-colors">중개사 대시보드</a>
     </nav>
   </div>
-  <div class="flex items-center gap-4">
-    <span class="mono text-xs text-on-surface-variant">ID : <span class="text-primary font-semibold">4829-QX</span></span>
-    <button onclick="window.print()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-outline-variant hover:bg-surface-container-low transition-colors">
-      <span class="material-symbols-outlined text-sm">print</span> 출력
+  <div class="flex items-center gap-3">
+    <!-- 알림 벨 -->
+    <button onclick="triggerTestPush()" class="relative p-2 hover:bg-surface-container-low transition-colors" title="테스트 알림 발생">
+      <span class="material-symbols-outlined text-primary">notifications</span>
+      <span id="bell-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center mono" style="font-size:9px;font-weight:700;">3</span>
     </button>
-    <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-primary text-white hover:opacity-90 transition-opacity">
-      <span class="material-symbols-outlined text-sm">share</span> 공유
+    <button class="p-2 hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant">account_circle</span>
     </button>
   </div>
 </header>
@@ -213,450 +197,552 @@ tailwind.config = {
 <!-- ══════════════════════════════════
      MAIN
 ══════════════════════════════════ -->
-<main class="flex-grow w-full max-w-[1200px] mx-auto px-5 py-8 space-y-5">
+<main class="max-w-[1200px] mx-auto px-5 pt-20 pb-6">
 
-  <!-- ① 히어로 그리드: 점수 + 메타 -->
-  <div class="grid grid-cols-1 md:grid-cols-12 gap-5 fade-up">
-
-    <!-- 점수 카드 (7/12) -->
-    <section class="md:col-span-7 bg-white border border-outline-variant flex flex-col items-center justify-center text-center p-10">
-      <span class="text-xs font-bold tracking-widest text-on-surface-variant uppercase mb-6">Overall Safety Analysis</span>
-
-      <!-- SVG 게이지 -->
-      <div class="relative" style="width:200px;height:200px;">
-        <svg width="200" height="200" viewBox="0 0 200 200" style="transform:rotate(-90deg)">
-          <circle cx="100" cy="100" r="84" fill="none" stroke="#e4e7ec" stroke-width="14"/>
-          <circle class="gauge-arc" cx="100" cy="100" r="84" fill="none"
-            stroke="#041627" stroke-width="14"
-            stroke-dasharray="528" stroke-dashoffset="528"
-            stroke-linecap="round"
-            style="--offset:122;"/>
-        </svg>
-        <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="mono font-black text-primary" style="font-size:56px;line-height:1;">78</span>
-          <span class="text-xs font-bold text-outline tracking-widest mono">/ 100</span>
-        </div>
-      </div>
-
-      <div class="mt-6 px-6 py-2 chip-warning text-lg font-bold" style="border-radius:9999px;">
-        ⚠ 보통 (Caution)
-      </div>
-      <p class="mt-4 text-sm text-on-surface-variant max-w-xs leading-relaxed">
-        해당 부동산은 일부 잠재적 위험 요소가 발견되었습니다.<br>계약 전 아래 리포트 내용을 면밀히 검토하십시오.
-      </p>
-
-      <!-- 요약 위험 바 3개 -->
-      <div class="mt-6 w-full max-w-xs space-y-3">
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span class="text-on-surface-variant">선순위 채권 위험</span><span class="font-semibold text-red-700">높음</span></div>
-          <div class="risk-bar-track"><div class="risk-bar-fill bg-red-500" style="width:0%" data-w="82%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span class="text-on-surface-variant">전세가율 위험</span><span class="font-semibold text-yellow-700">보통</span></div>
-          <div class="risk-bar-track"><div class="risk-bar-fill bg-yellow-400" style="width:0%" data-w="65%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1"><span class="text-on-surface-variant">임대인 체납 위험</span><span class="font-semibold text-green-700">낮음</span></div>
-          <div class="risk-bar-track"><div class="risk-bar-fill bg-green-500" style="width:0%" data-w="12%"></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 메타 카드 (5/12) -->
-    <section class="md:col-span-5 flex flex-col">
-      <div class="bg-primary text-white flex-1 flex flex-col p-6">
-        <span class="mono text-xs tracking-widest mb-5" style="color:#8192a7;">PROPERTY METADATA</span>
-        <div class="space-y-0 flex-1">
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">주소</span>
-            <span class="mono text-xs text-right text-white max-w-[180px]" id="meta-addr-val">—</span>
-          </div>
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">유형</span>
-            <span class="mono text-xs text-white">공동주택 (아파트)</span>
-          </div>
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">계약 유형</span>
-            <span class="mono text-xs text-white">전세 · 3억 2천만 원</span>
-          </div>
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">전용면적</span>
-            <span class="mono text-xs text-white">84.27㎡</span>
-          </div>
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">KB 시세</span>
-            <span class="mono text-xs text-white">4억 1,200만 원</span>
-          </div>
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">전세가율</span>
-            <span class="mono text-xs font-bold" style="color:#fcd34d;">77.7% ⚠</span>
-          </div>
-          <div class="flex justify-between py-3">
-            <span class="text-xs" style="color:#8192a7;">분석 일시</span>
-            <span class="mono text-xs text-white">2026.05.02 14:32</span>
-          </div>
-        </div>
-        <!-- 지도 영역 -->
-        <div class="mt-5 relative overflow-hidden" style="height:96px;background:#1a2b3c;border:1px solid rgba(255,255,255,.1);">
-          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:18px 18px;"></div>
-          <div class="absolute inset-0 flex items-center justify-center flex-col gap-1">
-            <span style="font-size:22px;">📍</span>
-            <span class="mono text-xs" style="color:#8192a7;">37.4979° N · 127.0276° E</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- ② 경고 배너 -->
-  <div class="alert-banner bg-red-50 fade-up-2" style="border-color:#dc2626;">
-    <span class="material-symbols-outlined text-red-600 text-xl flex-shrink-0 mt-0.5">warning</span>
+  <!-- 로그인 유도 배너 -->
+  <div style="background:linear-gradient(135deg,#041627,#1a2b3c);border-radius:12px;padding:28px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <div class="text-sm font-bold text-red-800 mb-0.5">HUG 전세보증금 반환보증 가입 불가</div>
-      <div class="text-xs text-red-700 leading-relaxed">전세가율(77.7%)이 HUG 기준(90%) 이하이나, 선순위 근저당으로 인해 실질 보증 가능 금액이 보증금에 미달합니다. 계약 전 반드시 중개사를 통해 보증보험 가입 가능 여부를 재확인하세요.</div>
+      <div style="font-size:13px;color:#8192a7;margin-bottom:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">MONITORING · 사후 모니터링</div>
+      <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:6px;">계약 후 안심하려면 로그인하세요</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;">등기부 변동 · 경매 개시 · 임대인 체납 발생 시 즉시 알림</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="history.back()"
+        style="padding:12px 20px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
+        ← 리포트로 돌아가기
+      </button>
+      <button onclick="alert('로그인 기능 준비 중입니다. 곧 카카오 로그인이 지원됩니다.')"
+        style="padding:12px 24px;background:#fff;color:#041627;border:none;border-radius:8px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;">
+        🔐 무료 로그인 후 모니터링 시작
+      </button>
     </div>
   </div>
 
-  <!-- ③ Red Flags -->
-  <section class="bg-white border border-outline-variant fade-up-2">
-    <div class="sec-head">
-      <span class="material-symbols-outlined text-red-600 text-base">report</span>
-      <span class="sec-head-title">위험 요소 — Red Flags</span>
-      <span class="ml-auto px-2 py-0.5 chip-danger text-xs font-bold rounded-full">위험 2건</span>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2">
-      <div class="p-5 flex gap-4 items-start border-b md:border-b-0 md:border-r border-outline-variant">
-        <div class="p-2 chip-danger flex-shrink-0">
-          <span class="material-symbols-outlined text-xl">account_balance</span>
+  <!-- ① 상태 배너 -->
+  <section class="mb-5">
+    <div class="bg-white border border-outline-variant p-5 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <!-- 펄스 인디케이터 -->
+        <div class="relative flex items-center justify-center w-10 h-10">
+          <div class="w-3 h-3 bg-green-500 rounded-full pulse-green z-10 relative"></div>
+          <div class="absolute inset-0 rounded-full border-2 border-green-200 ring-anim"></div>
         </div>
         <div>
-          <h3 class="font-bold text-primary mb-1" style="font-size:15px;">근저당 비율 높음 (65%)</h3>
-          <p class="text-sm text-on-surface-variant leading-relaxed">선순위 채권액이 매매 시세의 60%를 초과합니다. 경매 시 보증금 회수가 어려울 수 있습니다. <strong class="text-red-700">잔금 전 말소 특약 필수.</strong></p>
-          <div class="mt-3 flex items-center gap-2">
-            <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full">DANGER</span>
-            <span class="mono text-xs text-on-surface-variant">채권최고액 2.1억 원 · 2건</span>
+          <p class="mono text-xs tracking-widest text-on-surface-variant mb-0.5">NETWORK STATUS</p>
+          <h2 class="text-xl font-black text-primary tracking-tight">실시간 모니터링 활성화</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">마지막 스캔: <span class="mono font-medium text-primary" id="last-scan">방금 전</span> · 다음 스캔: <span class="mono font-medium" id="next-scan">30초 후</span></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right mr-4">
+          <p class="mono text-xs text-on-surface-variant">모니터링 중인 매물</p>
+          <p class="text-2xl font-black text-primary mono">1건</p>
+        </div>
+        <button onclick="triggerTestPush()" class="flex items-center gap-2 bg-primary text-white px-4 py-2.5 text-xs font-bold hover:opacity-90 transition-opacity">
+          <span class="material-symbols-outlined text-base">add_circle</span>
+          매물 추가 등록
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- ══════ 왼쪽: 알림 피드 ══════ -->
+    <section class="lg:col-span-1 flex flex-col gap-4">
+
+      <!-- 알림 피드 헤더 -->
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-black text-primary">알림 피드</h3>
+        <div class="flex items-center gap-2">
+          <span id="unread-badge" class="bg-red-600 text-white mono text-xs font-bold px-2 py-0.5 rounded-full">3 미확인</span>
+          <button onclick="markAllRead()" class="text-xs text-on-surface-variant hover:text-primary transition-colors">전체 읽음</button>
+        </div>
+      </div>
+
+      <!-- 필터 탭 -->
+      <div class="flex gap-1 bg-surface-container-high p-1">
+        <button onclick="filterFeed('all',this)" class="flex-1 py-1.5 text-xs font-bold bg-white text-primary shadow-sm transition-all">전체</button>
+        <button onclick="filterFeed('danger',this)" class="flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all">위험</button>
+        <button onclick="filterFeed('warning',this)" class="flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all">주의</button>
+        <button onclick="filterFeed('safe',this)" class="flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all">정상</button>
+      </div>
+
+      <!-- 알림 리스트 -->
+      <div id="feed-list" class="flex flex-col gap-2 overflow-y-auto" style="max-height:560px;">
+        <!-- JS로 렌더링 -->
+      </div>
+
+      <!-- 테스트 버튼 -->
+      <button onclick="simulateNewAlert()" class="w-full py-2.5 border border-dashed border-outline-variant text-xs text-on-surface-variant hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-sm">science</span>
+        실시간 알림 시뮬레이션 (테스트)
+      </button>
+    </section>
+
+    <!-- ══════ 오른쪽: 내 매물 카드 + 모니터링 상세 ══════ -->
+    <section class="lg:col-span-2 flex flex-col gap-5">
+
+      <!-- 내 계약 매물 카드 -->
+      <div class="bg-white border border-outline-variant overflow-hidden">
+        <!-- 상단 그라데이션 배너 -->
+        <div class="relative h-36 overflow-hidden" style="background:linear-gradient(135deg,#041627 0%,#1a2b3c 60%,#2d4a6a 100%);">
+          <!-- 그리드 패턴 -->
+          <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:20px 20px;"></div>
+          <!-- 스캔 라인 -->
+          <div class="scan-line"></div>
+          <div class="absolute inset-0 flex items-end p-5">
+            <div class="flex items-end justify-between w-full">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="material-symbols-outlined text-green-400 text-sm fill-icon">radar</span>
+                  <span class="mono text-xs text-green-400 tracking-widest">MONITORING ACTIVE</span>
+                </div>
+                <h3 class="text-white font-black text-lg tracking-tight">서울시 강남구 역삼동 825-13</h3>
+                <p class="text-xs mt-0.5" style="color:#8192a7;">래미안 아파트 502호 · 전세 3억 2천만 원</p>
+              </div>
+              <div class="text-right">
+                <p class="mono text-xs mb-1" style="color:#8192a7;">SAFE SCORE</p>
+                <p class="mono font-black text-yellow-400" style="font-size:36px;line-height:1;">78</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모니터링 항목 4개 그리드 -->
+        <div class="grid grid-cols-2 divide-x divide-y divide-outline-variant">
+
+          <!-- 등기부 변동 -->
+          <div class="p-4 relative overflow-hidden" id="mon-registry">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">gavel</span>
+                <span class="text-xs font-bold text-primary">등기부 변동 감지</span>
+              </div>
+              <span class="w-2 h-2 bg-red-500 rounded-full pulse-red"></span>
+            </div>
+            <div class="bg-red-50 border-l-4 border-red-500 p-3 mb-2">
+              <p class="mono text-xs font-bold text-red-700 mb-0.5">⚠ 변동 감지됨</p>
+              <p class="text-xs text-red-600">을구 근저당권 추가<br>채권최고액 5,000만 원</p>
+              <p class="mono text-xs text-red-400 mt-1">2026.05.02 09:14:33</p>
+            </div>
+            <button onclick="showDetail('registry')" class="w-full text-xs font-bold text-primary hover:bg-surface-container-low py-1.5 transition-colors flex items-center justify-center gap-1">
+              상세 보기 <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+
+          <!-- 경매·공매 -->
+          <div class="p-4" id="mon-auction">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">balance</span>
+                <span class="text-xs font-bold text-primary">경매·공매 개시</span>
+              </div>
+              <span class="w-2 h-2 bg-green-500 rounded-full pulse-green"></span>
+            </div>
+            <div class="bg-green-50 border-l-4 border-green-500 p-3 mb-2">
+              <p class="mono text-xs font-bold text-green-700 mb-0.5">✓ 이상 없음</p>
+              <p class="text-xs text-green-600">경매·공매 접수 내역<br>확인되지 않음</p>
+              <p class="mono text-xs text-green-400 mt-1">2026.05.02 09:00:00</p>
+            </div>
+            <button class="w-full text-xs font-medium text-on-surface-variant py-1.5 flex items-center justify-center gap-1">
+              법원 경매 연동 중 <span class="material-symbols-outlined text-sm">sync</span>
+            </button>
+          </div>
+
+          <!-- 임대인 체납 -->
+          <div class="p-4" id="mon-tax">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">receipt_long</span>
+                <span class="text-xs font-bold text-primary">임대인 세금 체납</span>
+              </div>
+              <span class="w-2 h-2 bg-green-500 rounded-full pulse-green"></span>
+            </div>
+            <div class="bg-green-50 border-l-4 border-green-500 p-3 mb-2">
+              <p class="mono text-xs font-bold text-green-700 mb-0.5">✓ 이상 없음</p>
+              <p class="text-xs text-green-600">국세·지방세 완납<br>체납 이력 없음</p>
+              <p class="mono text-xs text-green-400 mt-1">2026.05.01 정기조회</p>
+            </div>
+            <div class="flex items-center gap-1.5 justify-center">
+              <span class="mono text-xs text-on-surface-variant">다음 조회:</span>
+              <span class="mono text-xs font-bold text-primary" id="tax-countdown">89일 후</span>
+            </div>
+          </div>
+
+          <!-- 전세가율 변동 -->
+          <div class="p-4" id="mon-price">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-base">trending_down</span>
+                <span class="text-xs font-bold text-primary">전세가율 변동</span>
+              </div>
+              <span class="w-2 h-2 bg-yellow-400 rounded-full" style="animation:pulse-green 2.5s infinite;"></span>
+            </div>
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-2">
+              <p class="mono text-xs font-bold text-yellow-700 mb-0.5">△ 주의 필요</p>
+              <p class="text-xs text-yellow-700">시세 하락 감지<br>전세가율 77.7% → <strong>79.2%</strong></p>
+              <p class="mono text-xs text-yellow-500 mt-1">KB시세 4.04억 (↓800만)</p>
+            </div>
+            <button onclick="showDetail('price')" class="w-full text-xs font-bold text-primary hover:bg-surface-container-low py-1.5 transition-colors flex items-center justify-center gap-1">
+              시세 추이 보기 <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 알림 설정 -->
+        <div class="border-t border-outline-variant p-4 bg-surface-container-low">
+          <p class="text-xs font-bold text-primary mb-3">알림 수신 설정</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'등기부 변동')"/>
+              <span class="text-xs text-on-surface">등기부 변동</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'경매 개시')"/>
+              <span class="text-xs text-on-surface">경매 개시</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'세금 체납')"/>
+              <span class="text-xs text-on-surface">세금 체납</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="accent-[#041627]" onchange="updateAlertSetting(this,'시세 변동')"/>
+              <span class="text-xs text-on-surface">시세 변동</span>
+            </label>
           </div>
         </div>
       </div>
-      <div class="p-5 flex gap-4 items-start">
-        <div class="p-2 chip-warning flex-shrink-0">
-          <span class="material-symbols-outlined text-xl">history</span>
+
+      <!-- 시세 추이 미니 차트 -->
+      <div class="bg-white border border-outline-variant p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="mono text-xs tracking-widest text-on-surface-variant mb-0.5">KB 시세 추이</p>
+            <h4 class="font-bold text-primary">전세가율 변동 현황</h4>
+          </div>
+          <div class="flex gap-2">
+            <span class="px-2 py-1 bg-surface-container-high text-xs font-bold text-primary">3개월</span>
+            <span class="px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-colors">6개월</span>
+            <span class="px-2 py-1 text-xs text-on-surface-variant hover:bg-surface-container-low cursor-pointer transition-colors">1년</span>
+          </div>
         </div>
-        <div>
-          <h3 class="font-bold text-primary mb-1" style="font-size:15px;">최근 2년간 소유권 변동 3회</h3>
-          <p class="text-sm text-on-surface-variant leading-relaxed">단기간 내 잦은 소유주 변경은 권리 관계 불안정을 시사합니다. 갭투자·기획부동산 여부를 추가로 확인하세요.</p>
-          <div class="mt-3 flex items-center gap-2">
-            <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full">CAUTION</span>
-            <span class="mono text-xs text-on-surface-variant">2022.03 → 2023.11 → 2024.09</span>
+        <!-- SVG 차트 -->
+        <svg viewBox="0 0 600 140" class="w-full" style="height:140px;">
+          <!-- 그리드 라인 -->
+          <line x1="0" y1="28" x2="600" y2="28" stroke="#e9e7e9" stroke-width="1"/>
+          <line x1="0" y1="70" x2="600" y2="70" stroke="#e9e7e9" stroke-width="1"/>
+          <line x1="0" y1="112" x2="600" y2="112" stroke="#e9e7e9" stroke-width="1"/>
+          <!-- 레이블 -->
+          <text x="2" y="25" font-size="9" fill="#74777d" font-family="IBM Plex Mono">85%</text>
+          <text x="2" y="67" font-size="9" fill="#74777d" font-family="IBM Plex Mono">79%</text>
+          <text x="2" y="109" font-size="9" fill="#74777d" font-family="IBM Plex Mono">73%</text>
+          <!-- 위험선 (80%) -->
+          <line x1="30" y1="56" x2="600" y2="56" stroke="#fca5a5" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="540" y="52" font-size="9" fill="#ef4444" font-family="IBM Plex Mono">위험 80%</text>
+          <!-- 전세가율 라인 -->
+          <polyline points="30,105 110,98 190,92 270,88 350,84 430,79 510,75 590,72"
+            fill="none" stroke="#041627" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- 영역 채우기 -->
+          <polygon points="30,105 110,98 190,92 270,88 350,84 430,79 510,75 590,72 590,125 30,125"
+            fill="rgba(4,22,39,0.06)"/>
+          <!-- 데이터 포인트 -->
+          <circle cx="30" cy="105" r="3.5" fill="#041627"/>
+          <circle cx="190" cy="92" r="3.5" fill="#041627"/>
+          <circle cx="350" cy="84" r="3.5" fill="#041627"/>
+          <circle cx="510" cy="75" r="3.5" fill="#041627"/>
+          <circle cx="590" cy="72" r="4.5" fill="#ef4444" stroke="white" stroke-width="2"/>
+          <!-- 최신 포인트 레이블 -->
+          <text x="558" y="68" font-size="9" fill="#ef4444" font-family="IBM Plex Mono" font-weight="600">79.2%↑</text>
+          <!-- X축 날짜 -->
+          <text x="20" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">2.02</text>
+          <text x="178" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">3.02</text>
+          <text x="338" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">4.02</text>
+          <text x="498" y="135" font-size="9" fill="#74777d" font-family="IBM Plex Mono">5.02</text>
+        </svg>
+        <div class="flex items-center gap-4 mt-2">
+          <div class="flex items-center gap-1.5">
+            <div class="w-4 h-0.5 bg-primary"></div>
+            <span class="text-xs text-on-surface-variant">전세가율</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <div class="w-4 h-0.5 bg-red-300" style="border-top:1px dashed #fca5a5;"></div>
+            <span class="text-xs text-on-surface-variant">위험 기준선 (80%)</span>
+          </div>
+          <div class="ml-auto text-xs text-on-surface-variant">
+            현재 <span class="font-bold text-red-600">79.2%</span> — 위험선까지 <span class="font-bold">0.8%p</span>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ④ 블랙박스 체크리스트 -->
-  <section class="bg-white border border-outline-variant fade-up-3">
-    <div class="sec-head">
-      <span class="material-symbols-outlined text-primary text-base">fact_check</span>
-      <span class="sec-head-title">블랙박스 10대 체크리스트</span>
-      <span class="ml-auto mono text-xs text-on-surface-variant">4 / 10 완료</span>
-    </div>
+      <!-- 빠른 액션 -->
+      <div class="grid grid-cols-3 gap-3">
+        <button onclick="showDetail('report')" class="bg-white border border-outline-variant p-4 text-left hover:bg-surface-container-low transition-colors group">
+          <span class="material-symbols-outlined text-primary mb-2 group-hover:scale-110 transition-transform inline-block">description</span>
+          <p class="text-xs font-bold text-primary">분석 리포트</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">최신 리포트 확인</p>
+        </button>
+        <button onclick="showDetail('alert')" class="bg-white border border-outline-variant p-4 text-left hover:bg-surface-container-low transition-colors group">
+          <span class="material-symbols-outlined text-primary mb-2 group-hover:scale-110 transition-transform inline-block">campaign</span>
+          <p class="text-xs font-bold text-primary">중개사 연락</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">위험 사항 공유</p>
+        </button>
+        <button onclick="showDetail('hug')" class="bg-primary p-4 text-left hover:opacity-90 transition-opacity group">
+          <span class="material-symbols-outlined text-white mb-2 group-hover:scale-110 transition-transform inline-block">shield</span>
+          <p class="text-xs font-bold text-white">HUG 보증보험</p>
+          <p class="text-xs mt-0.5" style="color:#8192a7;">가입 현황 확인</p>
+        </button>
+      </div>
 
-    <!-- 완료 항목 -->
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">임대인 신분증 대조 (등기부 소유자 일치 확인)</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">국세 / 지방세 완납 증명서 확인</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">공인중개사 자격증 및 공제증서 번호 확인</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined fill-icon text-green-600">check_box</span>
-        <span class="text-sm font-medium text-primary">건물 관리비 / 공과금 체납 여부 확인</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="mono text-xs text-on-surface-variant">2026.05.01</span>
-        <span class="text-xs font-bold text-green-700">✓ 검증됨</span>
-      </div>
-    </div>
-
-    <!-- 미완료 항목 -->
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">근저당권 잔금 전 전액 말소 조건 계약서 명시</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">확정일자 취득 및 전입신고 즉시 이행 계획 확인</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">전세보증금 반환보증 (HUG / SGI) 가입 확인</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">임대인 담보대출 추가 설정 금지 특약 삽입</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">신탁 등기 여부 확인 (수익자 동의 없는 임대 금지)</span>
-      </div>
-      <span class="text-xs font-bold text-red-700">✗ 미확인</span>
-    </div>
-    <div class="chk-row" onclick="toggleCheck(this)">
-      <div class="flex items-center gap-3">
-        <span class="material-symbols-outlined text-outline">check_box_outline_blank</span>
-        <span class="text-sm text-on-surface-variant">계약 후 사후 모니터링 등록 (등기 변동 알림)</span>
-      </div>
-      <span class="text-xs font-bold text-yellow-700">△ 대기중</span>
-    </div>
-
-    <!-- 진행률 바 -->
-    <div class="px-5 py-4 bg-surface-container-low border-t border-outline-variant">
-      <div class="flex justify-between text-xs text-on-surface-variant mb-2">
-        <span>체크리스트 완료율</span>
-        <span class="font-bold text-primary" id="progress-label">4 / 10 (40%)</span>
-      </div>
-      <div class="risk-bar-track">
-        <div class="risk-bar-fill bg-primary" id="progress-bar" style="width:0%" data-w="40%"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⑤ Forensic Data Table -->
-  <section class="bg-white border border-outline-variant overflow-hidden fade-up-3">
-    <div class="sec-head">
-      <span class="material-symbols-outlined text-primary text-base">table_chart</span>
-      <span class="sec-head-title">정밀 데이터 분석 — Forensic Data</span>
-    </div>
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="bg-surface-container-high border-b border-outline-variant">
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Data Category</th>
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Analysis Result</th>
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Risk Level</th>
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">확인 방법</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-outline-variant text-sm">
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">등기부 갑구 (소유권)</td>
-          <td class="px-5 py-3 mono text-xs">Clean — No Seizures</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">등기부 을구 (근저당)</td>
-          <td class="px-5 py-3 mono text-xs">Mortgage 2건 · 2.1억 KRW</td>
-          <td class="px-5 py-3"><span class="chip-danger px-2 py-0.5 rounded-full text-xs font-bold uppercase">Danger</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-        </tr>
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">전세가율</td>
-          <td class="px-5 py-3 mono text-xs">77.7% — KB시세 4.12억 기준</td>
-          <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">KB부동산 시세 자동 조회</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">국세 체납</td>
-          <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">홈택스 완납증명 요청</td>
-        </tr>
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">지방세 체납</td>
-          <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">정부24 과세증명 요청</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">HUG 보증보험</td>
-          <td class="px-5 py-3 mono text-xs">조건부 가입 가능 (재확인 필요)</td>
-          <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">HUG 가입조건 시뮬레이션</td>
-        </tr>
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">신탁 등기</td>
-          <td class="px-5 py-3 mono text-xs">Not Detected</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">소유권 변동 이력</td>
-          <td class="px-5 py-3 mono text-xs">3회 / 24개월 — Unusual</td>
-          <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">등기 이력 자동 분석</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- ⑥ AI 추천 특약 -->
-  <section class="bg-white border border-outline-variant fade-up-4">
-    <div class="sec-head">
-      <span class="material-symbols-outlined text-primary text-base">auto_fix_high</span>
-      <span class="sec-head-title">AI 추천 특약 사항</span>
-      <span class="ml-auto text-xs text-on-surface-variant">계약서 자동 삽입 가능</span>
-    </div>
-    <!-- 미리보기 1개 -->
-    <div class="p-5 flex gap-3 items-start">
-      <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
-      <p class="text-sm leading-relaxed text-on-surface">잔금 지급 전 을구 기재 선순위 근저당권 및 가압류를 전액 말소할 것을 조건으로 한다...</p>
-    </div>
-    <!-- 블러 잠금 영역 -->
-    <div style="position:relative;border-top:0.5px solid #c4c6cd;">
-      <!-- 블러 콘텐츠 -->
-      <div style="filter:blur(4px);pointer-events:none;padding:12px 0;">
-        <div class="p-5 flex gap-3 items-start">
-          <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
-          <p class="text-sm text-on-surface">임차인은 잔금 지급 당일 전입신고 및 확정일자를 즉시 이행하며...</p>
-        </div>
-        <div class="p-5 flex gap-3 items-start border-t border-outline-variant">
-          <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">권장</span>
-          <p class="text-sm text-on-surface">계약 체결 후 30일 이내 전세보증금 반환보증(HUG)에 가입하고...</p>
-        </div>
-        <div class="p-5 flex gap-3 items-start border-t border-outline-variant">
-          <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">권장</span>
-          <p class="text-sm text-on-surface">임대 기간 중 임대인의 국세·지방세 체납 사실이 확인될 경우...</p>
-        </div>
-      </div>
-      <!-- 잠금 오버레이 -->
-      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);backdrop-filter:blur(2px);">
-        <div style="text-align:center;padding:20px;">
-          <div style="font-size:28px;margin-bottom:10px;">🔒</div>
-          <div style="font-size:15px;font-weight:700;color:#041627;margin-bottom:6px;">로그인 후 전체 열람 가능</div>
-          <div style="font-size:13px;color:#74777d;margin-bottom:16px;">계약 시 유의사항 전체 · AI 맞춤 특약 · 계약서 자동 작성</div>
-          <button onclick="alert('로그인 기능 준비 중입니다.')"
-            style="padding:11px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
-            무료 로그인하기
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- 액션 버튼 -->
-    <div class="flex gap-3 p-5 bg-surface-container-low border-t border-outline-variant">
-      <button onclick="alert('PDF 출력 기능 준비 중입니다.')" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-base">picture_as_pdf</span> 리포트 PDF 출력
-      </button>
-      <button onclick="alert('공유 링크가 클립보드에 복사되었습니다.')" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors">
-        <span class="material-symbols-outlined text-base">link</span> 공유 링크 복사
-      </button>
-      <button onclick="window.location.href='/pages/monitoring.html'" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold bg-primary text-white hover:opacity-90 transition-opacity">
-        <span class="material-symbols-outlined text-base">notifications_active</span> 사후 모니터링 등록
-      </button>
-    </div>
-  </section>
-
+    </section>
+  </div>
 </main>
 
+
 <!-- ══════════════════════════════════
-     FOOTER
+     JS
 ══════════════════════════════════ -->
-<footer class="w-full px-8 py-10 flex flex-col md:flex-row justify-between items-start gap-4 bg-surface-container-low border-t border-outline-variant">
-  <div class="max-w-2xl">
-    <p class="mono text-xs leading-relaxed text-on-surface-variant">
-      Confidential Forensic Analysis. © 2026 Real Estate Blackbox. All rights reserved.<br>
-      본 리포트는 참고용 데이터이며, 실제 계약의 법적 책임은 계약 당사자에게 있습니다. AI 분석 결과는 법적 효력을 갖지 않습니다.
-    </p>
-  </div>
-  <div class="flex flex-wrap gap-4 flex-shrink-0">
-    <a class="mono text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">이용약관</a>
-    <a class="mono text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">개인정보처리방침</a>
-    <a class="mono text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">위험 산출 기준</a>
-  </div>
-</footer>
-
 <script>
-// 위험바 애니메이션
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    document.querySelectorAll('.risk-bar-fill[data-w]').forEach(el => {
-      el.style.width = el.dataset.w;
-    });
-  }, 400);
-});
+/* ── 알림 데이터 ── */
+const FEED_DATA = [
+  {
+    id:1, type:'danger', icon:'warning', read:false,
+    title:'근저당권 신규 설정 감지',
+    desc:'을구 근저당권 추가 — 채권최고액 5,000만 원 (채권자: ○○은행)',
+    time:'오늘 09:14', tag:'등기부 변동', tagColor:'red'
+  },
+  {
+    id:2, type:'warning', icon:'trending_down', read:false,
+    title:'전세가율 상승 경보',
+    desc:'KB시세 하락으로 전세가율 77.7% → 79.2% 상승. 위험선(80%) 근접.',
+    time:'오늘 08:30', tag:'시세 변동', tagColor:'yellow'
+  },
+  {
+    id:3, type:'warning', icon:'update', read:false,
+    title:'소유권 관련 서류 접수',
+    desc:'갑구 문서 접수 확인 (서류번호 #2026-829-QX). 내용 확인 권장.',
+    time:'어제 17:45', tag:'등기부 변동', tagColor:'yellow'
+  },
+  {
+    id:4, type:'safe', icon:'check_circle', read:true,
+    title:'정기 스캔 완료 — 이상 없음',
+    desc:'등기부, 경매, 세금 체납 전항목 정상 확인.',
+    time:'어제 09:00', tag:'정기 점검', tagColor:'green'
+  },
+  {
+    id:5, type:'safe', icon:'shield', read:true,
+    title:'HUG 보증보험 갱신 완료',
+    desc:'전세보증금 반환보증 2026.05.01 자동 갱신 완료.',
+    time:'2026.05.01', tag:'보증보험', tagColor:'green'
+  },
+  {
+    id:6, type:'safe', icon:'receipt_long', read:true,
+    title:'임대인 국세 완납 확인',
+    desc:'분기 정기 조회 — 국세·지방세 완납 확인. 체납 없음.',
+    time:'2026.04.01', tag:'세금 체납', tagColor:'green'
+  },
+];
 
-// 체크박스 토글
-function toggleCheck(row) {
-  const icon = row.querySelector('.material-symbols-outlined');
-  const status = row.querySelector('span:last-child');
-  const isChecked = icon.classList.contains('fill-icon');
+let feedFilter = 'all';
+let unreadCount = FEED_DATA.filter(f=>!f.read).length;
 
-  if (isChecked) {
-    icon.classList.remove('fill-icon','text-green-600');
-    icon.classList.add('text-outline');
-    icon.textContent = 'check_box_outline_blank';
-    status.textContent = '✗ 미확인';
-    status.className = 'text-xs font-bold text-red-700';
-    // 날짜 숨기기
-    const dateEl = row.querySelector('.mono.text-xs.text-on-surface-variant');
-    if(dateEl) dateEl.style.display = 'none';
-  } else {
-    icon.classList.add('fill-icon','text-green-600');
-    icon.classList.remove('text-outline');
-    icon.textContent = 'check_box';
-    const today = new Date();
-    const d = today.getFullYear()+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+String(today.getDate()).padStart(2,'0');
-    status.textContent = '✓ 검증됨';
-    status.className = 'text-xs font-bold text-green-700';
-    // 날짜 표시
-    let dateEl = row.querySelector('.mono.text-xs.text-on-surface-variant');
-    if(!dateEl) {
-      dateEl = document.createElement('span');
-      dateEl.className = 'mono text-xs text-on-surface-variant';
-      row.querySelector('.flex.items-center.gap-3:last-child').prepend(dateEl);
-    }
-    dateEl.textContent = d;
-    dateEl.style.display = '';
+/* ── 피드 렌더링 ── */
+function renderFeed(filter='all'){
+  const list = document.getElementById('feed-list');
+  const filtered = filter==='all' ? FEED_DATA :
+    filter==='danger' ? FEED_DATA.filter(f=>f.type==='danger') :
+    filter==='warning' ? FEED_DATA.filter(f=>f.type==='warning') :
+    FEED_DATA.filter(f=>f.type==='safe');
+
+  list.innerHTML = filtered.map(item => {
+    const colors = {
+      red:   {bg:'bg-red-50',   border:'border-red-500',  icon:'text-red-600',   tag:'bg-red-100 text-red-700'},
+      yellow:{bg:'bg-yellow-50',border:'border-yellow-400',icon:'text-yellow-600',tag:'bg-yellow-100 text-yellow-700'},
+      green: {bg:'bg-green-50', border:'border-green-500', icon:'text-green-600', tag:'bg-green-100 text-green-700'},
+    }[item.tagColor];
+
+    return `
+    <div class="bg-white border-l-4 ${colors.border} shadow-sm p-3 cursor-pointer hover:shadow-md transition-shadow ${item.read?'opacity-60':''}"
+         onclick="markRead(${item.id})">
+      <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined ${colors.icon} text-xl flex-shrink-0 mt-0.5 ${item.read?'':'fill-icon'}">${item.icon}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+            ${!item.read ? '<span class="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0"></span>' : ''}
+            <p class="text-xs font-black text-primary truncate">${item.title}</p>
+          </div>
+          <p class="text-xs text-on-surface-variant leading-relaxed">${item.desc}</p>
+          <div class="flex items-center gap-2 mt-1.5">
+            <span class="mono text-xs ${colors.tag} px-1.5 py-0.5 rounded font-medium">${item.tag}</span>
+            <span class="mono text-xs text-on-surface-variant">${item.time}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markRead(id){
+  const item = FEED_DATA.find(f=>f.id===id);
+  if(item && !item.read){
+    item.read = true;
+    unreadCount = Math.max(0, unreadCount-1);
+    updateBadge();
+    renderFeed(feedFilter);
   }
-  updateProgress();
 }
 
-// 진행률 업데이트
-function updateProgress() {
-  const total = document.querySelectorAll('.chk-row').length;
-  const done  = document.querySelectorAll('.chk-row .fill-icon').length;
-  const pct   = Math.round(done / total * 100);
-  document.getElementById('progress-label').textContent = `${done} / ${total} (${pct}%)`;
-  document.getElementById('progress-bar').style.width = pct + '%';
+function markAllRead(){
+  FEED_DATA.forEach(f=>f.read=true);
+  unreadCount = 0;
+  updateBadge();
+  renderFeed(feedFilter);
 }
+
+function updateBadge(){
+  const badge = document.getElementById('unread-badge');
+  const bell  = document.getElementById('bell-badge');
+  badge.textContent = unreadCount > 0 ? `${unreadCount} 미확인` : '모두 읽음';
+  badge.className = unreadCount > 0
+    ? 'bg-red-600 text-white mono text-xs font-bold px-2 py-0.5 rounded-full'
+    : 'bg-surface-container text-on-surface-variant mono text-xs font-bold px-2 py-0.5 rounded-full';
+  if(bell) bell.textContent = unreadCount > 0 ? String(unreadCount) : '';
+  if(bell) bell.style.display = unreadCount > 0 ? 'flex' : 'none';
+}
+
+function filterFeed(type, btn){
+  feedFilter = type;
+  document.querySelectorAll('[onclick^="filterFeed"]').forEach(b=>{
+    b.className = 'flex-1 py-1.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-low transition-all';
+  });
+  btn.className = 'flex-1 py-1.5 text-xs font-bold bg-white text-primary shadow-sm transition-all';
+  renderFeed(type);
+}
+
+/* ── 푸시 알림 팝업 ── */
+const PUSH_QUEUE = [
+  {
+    level:'danger', icon:'warning',
+    title:'⚠ 긴급: 근저당권 추가 감지',
+    body:'강남구 역삼동 매물 — 을구 변동 발생. 즉시 확인하세요.',
+  },
+  {
+    level:'warning', icon:'trending_down',
+    title:'△ 전세가율 79.2% 상승',
+    body:'위험선(80%)까지 0.8%p. 시세 추이를 확인하세요.',
+  },
+  {
+    level:'safe', icon:'check_circle',
+    title:'✓ 정기 스캔 완료',
+    body:'경매·체납 항목 이상 없음. 모든 항목 정상입니다.',
+  },
+];
+let pushIdx = 0;
+
+function showPush(cfg){
+  const colors = {
+    danger:  {bg:'#fff1f1', border:'#dc2626', icon:'text-red-600'},
+    warning: {bg:'#fffbeb', border:'#d97706', icon:'text-yellow-600'},
+    safe:    {bg:'#f0fdf4', border:'#16a34a', icon:'text-green-600'},
+  }[cfg.level];
+
+  const div = document.createElement('div');
+  div.className = 'push-popup bg-white shadow-xl border-l-4 p-4 flex gap-3 items-start cursor-pointer';
+  div.style.cssText = `border-left-color:${colors.border};border-top:0.5px solid #e4e7ec;border-right:0.5px solid #e4e7ec;border-bottom:0.5px solid #e4e7ec;width:320px;`;
+  div.innerHTML = `
+    <span class="material-symbols-outlined ${colors.icon} text-xl fill-icon flex-shrink-0 mt-0.5">${cfg.icon}</span>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center justify-between gap-2">
+        <p class="text-xs font-black text-primary leading-tight">${cfg.title}</p>
+        <button onclick="this.closest('.push-popup').remove()" class="text-on-surface-variant hover:text-primary flex-shrink-0">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+      <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">${cfg.body}</p>
+      <div class="flex items-center gap-2 mt-2">
+        <span class="mono text-xs text-on-surface-variant">부동산 블랙박스</span>
+        <span class="mono text-xs text-on-surface-variant">·</span>
+        <span class="mono text-xs text-on-surface-variant">방금 전</span>
+      </div>
+    </div>`;
+  div.onclick = (e)=>{ if(e.target.tagName!=='BUTTON' && !e.target.closest('button')) div.remove(); };
+
+  const container = document.getElementById('push-container');
+  container.prepend(div);
+  setTimeout(()=>{
+    div.classList.add('hide');
+    setTimeout(()=>div.remove(), 400);
+  }, 5000);
+}
+
+function triggerTestPush(){
+  showPush(PUSH_QUEUE[pushIdx % PUSH_QUEUE.length]);
+  pushIdx++;
+}
+
+function simulateNewAlert(){
+  const newAlert = {
+    id: Date.now(), type:'danger', icon:'warning', read:false,
+    title:'🔴 실시간 감지: 등기부 변동',
+    desc:`새로운 변동사항이 감지되었습니다. (${new Date().toLocaleTimeString('ko-KR')})`,
+    time:'방금 전', tag:'등기부 변동', tagColor:'red'
+  };
+  FEED_DATA.unshift(newAlert);
+  unreadCount++;
+  updateBadge();
+  renderFeed(feedFilter);
+  // 피드 최상단 강조
+  const list = document.getElementById('feed-list');
+  if(list.firstChild) list.firstChild.classList.add('feed-new');
+  // 동시에 푸시도
+  showPush({
+    level:'danger', icon:'warning',
+    title:'⚠ 실시간 등기부 변동 감지',
+    body:`${new Date().toLocaleTimeString('ko-KR')} — 을구 변동. 즉시 확인하세요.`,
+  });
+}
+
+/* ── 상세 팝업 ── */
+function showDetail(type){
+  const msgs = {
+    registry: '등기부 변동 상세:\n\n을구 근저당권 신규 설정\n채권자: ○○은행\n채권최고액: 5,000만 원\n접수일: 2026.05.02\n\n→ 중개사에게 즉시 연락하여 말소 여부를 확인하세요.',
+    price:    '전세가율 추이:\n\n2월: 77.7%\n3월: 78.1%\n4월: 78.9%\n5월: 79.2% ← 현재\n\n위험선(80%)까지 0.8%p 남았습니다.',
+    report:   '분석 리포트 화면으로 이동합니다.',
+    alert:    '중개사 연락처:\n담당: 김○○ 공인중개사\n연락처: 010-1234-5678\n\n위험 사항을 공유하시겠습니까?',
+    hug:      'HUG 보증보험 현황:\n가입일: 2026.01.15\n만료일: 2028.01.14\n보증금액: 3억 2천만 원\n상태: ✓ 정상 유지 중',
+  };
+  alert(msgs[type] || '준비 중입니다.');
+}
+
+/* ── 알림 설정 ── */
+function updateAlertSetting(el, name){
+  const msg = el.checked ? `${name} 알림이 활성화되었습니다.` : `${name} 알림이 비활성화되었습니다.`;
+  // 토스트
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-2 text-xs font-bold z-[300] shadow-lg';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 2000);
+}
+
+/* ── 스캔 카운트다운 ── */
+let scanSec = 30;
+setInterval(()=>{
+  scanSec--;
+  if(scanSec <= 0){
+    scanSec = 30;
+    document.getElementById('last-scan').textContent = '방금 전';
+  }
+  document.getElementById('next-scan').textContent = `${scanSec}초 후`;
+}, 1000);
+
+/* ── 초기화 ── */
+window.addEventListener('load', ()=>{
+  renderFeed('all');
+  updateBadge();
+  // 3초 후 자동 푸시 시뮬레이션
+  setTimeout(()=>showPush(PUSH_QUEUE[0]), 3000);
+});
 </script>
 <script>
 if ('serviceWorker' in navigator) {
@@ -666,86 +752,21 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<!-- 하단 네비 (모바일/PC 공통) -->
+<!-- 하단 네비 -->
 <nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-around;align-items:center;height:56px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 8px rgba(0,0,0,.06);">
   <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 15.5L19 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     분석
   </a>
-  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#041627;font-size:10px;font-weight:700;padding:6px 12px;border-top:2px solid #041627;font-family:'Noto Sans KR',sans-serif;">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="#041627" stroke-width="1.8"/><path d="M7 11h8M7 7.5h8M7 14.5h5" stroke="#041627" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M7 11h8M7 7.5h8M7 14.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     리포트
   </a>
-  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#74777d;font-size:10px;font-weight:600;padding:6px 12px;font-family:'Noto Sans KR',sans-serif;">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#041627;font-size:10px;font-weight:700;padding:6px 12px;border-top:2px solid #041627;font-family:'Noto Sans KR',sans-serif;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#041627" stroke-width="1.8"/><path d="M11 7v4l3 2" stroke="#041627" stroke-width="1.8" stroke-linecap="round"/></svg>
     모니터링
   </a>
 </nav>
 <div style="height:56px;"></div>
-
-<script>
-// URL 파라미터 → 메타데이터 반영
-(function() {
-  const p = new URLSearchParams(window.location.search);
-  const address = p.get('address') || '서울시 강남구 역삼동 825-13';
-  const score   = parseInt(p.get('score') || '78');
-  const risk    = p.get('risk') || 'warning';
-
-  // 주소 파싱
-  const addrEl = document.getElementById('meta-addr-val');
-  if (addrEl) {
-    const parts = address.split(' ');
-    const short = parts.length > 3
-      ? parts.slice(0,2).join(' ') + '<br>' + parts.slice(2).join(' ')
-      : address;
-    addrEl.innerHTML = short;
-  }
-
-  // 점수 게이지
-  const scoreNum = document.querySelector('.gauge-num');
-  if (scoreNum) scoreNum.textContent = score;
-
-  // 게이지 아크
-  const arc = document.querySelector('.gauge-arc');
-  if (arc) {
-    const offset = Math.round(490 - (score/100)*490);
-    arc.style.setProperty('--offset', offset);
-    arc.style.strokeDashoffset = 490;
-    arc.style.animation = 'none';
-    arc.getBoundingClientRect();
-    arc.style.animation = 'drawArc 1.2s cubic-bezier(.4,0,.2,1) forwards';
-  }
-
-  // 위험 칩
-  const chip = document.querySelector('.score-chip');
-  const desc = document.querySelector('.score-desc');
-  if (chip) {
-    if (score >= 80) {
-      chip.className = 'score-chip chip-safe';
-      chip.textContent = '✓ 안전 (Safe)';
-      if(desc) desc.textContent = '주요 위험 요소가 발견되지 않았습니다.';
-    } else if (score >= 60) {
-      chip.className = 'score-chip chip-warn';
-      chip.textContent = '⚠ 보통 (Caution)';
-      if(desc) desc.textContent = '일부 잠재적 위험 요소가 발견되었습니다. 아래 리포트를 면밀히 검토하십시오.';
-    } else {
-      chip.className = 'score-chip chip-danger';
-      chip.textContent = '⛔ 고위험 (Danger)';
-      if(desc) desc.textContent = '복수의 위험 요소가 발견되었습니다. 전문가 자문 후 계약 여부를 결정하십시오.';
-    }
-  }
-
-  // 날짜
-  const dateEl = document.getElementById('meta-date');
-  if (dateEl) {
-    const now = new Date();
-    dateEl.textContent = now.getFullYear() + '.' +
-      String(now.getMonth()+1).padStart(2,'0') + '.' +
-      String(now.getDate()).padStart(2,'0') + ' ' +
-      String(now.getHours()).padStart(2,'0') + ':' +
-      String(now.getMinutes()).padStart(2,'0');
-  }
-})();
-</script>
 </body>
 </html>
