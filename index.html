@@ -273,14 +273,40 @@ body {
   <!-- 주소 입력 -->
   <div class="bb-search-wrap">
     <div class="bb-search-box">
-      <div class="bb-search-label">매물 주소를 입력하면 AI가 즉시 분석합니다</div>
-      <div class="bb-search-row">
+      <div class="bb-search-label">STEP 1 &nbsp;도로명 주소 검색</div>
+      <div class="bb-search-row" style="margin-bottom:0;">
         <input class="bb-search-input" id="hero-input" type="text"
-          placeholder="도로명 주소를 입력하세요 (예: 역삼로 123)"
+          placeholder="도로명 주소 입력 (예: 역삼로 123)"
           autocomplete="off"
           oninput="onAddrInput(this.value)"
           onkeydown="onAddrKeydown(event)"/>
-        <button class="bb-search-btn" id="hero-btn" onclick="startAnalysis()">분석 시작</button>
+      </div>
+      <!-- 상세주소 입력 (자동완성 선택 후 표시) -->
+      <div id="detail-addr-wrap" style="display:none;margin-top:10px;border-top:0.5px solid #e4e7ec;padding-top:10px;">
+        <div class="bb-search-label" style="margin-bottom:6px;">STEP 2 &nbsp;상세 주소 입력 <span style="color:#dc2626;">*필수</span></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div id="selected-road-addr" style="font-size:12px;color:#041627;font-weight:600;flex:1;padding:6px 0;"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input id="detail-input" type="text"
+            placeholder="동/층/호수 입력 (예: 102동 1203호)"
+            style="flex:1;border:1px solid #c4c6cd;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;"
+            onkeydown="if(event.key==='Enter') startAnalysis()"
+            oninput="validateDetailAddr()"/>
+          <button class="bb-search-btn" id="hero-btn" onclick="startAnalysis()"
+            style="opacity:0.4;pointer-events:none;" id="hero-btn">
+            분석 시작
+          </button>
+        </div>
+        <div id="detail-hint" style="font-size:11px;color:#8192a7;margin-top:4px;">
+          아파트·오피스텔은 동·호수, 빌라·단독주택은 층·호수를 입력하세요
+        </div>
+      </div>
+      <!-- 자동완성 전 분석 버튼 (주소 미선택 상태) -->
+      <div id="pre-select-btn-wrap" style="margin-top:10px;">
+        <button class="bb-search-btn" style="width:100%;opacity:0.35;pointer-events:none;" id="pre-select-btn">
+          위 주소를 검색하세요
+        </button>
       </div>
     </div>
   </div>
@@ -427,11 +453,29 @@ function selectSuggestion(idx) {
   document.getElementById('hero-input').value = s.roadAddr;
   window._selectedAddr = s;
   hideSuggestions();
+
+  // 상세주소 입력창 표시
+  document.getElementById('selected-road-addr').textContent = s.roadAddr;
+  document.getElementById('detail-addr-wrap').style.display = 'block';
+  document.getElementById('pre-select-btn-wrap').style.display = 'none';
+  document.getElementById('detail-input').focus();
 }
 
 function hideSuggestions() {
   document.getElementById('addr-suggestions').style.display = 'none';
   _suggestions = [];
+}
+
+function validateDetailAddr() {
+  const val = document.getElementById('detail-input').value.trim();
+  const btn = document.getElementById('hero-btn');
+  if (val.length >= 2) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '0.4';
+    btn.style.pointerEvents = 'none';
+  }
 }
 
 function onAddrKeydown(e) {
@@ -522,6 +566,20 @@ async function startAnalysis(){
     return;
   }
 
+  // 상세주소 체크
+  const detailInput = document.getElementById('detail-input');
+  const detailVal   = detailInput ? detailInput.value.trim() : '';
+  if (!detailVal) {
+    if(detailInput) {
+      detailInput.style.outline = '2px solid #dc2626';
+      detailInput.placeholder = '동/층/호수를 입력해주세요 (필수)';
+      detailInput.focus();
+      setTimeout(()=>{ detailInput.style.outline=''; }, 1800);
+    }
+    return;
+  }
+  const fullAddr = addr + ' ' + detailVal;
+
   // 로딩 UI
   btn.innerHTML='<span class="spinner"></span> 분석 중...';
   btn.style.pointerEvents='none';
@@ -531,7 +589,7 @@ async function startAnalysis(){
     // 실제 API 호출
     // 자동완성에서 선택한 주소 정보 활용
     const selected = window._selectedAddr;
-    const params = new URLSearchParams({ address: addr });
+    const params = new URLSearchParams({ address: fullAddr });
     if (selected?.admCd) params.set('lawdCd', selected.admCd.slice(0,5));
     if (selected?.bdMgtSn) params.set('bdMgtSn', selected.bdMgtSn);
     const res = await fetch('/api/analyze?' + params.toString());
@@ -553,7 +611,7 @@ async function startAnalysis(){
       const score = data.score || 75;
       const risk  = data.riskLevel || 'warning';
       window.location.href = '/pages/report.html'
-        + '?address=' + encodeURIComponent(addr)
+        + '?address=' + encodeURIComponent(fullAddr)
         + '&score='   + score
         + '&risk='    + risk;
     }, 500);
