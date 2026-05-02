@@ -1,0 +1,9 @@
+{
+  "name": "blackbox-realestate",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "부동산 블랙박스 — 임대차 계약 안전 분석 플랫폼",
+  "engines": {
+    "node": ">=18.x"
+  }
+}
