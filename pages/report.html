@@ -18,7 +18,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
 tailwind.config = {
   darkMode: "class",
@@ -589,7 +588,17 @@ tailwind.config = {
       <button onclick="alert('공유 링크가 클립보드에 복사되었습니다.')" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold border border-outline-variant hover:bg-surface-container transition-colors">
         <span class="material-symbols-outlined text-base">link</span> 공유 링크 복사
       </button>
-      <button onclick="window.location.href='/pages/monitoring.html'" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold bg-primary text-white hover:opacity-90 transition-opacity">
+      <button onclick="(function(){
+        var p = new URLSearchParams(window.location.search);
+        var params = new URLSearchParams({
+          address:  p.get('address')  || '',
+          score:    p.get('score')    || '78',
+          risk:     p.get('risk')     || 'warning',
+          contract: p.get('contract') || '전세',
+          deposit:  p.get('deposit')  || ''
+        });
+        window.location.href = '/pages/monitoring.html?' + params.toString();
+      })()" class="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold bg-primary text-white hover:opacity-90 transition-opacity">
         <span class="material-symbols-outlined text-base">notifications_active</span> 모니터링 등록
       </button>
     </div>
@@ -802,12 +811,7 @@ function openKakaoMapLink() {
   window.open('https://map.kakao.com/?q=' + address, '_blank');
 }
 </script>
-<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
-  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">🔍</span>분석</a>
-  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">📋</span>리포트</a>
-  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">🔔</span>모니터링</a>
-</nav>
-<div style="height:58px;"></div>
+
 <script>
 function doShare() {
   var isLoggedIn = localStorage.getItem("bb_logged_in") === "true";
@@ -826,5 +830,12 @@ function doShare() {
   }
 }
 </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
+  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">search</span>분석</a>
+  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>리포트</a>
+  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링</a>
+</nav>
+<div style="height:58px;"></div>
 </body>
 </html>

@@ -16,7 +16,6 @@
 <title>부동산 블랙박스 — 모니터링</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
 tailwind.config = {
   darkMode:"class",
@@ -290,12 +289,12 @@ body{min-height:100dvh;background:#fbf9fa;padding-bottom:80px;}
                   <span class="material-symbols-outlined text-green-400 text-sm fill-icon">radar</span>
                   <span class="mono text-xs text-green-400 tracking-widest">MONITORING ACTIVE</span>
                 </div>
-                <h3 class="text-white font-black text-lg tracking-tight">서울시 강남구 역삼동 825-13</h3>
-                <p class="text-xs mt-0.5" style="color:#8192a7;">래미안 아파트 502호 · 전세 3억 2천만 원</p>
+                <h3 class="text-white font-black text-lg tracking-tight" id="mon-addr">주소 로딩 중...</h3>
+                <p class="text-xs mt-0.5" style="color:#8192a7;" id="mon-detail">—</p>
               </div>
               <div class="text-right">
                 <p class="mono text-xs mb-1" style="color:#8192a7;">SAFE SCORE</p>
-                <p class="mono font-black text-yellow-400" style="font-size:36px;line-height:1;">78</p>
+                <p class="mono font-black text-yellow-400" style="font-size:36px;line-height:1;" id="mon-score">—</p>
               </div>
             </div>
           </div>
@@ -745,12 +744,7 @@ if ('serviceWorker' in navigator) {
 </script>
 
 
-<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
-  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">🔍</span>분석</a>
-  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">📋</span>리포트</a>
-  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span style="font-size:19px;">🔔</span>모니터링</a>
-</nav>
-<div style="height:58px;"></div>
+
 <script>
 function doShare() {
   var isLoggedIn = localStorage.getItem("bb_logged_in") === "true";
@@ -768,6 +762,61 @@ function doShare() {
       .catch(function(){ alert("주소창에서 직접 복사해주세요."); });
   }
 }
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
+  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">search</span>분석</a>
+  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>리포트</a>
+  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링</a>
+</nav>
+<div style="height:58px;"></div>
+<script>
+(function() {
+  var p = new URLSearchParams(window.location.search);
+  var address  = p.get('address') || sessionStorage.getItem('bb_address') || '';
+  var score    = p.get('score')   || sessionStorage.getItem('bb_score')   || '—';
+  var contract = p.get('contract')|| sessionStorage.getItem('bb_contract')|| '전세';
+  var deposit  = p.get('deposit') || sessionStorage.getItem('bb_deposit') || '';
+
+  // 파라미터 세션 저장 (뒤로가기 후에도 유지)
+  if (address) sessionStorage.setItem('bb_address', address);
+  if (score !== '—') sessionStorage.setItem('bb_score', score);
+  if (deposit) sessionStorage.setItem('bb_deposit', deposit);
+
+  // 주소 파싱
+  var addrEl = document.getElementById('mon-addr');
+  if (addrEl && address) {
+    var parts = address.trim().split(' ');
+    addrEl.textContent = parts.slice(0, 4).join(' ');
+  } else if (addrEl) {
+    addrEl.textContent = '등록된 매물 없음';
+  }
+
+  // 상세 (동·호수 + 계약 유형)
+  var detailEl = document.getElementById('mon-detail');
+  if (detailEl && address) {
+    var parts2 = address.trim().split(' ');
+    var detail = parts2.length > 4 ? parts2.slice(4).join(' ') : '';
+    var contractStr = contract + (deposit ? ' · ' + deposit : '');
+    detailEl.textContent = (detail ? detail + ' · ' : '') + contractStr;
+  }
+
+  // 점수
+  var scoreEl = document.getElementById('mon-score');
+  if (scoreEl) {
+    scoreEl.textContent = score;
+    var s = parseInt(score);
+    if (s >= 80) scoreEl.style.color = '#4ade80';
+    else if (s >= 60) scoreEl.style.color = '#fcd34d';
+    else scoreEl.style.color = '#f87171';
+  }
+
+  // 스캔 타임 업데이트
+  var now = new Date();
+  var timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0') + ':' + String(now.getSeconds()).padStart(2,'0');
+  var scanEl = document.getElementById('last-scan');
+  if (scanEl) scanEl.textContent = timeStr;
+})();
 </script>
 </body>
 </html>
