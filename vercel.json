@@ -1,24 +1,34 @@
 {
   "version": 2,
   "name": "blackbox-realestate",
-  "routes": [
-    { "src": "/api/address",  "dest": "/api/address.js"  },
-    { "src": "/api/price",    "dest": "/api/price.js"    },
-    { "src": "/api/registry", "dest": "/api/registry.js" },
-    { "src": "/api/analyze",  "dest": "/api/analyze.js"  },
-    { "src": "/sw.js",        "dest": "/sw.js",
-      "headers": { "Cache-Control": "no-cache" } },
-    { "src": "/manifest.json","dest": "/manifest.json",
-      "headers": { "Content-Type": "application/manifest+json" } },
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
-    { "src": "/pages/(.*)",  "dest": "/pages/$1" },
-    { "src": "/",            "dest": "/index.html" },
-    { "src": "/(.*)",        "dest": "/$1" }
-  ],
   "headers": [
-    { "source": "/(.*)", "headers": [
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "X-XSS-Protection",       "value": "1; mode=block" }
-    ]}
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json" },
+        { "key": "Cache-Control", "value": "public, max-age=0" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/address",  "destination": "/api/address.js"  },
+    { "source": "/api/price",    "destination": "/api/price.js"    },
+    { "source": "/api/registry", "destination": "/api/registry.js" },
+    { "source": "/api/analyze",  "destination": "/api/analyze.js"  }
   ]
 }
