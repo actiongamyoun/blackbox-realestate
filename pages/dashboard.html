@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png"/>
+<script src="/assets/data/regions.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -134,6 +135,20 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .prop-visitor-name{font-size:12px;font-weight:600;color:var(--navy);flex:1;}
 .prop-visitor-meta{font-size:11px;color:var(--text3);}
 .prop-visitor-price{font-size:11px;color:var(--info);font-family:'IBM Plex Mono',monospace;}
+.visitor-contract-btn{
+  display:flex;align-items:center;gap:3px;
+  padding:3px 8px;border-radius:5px;
+  border:1px solid var(--navy);
+  background:var(--white);color:var(--navy);
+  font-size:11px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.visitor-contract-btn:active{background:var(--navy);color:#fff;}
+.visitor-contract-btn.linked{
+  background:var(--info-bg);
+  border-color:var(--info);
+  color:var(--info);
+}
 .prop-actions{display:flex;border-top:1px solid var(--border2);}
 .prop-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);font-family:inherit;}
 .prop-action-btn.secondary{color:var(--text2);}
@@ -239,6 +254,45 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .form-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:vertical;min-height:80px;-webkit-appearance:none;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .form-row .form-group{margin-bottom:0;}
+
+/* ── 칩 (체크박스 형태) ── */
+.chip-group{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{
+  padding:8px 14px;
+  border:1.5px solid var(--border);
+  border-radius:20px;
+  background:var(--white);
+  color:var(--text2);
+  font-size:13px;font-weight:600;
+  font-family:inherit;
+  cursor:pointer;
+  transition:all .12s;
+}
+.chip:active{transform:scale(.96);}
+.chip.active{
+  background:var(--navy);
+  border-color:var(--navy);
+  color:#fff;
+}
+
+/* ── 지역 칩 (제거 가능) ── */
+.region-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:24px;}
+.region-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 6px 6px 12px;
+  background:var(--info-bg);
+  color:var(--info);
+  border-radius:16px;
+  font-size:12px;font-weight:600;
+}
+.region-chip-remove{
+  width:20px;height:20px;border-radius:50%;
+  border:none;background:rgba(37,99,235,.15);
+  color:var(--info);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;
+}
+.region-chip-remove:active{background:rgba(37,99,235,.3);}
 
 /* ── 버튼 ── */
 .btn-primary{display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;flex:1;}
@@ -497,7 +551,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-head">
-      <div class="sheet-title">매물 등록</div>
+      <div class="sheet-title" id="prop-sheet-title">매물 등록</div>
       <button class="sheet-close" onclick="closeSheet('property')">
         <span class="ms ms-sm">close</span>
       </button>
@@ -505,7 +559,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     <div class="sheet-body">
       <div class="form-group">
         <label class="form-label">도로명 주소 *</label>
-        <input class="form-input" id="prop-addr" type="text" placeholder="역삼로 123"/>
+        <input class="form-input" id="prop-addr" type="text" placeholder="해운대로 123"/>
       </div>
       <div class="form-group">
         <label class="form-label">상세주소</label>
@@ -525,6 +579,51 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
           <input class="form-input" id="prop-deposit" type="number" placeholder="32000"/>
         </div>
       </div>
+      <div class="form-group" id="prop-monthly-wrap" style="display:none;">
+        <label class="form-label">월세 (만원)</label>
+        <input class="form-input" id="prop-monthly" type="number" placeholder="80"/>
+      </div>
+
+      <!-- 평형 -->
+      <div class="form-group">
+        <label class="form-label">평형 (㎡) <span style="color:var(--text3);font-weight:400;">— 단일값 또는 범위</span></label>
+        <div class="form-row">
+          <input class="form-input" id="prop-area-min" type="number" placeholder="최소 84"/>
+          <input class="form-input" id="prop-area-max" type="number" placeholder="최대 (선택)"/>
+        </div>
+      </div>
+
+      <!-- 방 개수 -->
+      <div class="form-group">
+        <label class="form-label">방 개수</label>
+        <div class="chip-group" id="prop-rooms-chips">
+          <button type="button" class="chip" data-rooms="1">1개</button>
+          <button type="button" class="chip" data-rooms="2">2개</button>
+          <button type="button" class="chip" data-rooms="3">3개</button>
+          <button type="button" class="chip" data-rooms="4">4개</button>
+          <button type="button" class="chip" data-rooms="5">5개+</button>
+        </div>
+      </div>
+
+      <!-- 방향 -->
+      <div class="form-group">
+        <label class="form-label">방향</label>
+        <div class="chip-group" id="prop-direction-chips">
+          <button type="button" class="chip" data-dir="남향">남향</button>
+          <button type="button" class="chip" data-dir="남동향">남동</button>
+          <button type="button" class="chip" data-dir="남서향">남서</button>
+          <button type="button" class="chip" data-dir="동향">동향</button>
+          <button type="button" class="chip" data-dir="서향">서향</button>
+          <button type="button" class="chip" data-dir="북향">북향</button>
+        </div>
+      </div>
+
+      <!-- 입주 가능일 -->
+      <div class="form-group">
+        <label class="form-label">입주 가능일</label>
+        <input class="form-input" id="prop-movein" type="date"/>
+      </div>
+
       <div class="form-group">
         <label class="form-label">특이사항</label>
         <textarea class="form-textarea" id="prop-memo" placeholder="임대인 특이사항, 주의사항 등" style="min-height:70px;"></textarea>
@@ -536,8 +635,14 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div class="sheet-footer">
       <button class="btn-ghost" onclick="closeSheet('property')">취소</button>
-      <button class="btn-primary" onclick="submitProperty()">
+      <button class="btn-primary" id="prop-submit-btn" onclick="submitProperty()">
         <span class="ms ms-sm" style="color:#fff;">add_home</span> 등록 & 분석
+      </button>
+    </div>
+    <div id="prop-delete-wrap" style="display:none;padding:0 18px 18px;">
+      <button onclick="deleteCurrentProp()"
+        style="width:100%;padding:10px;border:1px solid var(--danger);background:none;color:var(--danger);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;">
+        <span class="ms ms-sm" style="color:var(--danger);font-size:14px;">delete</span> 매물 삭제
       </button>
     </div>
   </div>
@@ -602,7 +707,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-head">
-      <div class="sheet-title">고객 추가</div>
+      <div class="sheet-title" id="cli-sheet-title">고객 추가</div>
       <button class="sheet-close" onclick="closeSheet('client')">
         <span class="ms ms-sm">close</span>
       </button>
@@ -633,25 +738,68 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
           <input class="form-input" id="cli-budget" type="number" placeholder="30000"/>
         </div>
       </div>
-      <div class="form-row" style="margin-bottom:14px;">
-        <div class="form-group">
-          <label class="form-label">희망 평형 (㎡)</label>
-          <input class="form-input" id="cli-area-size" type="number" placeholder="84"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">방 개수</label>
-          <select class="form-select" id="cli-rooms">
-            <option value="">무관</option>
-            <option value="1">1개+</option>
-            <option value="2">2개+</option>
-            <option value="3">3개+</option>
-          </select>
-        </div>
-      </div>
+
+      <!-- 희망 평형 범위 -->
       <div class="form-group">
-        <label class="form-label">희망 지역 / 조건</label>
-        <input class="form-input" id="cli-area" type="text" placeholder="강남구, 역삼동 등"/>
+        <label class="form-label">희망 평형 (㎡)</label>
+        <div class="form-row">
+          <input class="form-input" id="cli-area-min" type="number" placeholder="최소 60"/>
+          <input class="form-input" id="cli-area-max" type="number" placeholder="최대 100"/>
+        </div>
       </div>
+
+      <!-- 방 개수 (최소) -->
+      <div class="form-group">
+        <label class="form-label">최소 방 개수</label>
+        <div class="chip-group" id="cli-rooms-chips">
+          <button type="button" class="chip" data-rooms="">무관</button>
+          <button type="button" class="chip" data-rooms="1">1개+</button>
+          <button type="button" class="chip" data-rooms="2">2개+</button>
+          <button type="button" class="chip" data-rooms="3">3개+</button>
+          <button type="button" class="chip" data-rooms="4">4개+</button>
+        </div>
+      </div>
+
+      <!-- 선호 방향 (멀티) -->
+      <div class="form-group">
+        <label class="form-label">선호 방향 <span style="color:var(--text3);font-weight:400;">— 복수 선택 가능</span></label>
+        <div class="chip-group" id="cli-direction-chips">
+          <button type="button" class="chip" data-dir="남향">남향</button>
+          <button type="button" class="chip" data-dir="남동향">남동</button>
+          <button type="button" class="chip" data-dir="남서향">남서</button>
+          <button type="button" class="chip" data-dir="동향">동향</button>
+          <button type="button" class="chip" data-dir="서향">서향</button>
+          <button type="button" class="chip" data-dir="북향">북향</button>
+        </div>
+      </div>
+
+      <!-- 희망 지역 트리 -->
+      <div class="form-group">
+        <label class="form-label">희망 지역 <span style="color:var(--text3);font-weight:400;">— 시/도 → 구 → 동 선택 후 [+ 추가]</span></label>
+        <div class="form-row" style="margin-bottom:8px;">
+          <select class="form-select" id="cli-region-sido"><option value="">시/도 선택</option></select>
+          <select class="form-select" id="cli-region-gu"><option value="">구/시 선택</option></select>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:8px;">
+          <select class="form-select" id="cli-region-dong" style="flex:1;"><option value="">동 선택</option></select>
+          <button type="button" class="btn-ghost" id="cli-region-add-btn"
+            style="flex:0 0 auto;padding:11px 16px;font-size:13px;"
+            onclick="addRegionChip()">
+            <span class="ms ms-sm">add</span> 추가
+          </button>
+        </div>
+        <div id="cli-region-chips" class="region-chips"></div>
+      </div>
+
+      <!-- 입주 희망일 범위 -->
+      <div class="form-group">
+        <label class="form-label">입주 희망일 (범위)</label>
+        <div class="form-row">
+          <input class="form-input" id="cli-movein-from" type="date"/>
+          <input class="form-input" id="cli-movein-to" type="date"/>
+        </div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">메모</label>
         <textarea class="form-textarea" id="cli-memo" placeholder="상담 내용" style="min-height:60px;"></textarea>
@@ -659,68 +807,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div class="sheet-footer">
       <button class="btn-ghost" onclick="closeSheet('client')">취소</button>
-      <button class="btn-primary" onclick="submitClient()">
+      <button class="btn-primary" id="cli-submit-btn" onclick="submitClient()">
         <span class="ms ms-sm" style="color:#fff;">person_add</span> 저장
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- 계약 추가 -->
-<div class="sheet-bg" id="sheet-contract">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-head">
-      <div class="sheet-title">계약 추가</div>
-      <button class="sheet-close" onclick="closeSheet('contract')">
-        <span class="ms ms-sm">close</span>
-      </button>
-    </div>
-    <div class="sheet-body">
-      <div class="form-group">
-        <label class="form-label">매물 주소 *</label>
-        <input class="form-input" id="con-addr" type="text" placeholder="역삼로 123 502호"/>
-      </div>
-      <div class="form-row" style="margin-bottom:14px;">
-        <div class="form-group">
-          <label class="form-label">고객명</label>
-          <input class="form-input" id="con-client" type="text" placeholder="김○○"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">연락처</label>
-          <input class="form-input" id="con-phone" type="tel" placeholder="010-0000"/>
-        </div>
-      </div>
-      <div class="form-row" style="margin-bottom:14px;">
-        <div class="form-group">
-          <label class="form-label">계약 유형</label>
-          <select class="form-select" id="con-type">
-            <option>전세</option><option>월세</option><option>매매</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">보증금 (만원)</label>
-          <input class="form-input" id="con-deposit" type="number" placeholder="32000"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">단계</label>
-        <select class="form-select" id="con-stage">
-          <option value="검토">검토 중</option>
-          <option value="협의">조건 협의</option>
-          <option value="계약">계약 진행</option>
-          <option value="완료">완료</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">메모</label>
-        <textarea class="form-textarea" id="con-memo" placeholder="협의 내용, 특약 사항 등"></textarea>
-      </div>
-    </div>
-    <div class="sheet-footer">
-      <button class="btn-ghost" onclick="closeSheet('contract')">취소</button>
-      <button class="btn-primary" onclick="submitContract()">
-        <span class="ms ms-sm" style="color:#fff;">description</span> 저장
       </button>
     </div>
   </div>
@@ -880,14 +968,20 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
           <div style="font-size:11px;color:var(--text3);" id="cd-sub"></div>
         </div>
       </div>
-      <button class="sheet-close" onclick="closeSheet('client-detail')">
-        <span class="ms ms-sm">close</span>
-      </button>
+      <div style="display:flex;gap:6px;">
+        <button onclick="editCurrentClient()" title="정보 수정"
+          style="width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <span class="ms ms-sm">edit</span>
+        </button>
+        <button class="sheet-close" onclick="closeSheet('client-detail')">
+          <span class="ms ms-sm">close</span>
+        </button>
+      </div>
     </div>
     <div style="overflow-y:auto;max-height:calc(95vh - 60px);">
       <!-- 기본 정보 -->
       <div style="padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--border2);">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
           <div>
             <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">희망유형</div>
             <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-type">—</div>
@@ -897,11 +991,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
             <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-budget">—</div>
           </div>
           <div>
-            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">평형/방수</div>
-            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-size">—</div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">평형</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-area-size">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">방수</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-rooms">—</div>
+          </div>
+          <div style="grid-column:span 2;">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">방향</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-directions">—</div>
           </div>
         </div>
-        <div style="font-size:12px;color:var(--text2);" id="cd-area"></div>
+        <div style="margin-bottom:6px;">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;">희망 지역</div>
+          <div id="cd-regions" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+        </div>
+        <div id="cd-movein-wrap" style="margin-top:6px;display:none;">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">입주 희망일</div>
+          <div style="font-size:12px;color:var(--text2);" id="cd-movein">—</div>
+        </div>
       </div>
       <!-- 관심 매물 -->
       <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
@@ -936,6 +1045,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         </button>
         <button class="btn-primary" onclick="addContractForClient()" style="font-size:13px;">
           <span class="ms ms-sm" style="color:#fff;">description</span> 계약 연결
+        </button>
+      </div>
+      <!-- 삭제 -->
+      <div style="padding:0 18px 24px;">
+        <button onclick="deleteCurrentClient()"
+          style="width:100%;padding:10px;border:1px solid var(--danger);background:none;color:var(--danger);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;">
+          <span class="ms ms-sm" style="color:var(--danger);font-size:14px;">delete</span> 고객 삭제
         </button>
       </div>
     </div>
@@ -975,7 +1091,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <div id="con-chk-list"></div>
       </div>
       <!-- 히스토리 -->
-      <div style="padding:12px 18px;padding-bottom:24px;">
+      <div style="padding:12px 18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
             <span class="ms ms-sm">history</span> 진행 히스토리
@@ -992,6 +1108,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
             <button class="btn-primary btn-sm" onclick="submitConHistory()">저장</button>
           </div>
         </div>
+      </div>
+      <!-- 삭제 -->
+      <div style="padding:0 18px 24px;">
+        <button onclick="deleteCurrentContract()"
+          style="width:100%;padding:10px;border:1px solid var(--danger);background:none;color:var(--danger);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;">
+          <span class="ms ms-sm" style="color:var(--danger);font-size:14px;">delete</span> 계약 삭제
+        </button>
       </div>
     </div>
   </div>
@@ -1011,6 +1134,8 @@ let _currentPage       = 'today';
 let _currentPropIdx    = -1;
 let _currentClientIdx  = -1;
 let _currentContractId = '';
+let _editingPropIdx    = -1;   // 매물 편집 중 인덱스
+let _editingClientIdx  = -1;   // 고객 편집 중 인덱스
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8CFdJNXRRbW58waE8cLQcirhgJiwrjnrsUYEbbd7P4WSBlNxIrbCYX9nAFy04sgPFkA/exec';
 
@@ -1023,21 +1148,17 @@ function showPage(id, el) {
   const page = document.getElementById('page-' + id);
   if (page) page.classList.add('active');
   if (el) el.classList.add('active');
-  // FAB 표시 여부
+  // FAB 표시 여부 — 계약 탭은 매물에서만 진입하므로 FAB 숨김
   const fab = document.getElementById('fab-btn');
-  fab.style.display = ['today','props','clients','contracts'].includes(id) ? 'flex' : 'none';
+  fab.style.display = ['today','props','clients'].includes(id) ? 'flex' : 'none';
   _currentPage = id;
 }
 
 function onFabClick() {
-  const map = {
-    today:     'schedule',
-    props:     'property',
-    clients:   'client',
-    contracts: 'contract',
-  };
-  const target = map[_currentPage];
-  if (target) openSheet(target);
+  // 계약은 매물 → 관심고객 → "계약 연결"로만 진입 (FAB 미사용)
+  if (_currentPage === 'today')   { openSheet('schedule'); return; }
+  if (_currentPage === 'props')   { openPropertyForCreate(); return; }
+  if (_currentPage === 'clients') { openClientForCreate(); return; }
 }
 
 // ════════════════════════════════
@@ -1080,6 +1201,147 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// ════════════════════════════════
+// 칩 그룹 헬퍼 (UI: chip-group)
+// ════════════════════════════════
+/**
+ * 칩 그룹 초기화 — 클릭 시 토글
+ * @param {string} containerId
+ * @param {boolean} multi - true면 멀티 선택, false면 단일 선택
+ */
+function setupChipGroup(containerId, multi) {
+  const el = document.getElementById(containerId);
+  if (!el || el._chipBound) return;
+  el._chipBound = true;
+  el.addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip || !el.contains(chip)) return;
+    if (multi) {
+      chip.classList.toggle('active');
+    } else {
+      el.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    }
+  });
+}
+
+/** 단일 선택 값 읽기 */
+function getChipValue(containerId, attr) {
+  const el = document.getElementById(containerId);
+  if (!el) return '';
+  const sel = el.querySelector('.chip.active');
+  return sel ? (sel.dataset[attr] || '') : '';
+}
+
+/** 멀티 선택 값 읽기 (배열) */
+function getChipValues(containerId, attr) {
+  const el = document.getElementById(containerId);
+  if (!el) return [];
+  return Array.from(el.querySelectorAll('.chip.active')).map(c => c.dataset[attr] || '');
+}
+
+/** 단일 선택 값 설정 */
+function setChipValue(containerId, attr, value) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', c.dataset[attr] === String(value || ''));
+  });
+}
+
+/** 멀티 선택 값 설정 (배열) */
+function setChipValues(containerId, attr, values) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const set = new Set((values || []).map(String));
+  el.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', set.has(c.dataset[attr]));
+  });
+}
+
+/** 칩 그룹 초기화 (모두 해제) */
+function clearChipGroup(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+}
+
+// ════════════════════════════════
+// 지역 트리 (시/도 → 구 → 동) 헬퍼
+// ════════════════════════════════
+let _cliRegionChips = [];   // 현재 편집 중인 고객의 지역 칩 배열
+
+function initRegionSelectors() {
+  const sidoSel = document.getElementById('cli-region-sido');
+  const guSel   = document.getElementById('cli-region-gu');
+  const dongSel = document.getElementById('cli-region-dong');
+
+  if (!sidoSel || !window.BB_REGION_HELPERS) return;
+  if (sidoSel._initialized) return;
+  sidoSel._initialized = true;
+
+  // 시/도 채우기
+  const sidos = window.BB_REGION_HELPERS.getSidos();
+  sidoSel.innerHTML = '<option value="">시/도 선택</option>' +
+    sidos.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+
+  // 시/도 변경 → 구 채우기
+  sidoSel.addEventListener('change', () => {
+    const gus = window.BB_REGION_HELPERS.getGus(sidoSel.value);
+    guSel.innerHTML = '<option value="">구/시 선택</option>' +
+      gus.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+    dongSel.innerHTML = '<option value="">동 선택</option>';
+  });
+
+  // 구 변경 → 동 채우기
+  guSel.addEventListener('change', () => {
+    const dongs = window.BB_REGION_HELPERS.getDongs(sidoSel.value, guSel.value);
+    dongSel.innerHTML = '<option value="">동 선택 (선택사항)</option>' +
+      dongs.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+  });
+}
+
+function addRegionChip() {
+  const sido = document.getElementById('cli-region-sido').value;
+  const gu   = document.getElementById('cli-region-gu').value;
+  const dong = document.getElementById('cli-region-dong').value;
+
+  if (!sido) { toast('시/도를 선택하세요'); return; }
+  if (!gu)   { toast('구/시를 선택하세요'); return; }
+
+  const chip = { sido, gu, dong };
+  // 중복 체크
+  if (_cliRegionChips.some(c => window.BB_REGION_HELPERS.chipEquals(c, chip))) {
+    toast('이미 추가된 지역입니다');
+    return;
+  }
+  _cliRegionChips.push(chip);
+  renderRegionChips();
+  // 동 셀렉터만 초기화 (시/도/구는 그대로 두어 추가 동 선택 편하게)
+  document.getElementById('cli-region-dong').value = '';
+}
+
+function removeRegionChip(idx) {
+  _cliRegionChips.splice(idx, 1);
+  renderRegionChips();
+}
+
+function renderRegionChips() {
+  const el = document.getElementById('cli-region-chips');
+  if (!el) return;
+  if (!_cliRegionChips.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:4px 0;">선택된 지역이 없습니다 (선택 안 하면 전체 지역에서 매칭)</div>';
+    return;
+  }
+  el.innerHTML = _cliRegionChips.map((c, i) => `
+    <span class="region-chip">
+      ${escapeHtml(window.BB_REGION_HELPERS.formatChip(c))}
+      <button type="button" class="region-chip-remove" onclick="removeRegionChip(${i})" aria-label="제거">
+        <span class="ms" style="font-size:14px;">close</span>
+      </button>
+    </span>`).join('');
 }
 
 function confirmLogout() {
@@ -1272,6 +1534,16 @@ function enterDashboard(id) {
 
 // 자동 로그인
 window.addEventListener('load', () => {
+  // 칩 그룹 이벤트 바인딩 (한 번만)
+  setupChipGroup('prop-rooms-chips',     false);  // 단일 선택
+  setupChipGroup('prop-direction-chips', false);  // 단일 선택
+  setupChipGroup('cli-rooms-chips',      false);  // 단일 선택
+  setupChipGroup('cli-direction-chips',  true);   // 멀티 선택
+
+  // 계약유형 변경 → 월세 필드 토글
+  const contractSel = document.getElementById('prop-contract');
+  if (contractSel) contractSel.addEventListener('change', togglePropMonthly);
+
   const saved = localStorage.getItem('bb_current_agency');
   if (saved) {
     _agencyId = saved;
@@ -1418,15 +1690,41 @@ function renderProps() {
   list.innerHTML = _props.map((p,i) => {
     const visitors = (p.visitors ? JSON.parse(p.visitors) : []);
     const visitorHtml = visitors.length
-      ? visitors.map(v => `
+      ? visitors.map((v, vi) => {
+          // 이미 이 매물+고객으로 계약이 있는지 확인
+          const linkedContract = _contracts.find(c =>
+            c.address === (p.address + (p.detail ? ' ' + p.detail : '').trim()) &&
+            c.clientName === v.name
+          );
+          return `
         <div class="prop-visitor-item">
           <span class="ms ms-sm" style="font-size:14px;color:var(--text3);">person</span>
           <span class="prop-visitor-name">${escapeHtml(v.name)}</span>
           <span class="prop-visitor-meta">${escapeHtml(v.date || '')}</span>
           ${v.price ? `<span class="prop-visitor-price">${parseInt(v.price).toLocaleString()}만</span>` : ''}
-        </div>`).join('')
+          ${linkedContract
+            ? `<button class="visitor-contract-btn linked" onclick="event.stopPropagation();openContractDetail('${escapeHtml(linkedContract.id)}')" title="${escapeHtml(linkedContract.stage)} 단계 진행 중">
+                 <span class="ms ms-sm" style="font-size:13px;">link</span>${escapeHtml(linkedContract.stage)}
+               </button>`
+            : `<button class="visitor-contract-btn" onclick="event.stopPropagation();linkContract(${i},${vi})" title="계약으로 연결">
+                 <span class="ms ms-sm" style="font-size:13px;">add_link</span>계약
+               </button>`}
+        </div>`;
+        }).join('')
       : `<div style="font-size:11px;color:var(--text3);padding:4px 0;">등록된 관심고객 없음</div>`;
     const cls = riskClass(p.score);
+
+    // 추가 정보 (평형, 방수, 방향)
+    const extras = [];
+    if (p.areaMin || p.areaMax) {
+      if (p.areaMin && p.areaMax && p.areaMin !== p.areaMax) extras.push(p.areaMin + '~' + p.areaMax + '㎡');
+      else extras.push((p.areaMin || p.areaMax) + '㎡');
+    }
+    if (p.rooms) extras.push('방' + p.rooms + '개');
+    const dirs = p.directions ? JSON.parse(p.directions) : [];
+    if (dirs.length) extras.push(dirs.join(','));
+    const monthlyStr = (p.contract === '월세' && p.monthly) ? ' / 월 ' + parseInt(p.monthly).toLocaleString() + '만' : '';
+
     return `
     <div class="prop-card">
       ${cls ? `<div class="prop-card-bar ${cls}"></div>` : ''}
@@ -1435,7 +1733,8 @@ function renderProps() {
           <div style="flex:1;min-width:0;">
             <div class="prop-addr">${escapeHtml(p.address)}</div>
             ${p.detail ? `<div class="prop-detail">${escapeHtml(p.detail)}</div>` : ''}
-            <div class="prop-meta">${escapeHtml(p.contract || '')} · ${p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—'}</div>
+            <div class="prop-meta">${escapeHtml(p.contract || '')} · ${p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—'}${monthlyStr}</div>
+            ${extras.length ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${escapeHtml(extras.join(' · '))}</div>` : ''}
           </div>
           <div style="text-align:right;flex-shrink:0;">
             <div style="font-size:9px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">SCORE</div>
@@ -1463,8 +1762,8 @@ function renderProps() {
         <button class="prop-action-btn" onclick="openPropReport(${i})">
           <span class="ms ms-sm">analytics</span>AI 분석 리포트
         </button>
-        <button class="prop-action-btn secondary" onclick="openPropEdit(${i})">
-          <span class="ms ms-sm">edit_note</span>특이사항 수정
+        <button class="prop-action-btn secondary" onclick="openPropertyForEdit(${i})">
+          <span class="ms ms-sm">edit_note</span>매물 정보 수정
         </button>
       </div>
     </div>`;
@@ -1511,6 +1810,18 @@ function renderClients() {
 function renderPipeline() {
   const stages = ['검토','협의','계약','완료'];
   const el = document.getElementById('pipeline-list');
+
+  // 전체가 비어있으면 안내 메시지
+  if (!_contracts.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <span class="ms">link</span>
+        <div class="empty-title">진행 중인 계약이 없습니다</div>
+        <div class="empty-sub">매물 카드의 관심고객에서 [계약 연결]을 누르면<br>이곳에 검토 단계로 추가됩니다</div>
+      </div>`;
+    return;
+  }
+
   el.innerHTML = stages.map(stage => {
     const items = _contracts.filter(c => c.stage === stage);
     return `
@@ -1526,9 +1837,6 @@ function renderPipeline() {
           ${c.memo ? `<div class="pipeline-item-memo">${escapeHtml(c.memo)}</div>` : ''}
         </div>`).join('')
       : `<div class="pipeline-empty">없음</div>`}
-      <button class="pipeline-add" onclick="openContractStage('${stage}')">
-        <span class="ms ms-sm" style="font-size:14px;">add</span> 추가
-      </button>
     </div>`;
   }).join('');
 }
@@ -1536,23 +1844,118 @@ function renderPipeline() {
 // ════════════════════════════════
 // 액션 — 매물
 // ════════════════════════════════
+
+// 매물 시트 초기화 (등록 모드)
+function openPropertyForCreate() {
+  _editingPropIdx = -1;
+  document.getElementById('prop-sheet-title').textContent = '매물 등록';
+  document.getElementById('prop-submit-btn').innerHTML =
+    '<span class="ms ms-sm" style="color:#fff;">add_home</span> 등록 & 분석';
+  document.getElementById('prop-delete-wrap').style.display = 'none';
+  // 폼 리셋
+  ['prop-addr','prop-detail','prop-deposit','prop-monthly','prop-area-min','prop-area-max','prop-memo']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('prop-contract').value = '전세';
+  document.getElementById('prop-movein').value = '';
+  clearChipGroup('prop-rooms-chips');
+  clearChipGroup('prop-direction-chips');
+  togglePropMonthly();
+  openSheet('property');
+}
+
+// 매물 시트 초기화 (편집 모드)
+function openPropertyForEdit(i) {
+  _editingPropIdx = i;
+  const p = _props[i];
+  if (!p) return;
+  document.getElementById('prop-sheet-title').textContent = '매물 수정';
+  document.getElementById('prop-submit-btn').innerHTML =
+    '<span class="ms ms-sm" style="color:#fff;">save</span> 저장';
+  document.getElementById('prop-delete-wrap').style.display = 'block';
+  document.getElementById('prop-addr').value     = p.address || '';
+  document.getElementById('prop-detail').value   = p.detail || '';
+  document.getElementById('prop-contract').value = p.contract || '전세';
+  document.getElementById('prop-deposit').value  = p.deposit || '';
+  document.getElementById('prop-monthly').value  = p.monthly || '';
+  document.getElementById('prop-area-min').value = p.areaMin || '';
+  document.getElementById('prop-area-max').value = p.areaMax || '';
+  document.getElementById('prop-movein').value   = p.moveinDate || '';
+  document.getElementById('prop-memo').value     = p.memo || '';
+  setChipValue ('prop-rooms-chips',    'rooms', p.rooms || '');
+  setChipValues('prop-direction-chips','dir',   p.directions ? JSON.parse(p.directions) : []);
+  togglePropMonthly();
+  openSheet('property');
+}
+
+function deleteCurrentProp() {
+  if (_editingPropIdx < 0) return;
+  const p = _props[_editingPropIdx];
+  if (!confirm((p.address || '매물') + '을(를) 삭제하시겠습니까?\n관련 관심고객 매칭도 함께 제거됩니다.')) return;
+  _props.splice(_editingPropIdx, 1);
+  saveLocal('props', _props);
+  _editingPropIdx = -1;
+  closeSheet('property');
+  renderProps(); updateKPIs();
+  toast('매물 삭제 완료');
+}
+
+// 월세 필드 표시 토글
+function togglePropMonthly() {
+  const contract = document.getElementById('prop-contract').value;
+  const wrap     = document.getElementById('prop-monthly-wrap');
+  if (wrap) wrap.style.display = (contract === '월세') ? 'block' : 'none';
+}
+
 function submitProperty() {
   const addr     = document.getElementById('prop-addr').value.trim();
   const detail   = document.getElementById('prop-detail').value.trim();
   const contract = document.getElementById('prop-contract').value;
   const deposit  = document.getElementById('prop-deposit').value;
+  const monthly  = document.getElementById('prop-monthly').value;
+  const areaMin  = document.getElementById('prop-area-min').value;
+  const areaMax  = document.getElementById('prop-area-max').value;
+  const movein   = document.getElementById('prop-movein').value;
   const memo     = document.getElementById('prop-memo').value.trim();
+  const rooms      = getChipValue ('prop-rooms-chips', 'rooms');
+  const directions = getChipValues('prop-direction-chips', 'dir');
+
   if (!addr) { toast('주소를 입력하세요'); return; }
 
-  const prop = { id: Date.now().toString(), address: addr, detail, contract, deposit, memo, score: '', risk: '', createdAt: new Date().toISOString() };
+  if (_editingPropIdx >= 0) {
+    // 편집
+    const p = _props[_editingPropIdx];
+    Object.assign(p, {
+      address: addr, detail, contract, deposit,
+      monthly: contract === '월세' ? monthly : '',
+      areaMin, areaMax, moveinDate: movein, memo,
+      rooms,
+      directions: JSON.stringify(directions),
+      updatedAt: new Date().toISOString(),
+    });
+    saveLocal('props', _props);
+    closeSheet('property');
+    renderProps(); updateKPIs();
+    toast('매물 수정 완료');
+    p.agencyId = _agencyId;
+    savePropToServer(p);
+    return;
+  }
+
+  // 신규 등록
+  const prop = {
+    id: Date.now().toString(),
+    address: addr, detail, contract, deposit,
+    monthly: contract === '월세' ? monthly : '',
+    areaMin, areaMax, moveinDate: movein, memo,
+    rooms,
+    directions: JSON.stringify(directions),
+    score: '', risk: '',
+    visitors: '[]',
+    createdAt: new Date().toISOString()
+  };
   _props.push(prop);
   saveLocal('props', _props);
   closeSheet('property');
-  // 폼 초기화
-  document.getElementById('prop-addr').value = '';
-  document.getElementById('prop-detail').value = '';
-  document.getElementById('prop-deposit').value = '';
-  document.getElementById('prop-memo').value = '';
   renderProps(); updateKPIs();
   toast('매물 등록 완료 · AI 분석 중...');
 
@@ -1692,20 +2095,95 @@ function toggleTodo(i) {
 // ════════════════════════════════
 // 액션 — 고객
 // ════════════════════════════════
+
+function openClientForCreate() {
+  _editingClientIdx = -1;
+  document.getElementById('cli-sheet-title').textContent = '고객 추가';
+  document.getElementById('cli-submit-btn').innerHTML =
+    '<span class="ms ms-sm" style="color:#fff;">person_add</span> 저장';
+  // 폼 리셋
+  ['cli-name','cli-phone','cli-budget','cli-area-min','cli-area-max','cli-memo']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cli-type').value = '전세';
+  document.getElementById('cli-movein-from').value = '';
+  document.getElementById('cli-movein-to').value = '';
+  clearChipGroup('cli-rooms-chips');
+  clearChipGroup('cli-direction-chips');
+  _cliRegionChips = [];
+  renderRegionChips();
+  initRegionSelectors();   // 시/도 셀렉터 채우기 (한 번만)
+  openSheet('client');
+}
+
+function openClientForEdit(i) {
+  _editingClientIdx = i;
+  const c = _clients[i];
+  if (!c) return;
+  document.getElementById('cli-sheet-title').textContent = '고객 정보 수정';
+  document.getElementById('cli-submit-btn').innerHTML =
+    '<span class="ms ms-sm" style="color:#fff;">save</span> 저장';
+  document.getElementById('cli-name').value     = c.name || '';
+  document.getElementById('cli-phone').value    = c.phone || '';
+  document.getElementById('cli-type').value     = c.type || '전세';
+  document.getElementById('cli-budget').value   = c.budget || '';
+  document.getElementById('cli-area-min').value = c.areaMin || '';
+  document.getElementById('cli-area-max').value = c.areaMax || '';
+  document.getElementById('cli-movein-from').value = c.moveinFrom || '';
+  document.getElementById('cli-movein-to').value   = c.moveinTo || '';
+  document.getElementById('cli-memo').value     = c.memo || '';
+  setChipValue ('cli-rooms-chips',    'rooms', c.rooms || '');
+  setChipValues('cli-direction-chips','dir',   c.directions ? JSON.parse(c.directions) : []);
+  _cliRegionChips = c.regions ? JSON.parse(c.regions) : [];
+  initRegionSelectors();
+  renderRegionChips();
+  openSheet('client');
+}
+
 function submitClient() {
   const name     = document.getElementById('cli-name').value.trim();
   const phone    = document.getElementById('cli-phone').value.trim();
   const type     = document.getElementById('cli-type').value;
   const budget   = document.getElementById('cli-budget').value;
-  const areaSize = document.getElementById('cli-area-size').value;
-  const rooms    = document.getElementById('cli-rooms').value;
-  const area     = document.getElementById('cli-area').value.trim();
+  const areaMin  = document.getElementById('cli-area-min').value;
+  const areaMax  = document.getElementById('cli-area-max').value;
+  const moveinFrom = document.getElementById('cli-movein-from').value;
+  const moveinTo   = document.getElementById('cli-movein-to').value;
   const memo     = document.getElementById('cli-memo').value.trim();
+  const rooms      = getChipValue ('cli-rooms-chips', 'rooms');
+  const directions = getChipValues('cli-direction-chips', 'dir');
+  const regions    = _cliRegionChips.slice();
+
   if (!name) { toast('고객명을 입력하세요'); return; }
 
+  if (_editingClientIdx >= 0) {
+    // 편집
+    const c = _clients[_editingClientIdx];
+    Object.assign(c, {
+      name, phone, type, budget,
+      areaMin, areaMax, moveinFrom, moveinTo, memo,
+      rooms,
+      directions: JSON.stringify(directions),
+      regions:    JSON.stringify(regions),
+      updatedAt: new Date().toISOString(),
+    });
+    saveLocal('clients', _clients);
+    closeSheet('client');
+    // 매칭 다시
+    const matched = autoMatchProps(c);
+    renderClients(); renderProps(); updateSettingCounts();
+    if (_currentClientIdx === _editingClientIdx) openClientDetail(_currentClientIdx);
+    toast('고객 정보 수정 완료' + (matched > 0 ? ' · 신규 매칭 ' + matched + '개' : ''));
+    return;
+  }
+
+  // 신규 등록
   const newClient = {
-    id: Date.now().toString(), name, phone, type,
-    budget, areaSize, rooms, area, memo,
+    id: Date.now().toString(),
+    name, phone, type, budget,
+    areaMin, areaMax, moveinFrom, moveinTo, memo,
+    rooms,
+    directions: JSON.stringify(directions),
+    regions:    JSON.stringify(regions),
     interests: '[]',
     memos: JSON.stringify([]),
     createdAt: new Date().toISOString()
@@ -1715,10 +2193,6 @@ function submitClient() {
 
   const matched = autoMatchProps(newClient);
   closeSheet('client');
-  // 폼 초기화
-  ['cli-name','cli-phone','cli-budget','cli-area-size','cli-area','cli-memo'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
   renderClients(); renderProps(); updateSettingCounts();
   toast('고객 저장 완료' + (matched > 0 ? ' · 관심매물 ' + matched + '개 자동 매칭' : ''));
 }
@@ -1750,23 +2224,122 @@ function autoMatchProps(client) {
   return count;
 }
 
+/**
+ * 고객 조건과 매물 매칭 여부
+ *
+ * 매칭 기준 (모든 조건 통과해야 매칭):
+ * 1. 계약 유형 일치
+ * 2. 보증금 ≤ 예산
+ * 3. 평형 범위 겹침 (양쪽 모두 지정된 경우)
+ * 4. 최소 방 개수 (매물 방수 ≥ 고객 최소)
+ * 5. 방향 일치 (고객이 선호 방향 지정 + 매물이 방향 지정 → 교집합)
+ * 6. 입주일 범위 겹침
+ * 7. 지역 매칭 (주소 → 고객 희망 지역 칩)
+ *
+ * 정보 누락 시: 해당 조건은 통과로 간주 (관대 매칭)
+ */
 function matchClientToProp(client, prop) {
+  // 1. 계약 유형
   if (client.type && prop.contract && client.type !== prop.contract) return false;
-  if (client.budget && prop.deposit && parseInt(prop.deposit) > parseInt(client.budget)) return false;
+
+  // 2. 예산 (보증금 기준)
+  if (client.budget && prop.deposit) {
+    if (parseInt(prop.deposit) > parseInt(client.budget)) return false;
+  }
+
+  // 3. 평형 범위 겹침
+  // 매물 [pMin, pMax], 고객 [cMin, cMax] — 둘이 겹치는지
+  const pMin = parseFloat(prop.areaMin);
+  const pMax = parseFloat(prop.areaMax) || pMin;   // 매물 최대 미지정 시 단일값
+  const cMin = parseFloat(client.areaMin);
+  const cMax = parseFloat(client.areaMax) || cMin;
+  if (!isNaN(pMin) && !isNaN(cMin)) {
+    // 겹치지 않으면 매칭 X: pMax < cMin 또는 cMax < pMin
+    if (!isNaN(pMax) && !isNaN(cMax)) {
+      if (pMax < cMin || cMax < pMin) return false;
+    }
+  }
+
+  // 4. 방 개수
+  const propRooms   = parseInt(prop.rooms);
+  const clientRooms = parseInt(client.rooms);
+  if (!isNaN(propRooms) && !isNaN(clientRooms)) {
+    if (propRooms < clientRooms) return false;
+  }
+
+  // 5. 방향
+  const propDirs   = prop.directions   ? JSON.parse(prop.directions)   : [];
+  const clientDirs = client.directions ? JSON.parse(client.directions) : [];
+  if (clientDirs.length && propDirs.length) {
+    const intersect = propDirs.some(d => clientDirs.includes(d));
+    if (!intersect) return false;
+  }
+
+  // 6. 입주일 범위
+  // 매물 입주가능일이 고객 희망 범위 안에 있어야
+  if (prop.moveinDate && (client.moveinFrom || client.moveinTo)) {
+    const propDate = prop.moveinDate;
+    if (client.moveinFrom && propDate < client.moveinFrom) return false;
+    if (client.moveinTo   && propDate > client.moveinTo)   return false;
+  }
+
+  // 7. 지역 매칭
+  const clientRegions = client.regions ? JSON.parse(client.regions) : [];
+  if (clientRegions.length && window.BB_REGION_HELPERS) {
+    if (!window.BB_REGION_HELPERS.addressMatchesChips(prop.address, clientRegions)) return false;
+  }
+
   return true;
 }
 
 function openClientDetail(i) {
   _currentClientIdx = i;
   const c = _clients[i];
+  if (!c) return;
 
   document.getElementById('cd-name').textContent   = c.name;
   document.getElementById('cd-sub').textContent    = (c.phone || '연락처 없음');
   document.getElementById('cd-type').textContent   = c.type   || '—';
   document.getElementById('cd-budget').textContent = c.budget ? parseInt(c.budget).toLocaleString()+'만원' : '—';
-  document.getElementById('cd-size').textContent   = (c.areaSize ? c.areaSize+'㎡' : '—') + (c.rooms ? ' / 방'+c.rooms+'개+' : '');
-  document.getElementById('cd-area').textContent   = c.area   || '—';
 
+  // 평형 (범위 표시)
+  let areaStr = '—';
+  if (c.areaMin || c.areaMax) {
+    if (c.areaMin && c.areaMax) areaStr = c.areaMin + '~' + c.areaMax + '㎡';
+    else if (c.areaMin) areaStr = c.areaMin + '㎡+';
+    else                areaStr = '~' + c.areaMax + '㎡';
+  }
+  document.getElementById('cd-area-size').textContent = areaStr;
+
+  // 방수
+  document.getElementById('cd-rooms').textContent = c.rooms ? c.rooms + '개+' : '무관';
+
+  // 방향 (배열)
+  const dirs = c.directions ? JSON.parse(c.directions) : [];
+  document.getElementById('cd-directions').textContent = dirs.length ? dirs.join(' · ') : '무관';
+
+  // 지역 칩
+  const regions = c.regions ? JSON.parse(c.regions) : [];
+  const regionsEl = document.getElementById('cd-regions');
+  if (regions.length && window.BB_REGION_HELPERS) {
+    regionsEl.innerHTML = regions.map(r =>
+      `<span class="region-chip" style="padding:4px 10px;font-size:11px;">${escapeHtml(window.BB_REGION_HELPERS.formatChip(r))}</span>`
+    ).join('');
+  } else {
+    regionsEl.innerHTML = '<span style="font-size:12px;color:var(--text3);">전체 지역</span>';
+  }
+
+  // 입주 희망일
+  const moveinWrap = document.getElementById('cd-movein-wrap');
+  if (c.moveinFrom || c.moveinTo) {
+    moveinWrap.style.display = 'block';
+    document.getElementById('cd-movein').textContent =
+      (c.moveinFrom || '—') + ' ~ ' + (c.moveinTo || '—');
+  } else {
+    moveinWrap.style.display = 'none';
+  }
+
+  // 관심 매물 목록
   const interestProps = _props.filter(p => {
     const visitors = p.visitors ? JSON.parse(p.visitors) : [];
     return visitors.some(v => v.name === c.name);
@@ -1777,8 +2350,10 @@ function openClientDetail(i) {
       const visitors = JSON.parse(p.visitors || '[]');
       const visit    = visitors.find(v => v.name === c.name) || {};
       const propIdx  = _props.indexOf(p);
-      const cls      = riskClass(p.score);
       const colorVar = riskColorVar(p.score);
+      const fullAddr = (p.address + (p.detail ? ' ' + p.detail : '')).trim();
+      const linkedContract = _contracts.find(co => co.address === fullAddr && co.clientName === c.name);
+      const visitorIdx = visitors.indexOf(visit);
       return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;">
         <span class="ms ms-sm" style="font-size:18px;color:var(--text3);flex-shrink:0;">home_work</span>
         <div style="flex:1;min-width:0;cursor:pointer;" onclick="openPropReport(${propIdx})">
@@ -1786,12 +2361,21 @@ function openClientDetail(i) {
           <div style="font-size:11px;color:var(--text3);margin-top:2px;">
             ${escapeHtml(p.contract || '')} ${p.deposit ? '· '+parseInt(p.deposit).toLocaleString()+'만' : ''}
             ${visit.date ? '· '+escapeHtml(visit.date) : ''}
-            ${visit.interest ? '· 관심도: '+escapeHtml(visit.interest) : ''}
+            ${visit.interest ? '· '+escapeHtml(visit.interest) : ''}
             ${visit.autoMatched ? '· <span style="color:var(--info);">자동매칭</span>' : ''}
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          ${p.score ? `<span style="font-size:11px;font-weight:700;color:${colorVar};font-family:'IBM Plex Mono',monospace;">${p.score}점</span>` : ''}
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
+          ${p.score ? `<span style="font-size:11px;font-weight:700;color:${colorVar};font-family:'IBM Plex Mono',monospace;">${p.score}</span>` : ''}
+          ${linkedContract
+            ? `<button onclick="event.stopPropagation();openContractDetail('${escapeHtml(linkedContract.id)}')" title="${escapeHtml(linkedContract.stage)} 단계"
+                 class="visitor-contract-btn linked" style="font-size:10px;padding:2px 6px;">
+                 <span class="ms" style="font-size:12px;">link</span>${escapeHtml(linkedContract.stage)}
+               </button>`
+            : `<button onclick="event.stopPropagation();linkContract(${propIdx},${visitorIdx})" title="계약 연결"
+                 class="visitor-contract-btn" style="font-size:10px;padding:2px 6px;">
+                 <span class="ms" style="font-size:12px;">add_link</span>계약
+               </button>`}
           <button onclick="event.stopPropagation();removeInterest('${escapeHtml(p.id)}','${escapeHtml(c.name)}')" title="관심 제외"
             style="border:none;background:none;cursor:pointer;padding:3px;border-radius:4px;color:var(--text3);">
             <span class="ms ms-sm" style="font-size:16px;">heart_minus</span>
@@ -1805,6 +2389,37 @@ function openClientDetail(i) {
 
   renderClientMemos(c);
   openSheet('client-detail');
+}
+
+function editCurrentClient() {
+  if (_currentClientIdx < 0) return;
+  closeSheet('client-detail');
+  openClientForEdit(_currentClientIdx);
+}
+
+function deleteCurrentClient() {
+  if (_currentClientIdx < 0) return;
+  const c = _clients[_currentClientIdx];
+  if (!confirm(c.name + ' 고객을 삭제하시겠습니까?\n관련 관심매물 매칭도 함께 제거됩니다.\n(이 동작은 되돌릴 수 없습니다)')) return;
+
+  // 매물 visitor에서도 제거
+  _props.forEach(p => {
+    if (!p.visitors) return;
+    const visitors = JSON.parse(p.visitors);
+    const filtered = visitors.filter(v => v.name !== c.name);
+    if (filtered.length !== visitors.length) {
+      p.visitors = JSON.stringify(filtered);
+    }
+  });
+  saveLocal('props', _props);
+
+  // 고객 삭제
+  _clients.splice(_currentClientIdx, 1);
+  saveLocal('clients', _clients);
+  _currentClientIdx = -1;
+  closeSheet('client-detail');
+  renderClients(); renderProps(); updateSettingCounts();
+  toast('고객 삭제 완료');
 }
 
 function removeInterest(propId, clientName) {
@@ -1864,42 +2479,83 @@ function addScheduleForClient() {
 function addContractForClient() {
   if (_currentClientIdx < 0) return;
   const c = _clients[_currentClientIdx];
+  // 이 고객이 관심을 가진 매물 찾기
+  const matchedProps = _props.filter(p => {
+    const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+    return visitors.some(v => v.name === c.name);
+  });
+  if (!matchedProps.length) {
+    toast('관심매물이 없습니다 · 매물 탭에서 관심고객 등록 후 시도하세요');
+    return;
+  }
+  // 첫 매물의 visitor에서 자동 연결 (단순 케이스)
+  // 여러개면 사용자에게 매물 탭에서 직접 선택하라고 안내
+  if (matchedProps.length > 1) {
+    closeSheet('client-detail');
+    showPage('props', document.getElementById('tab-props'));
+    toast('매물 탭에서 [계약] 버튼을 눌러 연결하세요');
+    return;
+  }
+  const p = matchedProps[0];
+  const visitors = JSON.parse(p.visitors || '[]');
+  const vi = visitors.findIndex(v => v.name === c.name);
+  if (vi < 0) return;
+  const propIdx = _props.indexOf(p);
   closeSheet('client-detail');
-  document.getElementById('con-client').value = c.name;
-  document.getElementById('con-phone').value  = c.phone || '';
-  document.getElementById('con-type').value   = c.type  || '전세';
-  openSheet('contract');
+  linkContract(propIdx, vi);
 }
 
 // ════════════════════════════════
 // 액션 — 계약
 // ════════════════════════════════
-function submitContract() {
-  const addr    = document.getElementById('con-addr').value.trim();
-  const client  = document.getElementById('con-client').value.trim();
-  const phone   = document.getElementById('con-phone').value.trim();
-  const type    = document.getElementById('con-type').value;
-  const deposit = document.getElementById('con-deposit').value;
-  const stage   = document.getElementById('con-stage').value;
-  const memo    = document.getElementById('con-memo').value.trim();
-  if (!addr) { toast('주소를 입력하세요'); return; }
 
-  const newContract = { id: Date.now().toString(), agencyId: _agencyId, address: addr, clientName: client, clientPhone: phone, contract: type, deposit, stage, memo, history: '[]', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+/**
+ * 매물의 관심고객을 계약(검토 단계)으로 연결
+ */
+function linkContract(propIdx, visitorIdx) {
+  const p = _props[propIdx];
+  if (!p) return;
+  const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+  const v = visitors[visitorIdx];
+  if (!v) return;
+
+  const fullAddr = (p.address + (p.detail ? ' ' + p.detail : '')).trim();
+
+  // 이미 연결된 계약이 있는지 확인
+  const existing = _contracts.find(c => c.address === fullAddr && c.clientName === v.name);
+  if (existing) {
+    toast('이미 연결된 계약이 있습니다 (' + existing.stage + ')');
+    openContractDetail(existing.id);
+    return;
+  }
+
+  // 검토 단계로 신규 계약 생성
+  const newContract = {
+    id: Date.now().toString(),
+    agencyId: _agencyId,
+    address: fullAddr,
+    clientName: v.name,
+    clientPhone: '',
+    contract: p.contract || '전세',
+    deposit: v.price || p.deposit || '',
+    stage: '검토',
+    memo: v.memo || '',
+    history: JSON.stringify([{
+      date: new Date().toISOString().split('T')[0],
+      text: '계약 검토 시작 (관심매물에서 연결)'
+    }]),
+    checklist: '{}',
+    propId: p.id,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
   _contracts.push(newContract);
   saveLocal('contracts', _contracts);
-  closeSheet('contract');
-  // 폼 초기화
-  ['con-addr','con-client','con-phone','con-deposit','con-memo'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  renderPipeline(); updateKPIs();
-  toast('계약 저장 완료');
+  renderPipeline(); renderProps(); updateKPIs();
   saveContractToServer(newContract);
-}
-
-function openContractStage(stage) {
-  document.getElementById('con-stage').value = stage;
-  openSheet('contract');
+  toast(v.name + ' 계약 검토로 추가되었습니다');
+  // 자동으로 계약 상세 열기
+  openContractDetail(newContract.id);
 }
 
 function openContractDetail(id) {
@@ -2000,6 +2656,19 @@ function submitConHistory() {
   renderConHistory(con);
   renderPipeline();
   toast('히스토리 추가 완료');
+}
+
+function deleteCurrentContract() {
+  if (!_currentContractId) return;
+  const con = _contracts.find(c => c.id === _currentContractId);
+  if (!con) return;
+  if (!confirm((con.address || '계약') + '을(를) 삭제하시겠습니까?\n매물의 관심고객은 그대로 유지됩니다.')) return;
+  _contracts = _contracts.filter(c => c.id !== _currentContractId);
+  saveLocal('contracts', _contracts);
+  _currentContractId = '';
+  closeSheet('contract-detail');
+  renderPipeline(); renderProps(); updateKPIs();
+  toast('계약 삭제 완료');
 }
 </script>
 
