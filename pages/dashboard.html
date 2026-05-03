@@ -1346,6 +1346,19 @@ async function syncContractsFromServer(agencyId) {
   }
 }
 
+async function syncScheduleFromServer(agencyId) {
+  try {
+    const data = await dbGet({ action: 'read', sheet: '일정', agencyId });
+    if (data.ok && data.data.length) {
+      _schedule = data.data;
+      saveLocal('schedule', _schedule);
+      renderTodaySchedule(); updateKPIs();
+    }
+  } catch(e) {
+    console.log('일정 서버 동기화 실패');
+  }
+}
+
 // ── 계약 서버 저장 ──
 async function saveContractToServer(contract) {
   try {
@@ -1369,22 +1382,38 @@ let _settings   = { today:true, props:true, clients:true, contracts:true, alerts
 // ════════════════════════════════
 // 로그인
 // ════════════════════════════════
-function doLogin() {
+async function doLogin() {
   const id = document.getElementById('login-id').value.trim();
   const pw = document.getElementById('login-pw').value.trim();
   if (!id || !pw) { toast('ID와 비밀번호를 입력하세요'); return; }
-  // MVP: 간단한 로컬 인증 (추후 Supabase/백엔드 교체)
-  const stored = localStorage.getItem('bb_agency_' + id);
-  if (stored) {
-    const data = JSON.parse(stored);
-    if (data.pw !== btoa(pw)) { toast('비밀번호가 틀렸습니다'); return; }
-  } else {
-    // 첫 로그인 = 계정 생성
-    localStorage.setItem('bb_agency_' + id, JSON.stringify({ pw: btoa(pw), name: id, createdAt: new Date().toISOString() }));
+
+  const btn = document.getElementById('login-btn');
+  btn.innerHTML = '<span class="ms ms-sm" style="color:#fff;animation:spin .7s linear infinite;">refresh</span> 로그인 중...';
+  btn.disabled = true;
+
+  try {
+    const result = await doLoginRemote(id, pw);
+
+    if (result.ok) {
+      localStorage.setItem('bb_agency_name_' + id, result.agencyName || id);
+      _agencyId = id;
+      localStorage.setItem('bb_current_agency', id);
+      enterDashboard(id);
+      // 구글시트에서 데이터 동기화
+      await Promise.all([
+        syncPropsFromServer(id),
+        syncContractsFromServer(id),
+        syncScheduleFromServer(id),
+      ]);
+    } else {
+      toast('❌ ' + (result.error || '로그인 실패'));
+    }
+  } catch(e) {
+    toast('❌ 서버 연결 실패: ' + e.message);
+  } finally {
+    btn.innerHTML = '<span class="ms ms-sm" style="color:#fff;">login</span> 로그인';
+    btn.disabled = false;
   }
-  _agencyId = id;
-  localStorage.setItem('bb_current_agency', id);
-  enterDashboard(id);
 }
 
 
@@ -1423,8 +1452,18 @@ function enterDashboard(id) {
 // 자동 로그인
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('bb_current_agency');
-  if (saved) { _agencyId = saved; enterDashboard(saved); }
-  else { document.getElementById('page-login').style.display = 'flex'; }
+  if (saved) {
+    _agencyId = saved;
+    enterDashboard(saved);
+    // 백그라운드 서버 동기화
+    Promise.all([
+      syncPropsFromServer(saved),
+      syncContractsFromServer(saved),
+      syncScheduleFromServer(saved),
+    ]).catch(() => {});
+  } else {
+    document.getElementById('page-login').style.display = 'flex';
+  }
 });
 
 // ════════════════════════════════
@@ -1713,6 +1752,7 @@ function submitProperty() {
   renderProps(); updateKPIs();
   toast('매물 등록 완료 · AI 분석 중...');
   // 서버에도 저장
+  prop.agencyId = _agencyId;
   savePropToServer(prop);
 
   // AI 분석 호출
@@ -1740,11 +1780,14 @@ function submitSchedule() {
   const memo   = document.getElementById('sch-memo').value.trim();
   if (!date) { toast('날짜를 선택하세요'); return; }
 
-  _schedule.push({ id: Date.now().toString(), date, time, type, clientName: client, address: addr, memo });
+  const newSch = { id: Date.now().toString(), agencyId: _agencyId, date, time, type, clientName: client, address: addr, memo, done: 'false', createdAt: new Date().toISOString() };
+  _schedule.push(newSch);
   saveLocal('schedule', _schedule);
   closeSheet('schedule');
   renderTodaySchedule(); updateKPIs();
   toast('일정 저장 완료');
+  // 구글시트 저장
+  dbGet({ action: 'append', sheet: '일정', agencyId: _agencyId, data: JSON.stringify(newSch) }).catch(()=>{});
 }
 
 function submitClient() {
@@ -2168,7 +2211,7 @@ async function doRegister() {
   if (!result.ok) { toast(' ' + (result.error || '등록 실패')); return; }
 
   toast(' 등록 완료! 로그인해주세요');
-  document.getElementById('register-form').style.display = 'none';
+  closeSheet('register');
   document.getElementById('login-id').value = id;
 }
 
