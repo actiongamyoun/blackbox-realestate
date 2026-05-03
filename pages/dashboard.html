@@ -715,7 +715,112 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- 일정 추가 -->
+<!-- 매물 분석 리포트 (중개사 전용) -->
+<div class="sheet-bg" id="sheet-prop-report">
+  <div class="sheet" style="max-height:95vh;">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title" id="pr-complex" style="font-size:15px;"></div>
+        <div style="font-size:11px;color:var(--text3);" id="pr-addr"></div>
+      </div>
+      <button class="sheet-close" onclick="closeSheet('prop-report')">
+        <span class="ms ms-sm">close</span>
+      </button>
+    </div>
+    <div style="overflow-y:auto;max-height:calc(95vh - 60px);">
+
+      <!-- 종합 점수 카드 -->
+      <div style="padding:20px 18px;text-align:center;background:var(--bg);border-bottom:1px solid var(--border2);">
+        <div class="mono" style="font-size:10px;color:var(--text3);letter-spacing:1.5px;margin-bottom:14px;">SAFETY ANALYSIS</div>
+        <div style="position:relative;width:140px;height:140px;margin:0 auto;">
+          <svg width="140" height="140" viewBox="0 0 140 140" style="transform:rotate(-90deg);">
+            <circle cx="70" cy="70" r="58" fill="none" stroke="#e4e7ec" stroke-width="10"/>
+            <circle id="pr-gauge-arc" cx="70" cy="70" r="58" fill="none"
+              stroke="var(--navy)" stroke-width="10"
+              stroke-dasharray="365" stroke-dashoffset="365"
+              stroke-linecap="round"
+              style="transition:stroke-dashoffset 1s ease;"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <span class="mono" style="font-size:38px;font-weight:900;color:var(--navy);line-height:1;" id="pr-score">--</span>
+            <span class="mono" style="font-size:10px;color:var(--text3);letter-spacing:1.5px;margin-top:2px;">/ 100</span>
+          </div>
+        </div>
+        <div id="pr-chip" style="display:inline-block;margin-top:14px;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;">--</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:8px;line-height:1.5;" id="pr-desc">분석 데이터를 불러오는 중...</div>
+      </div>
+
+      <!-- 메타 정보 -->
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border2);">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:3px;">계약 유형</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="pr-meta-contract">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:3px;">보증금</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="pr-meta-deposit">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:3px;">평형</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="pr-meta-area">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;letter-spacing:1px;margin-bottom:3px;">분석 일시</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="pr-meta-date">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 위험 요소 (Red Flags) -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span class="ms ms-sm" style="color:var(--danger);">report</span>
+          위험 요소 (Red Flags)
+          <span id="pr-flags-count" style="margin-left:auto;font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">--</span>
+        </div>
+        <div id="pr-flags-list"></div>
+      </div>
+
+      <!-- 정밀 데이터 -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span class="ms ms-sm">table_chart</span>
+          정밀 데이터 분석
+        </div>
+        <div id="pr-data-list"></div>
+      </div>
+
+      <!-- 체크리스트 -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="ms ms-sm">fact_check</span>
+            10대 체크리스트
+          </div>
+          <span id="pr-chk-progress" style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">--</span>
+        </div>
+        <div style="height:4px;background:#f0f0ee;border-radius:2px;overflow:hidden;margin-bottom:10px;">
+          <div id="pr-chk-bar" style="height:100%;background:var(--navy);border-radius:2px;width:0%;transition:width .3s;"></div>
+        </div>
+        <div id="pr-chk-list"></div>
+      </div>
+
+      <!-- 액션 -->
+      <div style="padding:12px 18px;display:flex;gap:8px;padding-bottom:24px;">
+        <button class="btn-ghost" onclick="reanalyzeProp()" style="font-size:13px;">
+          <span class="ms ms-sm">refresh</span> 재분석
+        </button>
+        <button class="btn-primary" onclick="editPropFromReport()" style="font-size:13px;">
+          <span class="ms ms-sm" style="color:#fff;">edit</span> 매물 정보 수정
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 매물 분석 리포트 끝 -->
 <div class="sheet-bg" id="sheet-schedule">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -2256,21 +2361,262 @@ function submitProperty() {
     });
 }
 
+// ════════════════════════════════
+// 매물 분석 리포트 (대시보드 내부 시트)
+// ════════════════════════════════
 function openPropReport(i) {
+  _currentPropIdx = i;
   const p = _props[i];
-  sessionStorage.setItem('bb_agency_login', _agencyId);
-  sessionStorage.setItem('bb_address',  p.address + ' ' + (p.detail||''));
-  sessionStorage.setItem('bb_score',    p.score || '75');
-  sessionStorage.setItem('bb_risk',     p.risk  || 'warning');
-  sessionStorage.setItem('bb_contract', p.contract || '전세');
-  sessionStorage.setItem('bb_deposit',  p.deposit  || '');
-  const url = '/pages/report.html?address=' + encodeURIComponent(p.address + ' ' + (p.detail||''))
-    + '&score='    + (p.score    || 75)
-    + '&risk='     + (p.risk     || 'warning')
-    + '&contract=' + encodeURIComponent(p.contract || '전세')
-    + '&deposit='  + (p.deposit  || '')
-    + '&agency='   + encodeURIComponent(_agencyId);
-  window.open(url, '_blank');
+  if (!p) return;
+  renderPropReport(p);
+  openSheet('prop-report');
+}
+
+// 외부에서 다시 호출 시 사용
+function reanalyzeProp() {
+  if (_currentPropIdx < 0) return;
+  const p = _props[_currentPropIdx];
+  if (!p) return;
+  toast('재분석 중...');
+  fetchPropAnalysis(p, true);
+}
+
+function editPropFromReport() {
+  if (_currentPropIdx < 0) return;
+  closeSheet('prop-report');
+  setTimeout(() => openPropertyForEdit(_currentPropIdx), 200);
+}
+
+// ── 분석 데이터 표시 ──
+function renderPropReport(p) {
+  // 헤더
+  document.getElementById('pr-complex').textContent = (p.complexName || p.address) + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('pr-addr').textContent    = p.complexName ? p.address : '';
+
+  // 기존 분석 데이터 (있으면)
+  let analysis = null;
+  try { analysis = p.analysis ? JSON.parse(p.analysis) : null; } catch(e) {}
+
+  // 점수 + 게이지
+  const score = analysis?.score ?? p.score;
+  updatePropReportScore(score);
+
+  // 메타
+  document.getElementById('pr-meta-contract').textContent = p.contract || '—';
+  document.getElementById('pr-meta-deposit').textContent  = p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—';
+  let areaStr = '—';
+  if (p.areaMin || p.areaMax) {
+    if (p.areaMin && p.areaMax && p.areaMin !== p.areaMax) areaStr = p.areaMin + '~' + p.areaMax + '㎡';
+    else areaStr = (p.areaMin || p.areaMax) + '㎡';
+  }
+  document.getElementById('pr-meta-area').textContent = areaStr;
+  const dateStr = analysis?.analyzedAt
+    ? new Date(analysis.analyzedAt).toLocaleString('ko-KR', { dateStyle:'short', timeStyle:'short' })
+    : (p.updatedAt
+      ? new Date(p.updatedAt).toLocaleString('ko-KR', { dateStyle:'short', timeStyle:'short' })
+      : '미분석');
+  document.getElementById('pr-meta-date').textContent = dateStr;
+
+  // Red Flags / 정밀 데이터 / 체크리스트 — 분석 데이터 있으면 표시, 없으면 placeholder
+  if (analysis) {
+    renderPropReportData(analysis, p.contract);
+  } else {
+    renderPropReportEmpty();
+    // 분석 데이터 없으면 자동으로 새로 분석 시도
+    fetchPropAnalysis(p, false);
+  }
+}
+
+function updatePropReportScore(score) {
+  const s = parseInt(score);
+  const scoreEl = document.getElementById('pr-score');
+  const arcEl   = document.getElementById('pr-gauge-arc');
+  const chipEl  = document.getElementById('pr-chip');
+  const descEl  = document.getElementById('pr-desc');
+
+  if (isNaN(s)) {
+    scoreEl.textContent = '--';
+    arcEl.style.strokeDashoffset = 365;
+    chipEl.textContent = '분석 대기';
+    chipEl.style.background = 'var(--bg)';
+    chipEl.style.color = 'var(--text3)';
+    descEl.textContent = '분석 데이터가 아직 없습니다';
+    return;
+  }
+
+  scoreEl.textContent = s;
+  // 게이지 애니메이션
+  const offset = Math.round(365 - (s / 100) * 365);
+  setTimeout(() => arcEl.style.strokeDashoffset = offset, 100);
+
+  if (s >= 80) {
+    chipEl.textContent = '✓ 안전';
+    chipEl.style.background = 'rgba(34,197,94,.12)';
+    chipEl.style.color = 'var(--safe)';
+    arcEl.style.stroke = 'var(--safe)';
+    descEl.textContent = '주요 위험 요소가 발견되지 않았습니다';
+  } else if (s >= 60) {
+    chipEl.textContent = '⚠ 주의';
+    chipEl.style.background = 'rgba(245,158,11,.12)';
+    chipEl.style.color = 'var(--warn)';
+    arcEl.style.stroke = 'var(--warn)';
+    descEl.textContent = '일부 위험 요소가 발견되었습니다 · 면밀한 검토 필요';
+  } else {
+    chipEl.textContent = '⛔ 고위험';
+    chipEl.style.background = 'rgba(220,38,38,.12)';
+    chipEl.style.color = 'var(--danger)';
+    arcEl.style.stroke = 'var(--danger)';
+    descEl.textContent = '복수의 위험 요소 · 전문가 자문 후 계약 결정 권장';
+  }
+}
+
+function renderPropReportEmpty() {
+  document.getElementById('pr-flags-list').innerHTML =
+    '<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px;">분석 데이터를 불러오는 중...</div>';
+  document.getElementById('pr-flags-count').textContent = '--';
+  document.getElementById('pr-data-list').innerHTML =
+    '<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px;">—</div>';
+  document.getElementById('pr-chk-list').innerHTML =
+    '<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px;">—</div>';
+  document.getElementById('pr-chk-progress').textContent = '--';
+  document.getElementById('pr-chk-bar').style.width = '0%';
+}
+
+function renderPropReportData(analysis, contract) {
+  // ── Red Flags ──
+  const flags = analysis.redFlags || analysis.flags || [];
+  const flagsEl = document.getElementById('pr-flags-list');
+  const flagsCnt = document.getElementById('pr-flags-count');
+  if (flags.length) {
+    flagsCnt.textContent = flags.length + '건';
+    flagsCnt.style.color = 'var(--danger)';
+    flagsEl.innerHTML = flags.map(f => {
+      const sev = (f.severity || f.level || 'caution').toLowerCase();
+      const sevBg  = sev === 'danger' ? 'rgba(220,38,38,.08)'  : 'rgba(245,158,11,.08)';
+      const sevCol = sev === 'danger' ? 'var(--danger)' : 'var(--warn)';
+      const sevLbl = sev === 'danger' ? 'DANGER' : 'CAUTION';
+      return `
+      <div style="padding:10px 12px;background:${sevBg};border-radius:8px;margin-bottom:8px;border-left:3px solid ${sevCol};">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:9px;font-weight:900;color:${sevCol};font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">${sevLbl}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--navy);">${escapeHtml(f.title || f.name || '경고')}</span>
+        </div>
+        ${f.description ? `<div style="font-size:12px;color:var(--text2);line-height:1.5;">${escapeHtml(f.description)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } else {
+    flagsCnt.textContent = '0건';
+    flagsCnt.style.color = 'var(--safe)';
+    flagsEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px;"><span class="ms" style="font-size:24px;color:var(--safe);display:block;margin-bottom:4px;">check_circle</span>발견된 위험 요소 없음</div>';
+  }
+
+  // ── 정밀 데이터 ──
+  const data = analysis.forensicData || analysis.data || analysis.details || [];
+  const dataEl = document.getElementById('pr-data-list');
+  if (data.length) {
+    dataEl.innerHTML = data.map(d => {
+      const lvl = (d.riskLevel || d.level || 'safe').toLowerCase();
+      const lvlBg  = lvl === 'danger' ? 'rgba(220,38,38,.08)' : lvl === 'caution' || lvl === 'warning' ? 'rgba(245,158,11,.08)' : 'rgba(34,197,94,.08)';
+      const lvlCol = lvl === 'danger' ? 'var(--danger)' : lvl === 'caution' || lvl === 'warning' ? 'var(--warn)' : 'var(--safe)';
+      const lvlLbl = lvl === 'danger' ? 'DANGER' : lvl === 'caution' || lvl === 'warning' ? 'CAUTION' : 'SAFE';
+      return `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border2);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:600;color:var(--navy);">${escapeHtml(d.category || d.name || '항목')}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:1px;">${escapeHtml(d.result || d.value || '—')}</div>
+        </div>
+        <span style="font-size:9px;font-weight:900;padding:3px 7px;border-radius:10px;background:${lvlBg};color:${lvlCol};font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;flex-shrink:0;">${lvlLbl}</span>
+      </div>`;
+    }).join('');
+  } else {
+    dataEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px;">정밀 데이터 없음</div>';
+  }
+
+  // ── 체크리스트 ──
+  const CHK = {
+    '전세':[
+      '임대인 신분증 대조 및 등기부 소유자 일치 확인',
+      '등기부 을구 — 근저당·가압류 확인 및 말소 특약',
+      '전세가율 확인 (80% 이하 권장)',
+      '국세 / 지방세 완납 증명서 수령',
+      'HUG / SGI 전세보증금 반환보증 가입 가능 여부',
+      '확정일자 취득 및 전입신고 즉시 이행',
+      '임대인 담보대출 추가 설정 금지 특약',
+      '신탁 등기 여부 확인',
+      '공인중개사 자격증 및 공제증서 확인',
+      '계약 후 모니터링 등록',
+    ],
+    '월세':[
+      '임대인 신분증 대조 및 등기부 소유자 일치 확인',
+      '확정일자 취득 및 전입신고',
+      '국세 / 지방세 완납 증명서 수령',
+      '월세 입금 계좌가 임대인 본인 명의인지 확인',
+      '차임 인상률 상한 확인',
+      '관리비 항목 계약서 명시',
+      '등기부 을구 — 근저당·가압류 확인',
+      '소액임차인 최우선변제금 요건',
+      '공인중개사 자격증 확인',
+      '계약 후 모니터링 등록',
+    ],
+    '매매':[
+      '등기부 갑구 — 가압류·압류·경매 확인',
+      '등기부 을구 — 근저당·전세권 말소 확인',
+      '신탁 등기 여부 확인',
+      '매도인 신분증 대조 및 등기부 일치 확인',
+      '취득세 / 등록세 계산 및 준비',
+      '건축물대장 — 위반건축물 확인',
+      '실거래가 및 공시지가 대비 적정성',
+      '잔금일 소유권이전등기 동시 처리',
+      '공인중개사 자격증 확인',
+      '하자담보책임 특약 명시',
+    ],
+  };
+  const chkItems = CHK[contract] || CHK['전세'];
+  // AI 자동체크 결과 (analysis에서 추출)
+  const autoChecked = analysis.autoChecked || {};
+  const checkedCount = chkItems.filter(item => autoChecked[item]).length;
+  const pct = Math.round(checkedCount / chkItems.length * 100);
+  document.getElementById('pr-chk-progress').textContent = checkedCount + ' / ' + chkItems.length + ' (' + pct + '%)';
+  document.getElementById('pr-chk-bar').style.width = pct + '%';
+
+  document.getElementById('pr-chk-list').innerHTML = chkItems.map((item, idx) => {
+    const checked = !!autoChecked[item];
+    return `
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border2);">
+      <span class="ms ms-sm" style="font-size:18px;color:${checked?'var(--safe)':'var(--text3)'};flex-shrink:0;margin-top:1px;">${checked?'check_box':'check_box_outline_blank'}</span>
+      <span style="font-size:12px;color:${checked?'var(--text2)':'var(--text)'};${checked?'text-decoration:line-through;':''};line-height:1.4;flex:1;">${escapeHtml(item)}</span>
+      ${checked ? '<span style="font-size:9px;font-weight:900;color:var(--safe);font-family:\'IBM Plex Mono\',monospace;letter-spacing:0.5px;flex-shrink:0;">AI</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── 분석 API 호출 (필요 시) ──
+async function fetchPropAnalysis(p, force) {
+  const fullAddr = (p.address + (p.detail ? ' ' + p.detail : '')).trim();
+  try {
+    const res = await fetch('/api/analyze?address=' + encodeURIComponent(fullAddr)
+      + '&contract=' + encodeURIComponent(p.contract || '전세')
+      + '&deposit='  + encodeURIComponent(p.deposit || ''));
+    const data = await res.json();
+    if (data.ok) {
+      data.analyzedAt = new Date().toISOString();
+      p.score    = data.score;
+      p.risk     = data.riskLevel;
+      p.analysis = JSON.stringify(data);
+      saveLocal('props', _props);
+      renderProps(); updateKPIs();
+      // 시트가 열려있으면 다시 그리기
+      if (_currentPropIdx >= 0 && _props[_currentPropIdx]?.id === p.id) {
+        renderPropReport(p);
+      }
+      if (force) toast('분석 완료');
+    } else {
+      if (force) toast('분석 실패: ' + (data.error || ''));
+    }
+  } catch(e) {
+    console.error('분석 오류:', e);
+    if (force) toast('분석 중 오류 발생');
+  }
 }
 
 function openAddVisitor(i) {

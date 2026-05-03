@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html class="light" lang="ko">
 <head>
-  <!-- PWA -->
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#041627"/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -18,6 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
 tailwind.config = {
   darkMode: "class",
@@ -63,28 +63,23 @@ tailwind.config = {
   .fill-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
   .mono { font-family: 'IBM Plex Mono', monospace; }
 
-  /* 상태 칩 */
   .chip-safe    { background:rgba(34,197,94,.1);  color:#166534; }
   .chip-warning { background:rgba(245,158,11,.1); color:#92400e; }
   .chip-danger  { background:rgba(220,38,38,.1);  color:#991b1b; }
   .chip-info    { background:rgba(37,99,235,.1);  color:#1e40af; }
 
-  /* 위험바 */
   .risk-bar-track { background:#e4e7ec; border-radius:2px; height:6px; }
   .risk-bar-fill  { border-radius:2px; height:6px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
 
-  /* 게이지 */
   @keyframes drawGauge { from{stroke-dashoffset:553} to{stroke-dashoffset:var(--offset)} }
   .gauge-arc { animation: drawGauge 1.4s cubic-bezier(.4,0,.2,1) forwards; }
 
-  /* 페이드업 */
   @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-  .fade-up { animation: fadeUp .5s ease forwards; }
+  .fade-up   { animation: fadeUp .5s ease forwards; }
   .fade-up-2 { animation: fadeUp .5s .1s ease both; }
   .fade-up-3 { animation: fadeUp .5s .2s ease both; }
   .fade-up-4 { animation: fadeUp .5s .3s ease both; }
 
-  /* 섹션 공통 헤더 */
   .sec-head {
     display:flex; align-items:center; gap:8px;
     padding:10px 20px;
@@ -96,7 +91,6 @@ tailwind.config = {
     color:#041627; text-transform:uppercase;
   }
 
-  /* 체크박스 행 */
   .chk-row {
     display:flex; align-items:center; justify-content:space-between;
     padding:14px 20px; border-bottom:1px solid #c4c6cd;
@@ -105,7 +99,6 @@ tailwind.config = {
   .chk-row:last-child { border-bottom:none; }
   .chk-row:hover { background:#f5f3f4; }
 
-  /* 알림 배너 */
   .alert-banner {
     padding:12px 16px; border-left:4px solid;
     display:flex; gap:10px; align-items:flex-start;
@@ -113,60 +106,28 @@ tailwind.config = {
 
   body { min-height:100dvh; background:#fbf9fa; }
 
-  /* 스크롤바 */
   ::-webkit-scrollbar { width:6px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:#c4c6cd; border-radius:3px; }
 
-  /* ── 공통 모바일 반응형 ── */
+  /* 모바일 반응형 */
   @media (max-width: 768px) {
-    /* 헤더 네비 숨김 */
     nav.flex.items-center.gap-1.ml-6 { display: none !important; }
-
-    /* 메인 패딩 */
     .wrap, main { padding-left: 12px !important; padding-right: 12px !important; }
-
-    /* 히어로 그리드 1열 */
     .hero-grid,
-    .grid.grid-cols-1.md\:grid-cols-12 {
-      grid-template-columns: 1fr !important;
-    }
-
-    /* 테이블 가로 스크롤 */
+    .grid.grid-cols-1.md\:grid-cols-12 { grid-template-columns: 1fr !important; }
     table { display: block; overflow-x: auto; white-space: nowrap; }
-
-    /* 플래그 그리드 */
     .flags-grid,
-    .grid.grid-cols-1.md\:grid-cols-2 {
-      grid-template-columns: 1fr !important;
-    }
-
-    /* 특약 액션 버튼 세로 */
-    .action-bar,
-    .bb-actions,
-    .flex.gap-3 {
-      flex-wrap: wrap;
-    }
+    .grid.grid-cols-1.md\:grid-cols-2 { grid-template-columns: 1fr !important; }
+    .action-bar, .bb-actions, .flex.gap-3 { flex-wrap: wrap; }
     .act-btn { min-width: 100%; }
-
-    /* 모니터링 그리드 */
-    .monitor-grid,
-    .grid.grid-cols-3 {
-      grid-template-columns: 1fr !important;
-    }
+    .monitor-grid, .grid.grid-cols-3 { grid-template-columns: 1fr !important; }
     .monitor-item { border-right: none !important; border-bottom: 0.5px solid #c4c6cd; }
-
-    /* 대시보드 사이드바 숨김 → 상단 탭으로 */
     .sidebar { display: none !important; }
     body.flex { flex-direction: column !important; }
   }
-
   @media (max-width: 480px) {
-    .bb-stats, .grid.grid-cols-4 {
-      grid-template-columns: 1fr 1fr !important;
-    }
-    .pipe-stage { padding: 8px 6px; }
-    .pipe-stage .mono { font-size: 9px; }
+    .bb-stats, .grid.grid-cols-4 { grid-template-columns: 1fr 1fr !important; }
   }
 </style>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=52b23b080ca355ccf759fc1686d95d15&libraries=services"></script>
@@ -175,7 +136,7 @@ tailwind.config = {
 <body class="text-on-background flex flex-col">
 
 <!-- ══════════════════════════════════
-     HEADER
+     HEADER (임차인 전용)
 ══════════════════════════════════ -->
 <header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;">
   <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
@@ -194,11 +155,17 @@ tailwind.config = {
     </div>
   </a>
   <div style="display:flex;align-items:center;gap:8px;">
-    <button onclick="doShare()" style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
-      🔗 공유
+    <button onclick="doShare()"
+      style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;"
+      onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
+      <span class="material-symbols-outlined" style="font-size:16px;">share</span> 공유
     </button>
-    <button onclick="window.location.href='/pages/dashboard.html'" style="padding:7px 16px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-      💼 중개사
+    <!-- 임차인 로그인/계정 영역 -->
+    <button id="user-btn" onclick="onUserBtnClick()"
+      style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <span class="material-symbols-outlined" style="font-size:16px;">person</span>
+      <span id="user-btn-label">로그인</span>
     </button>
   </div>
 </header>
@@ -208,33 +175,31 @@ tailwind.config = {
 ══════════════════════════════════ -->
 <main class="flex-grow w-full max-w-[1200px] mx-auto px-5 py-8 space-y-5">
 
-  <!-- ① 히어로 그리드: 점수 + 메타 -->
+  <!-- ① 히어로: 점수 + 메타 -->
   <div class="grid grid-cols-1 md:grid-cols-12 gap-5 fade-up">
 
-    <!-- 점수 카드 (7/12) -->
     <section class="md:col-span-7 bg-white border border-outline-variant flex flex-col items-center justify-center text-center p-10">
       <span class="text-xs font-bold tracking-widest text-on-surface-variant uppercase mb-6">Overall Safety Analysis</span>
 
-      <!-- SVG 게이지 -->
       <div class="relative" style="width:200px;height:200px;">
         <svg width="200" height="200" viewBox="0 0 200 200" style="transform:rotate(-90deg)">
           <circle cx="100" cy="100" r="84" fill="none" stroke="#e4e7ec" stroke-width="14"/>
-          <circle class="gauge-arc" cx="100" cy="100" r="84" fill="none"
+          <circle class="gauge-arc" id="gauge-arc" cx="100" cy="100" r="84" fill="none"
             stroke="#041627" stroke-width="14"
             stroke-dasharray="528" stroke-dashoffset="528"
             stroke-linecap="round"
             style="--offset:122;"/>
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="mono font-black text-primary" style="font-size:56px;line-height:1;">78</span>
+          <span class="mono font-black text-primary gauge-num" style="font-size:56px;line-height:1;">78</span>
           <span class="text-xs font-bold text-outline tracking-widest mono">/ 100</span>
         </div>
       </div>
 
-      <div class="mt-6 px-6 py-2 chip-warning text-lg font-bold" style="border-radius:9999px;">
+      <div id="score-chip" class="mt-6 px-6 py-2 chip-warning text-lg font-bold" style="border-radius:9999px;">
         ⚠ 보통 (Caution)
       </div>
-      <p class="mt-4 text-sm text-on-surface-variant max-w-xs leading-relaxed">
+      <p id="score-desc" class="mt-4 text-sm text-on-surface-variant max-w-xs leading-relaxed">
         해당 부동산은 일부 잠재적 위험 요소가 발견되었습니다.<br>계약 전 아래 리포트 내용을 면밀히 검토하십시오.
       </p>
 
@@ -255,7 +220,7 @@ tailwind.config = {
       </div>
     </section>
 
-    <!-- 메타 카드 (5/12) -->
+    <!-- 메타 카드 -->
     <section class="md:col-span-5 flex flex-col">
       <div class="bg-primary text-white flex-1 flex flex-col p-6">
         <span class="mono text-xs tracking-widest mb-5" style="color:#8192a7;">PROPERTY METADATA</span>
@@ -289,7 +254,6 @@ tailwind.config = {
             <span class="mono text-xs text-white" id="meta-date">—</span>
           </div>
         </div>
-        <!-- 카카오맵 -->
         <div class="mt-5" style="height:140px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.15);">
           <div id="kakao-map" style="width:100%;height:100%;"></div>
         </div>
@@ -349,111 +313,105 @@ tailwind.config = {
     </div>
   </section>
 
-  <!-- ④ 블랙박스 체크리스트 -->
+  <!-- ④ 체크리스트 -->
   <section class="bg-white border border-outline-variant fade-up-3">
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">fact_check</span>
-      <span class="sec-head-title">블랙박스 10대 체크리스트</span>
-      <span class="ml-auto mono text-xs text-on-surface-variant">4 / 10 완료</span>
+      <span class="sec-head-title" id="chk-section-title">블랙박스 10대 체크리스트</span>
+      <span class="ml-auto mono text-xs text-on-surface-variant" id="chk-progress-label">0 / 0 완료</span>
     </div>
-
-    <!-- 동적 체크리스트 -->
-    <div class="chk-container divide-y divide-outline-variant">
-      <!-- JS로 계약유형별 렌더링 -->
-    </div>
-
-    <!-- 진행률 바 -->
+    <div class="chk-container divide-y divide-outline-variant"></div>
     <div class="px-5 py-4 bg-surface-container-low border-t border-outline-variant">
       <div class="flex justify-between text-xs text-on-surface-variant mb-2">
         <span>체크리스트 완료율</span>
-        <span class="font-bold text-primary" id="progress-label">4 / 10 (40%)</span>
+        <span class="font-bold text-primary" id="progress-label">0 / 10 (0%)</span>
       </div>
       <div class="risk-bar-track">
-        <div class="risk-bar-fill bg-primary" id="progress-bar" style="width:0%" data-w="40%"></div>
+        <div class="risk-bar-fill bg-primary" id="progress-bar" style="width:0%" data-w="0%"></div>
       </div>
     </div>
   </section>
 
-  <!-- ⑤ Forensic Data Table -->
+  <!-- ⑤ 정밀 데이터 (블러 + 로그인 유도) -->
   <section class="bg-white border border-outline-variant overflow-hidden fade-up-3">
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">table_chart</span>
-      <span class="sec-head-title">정밀 데이터 분석 — Forensic Data</span>
-      <span class="ml-auto text-xs" style="color:#dc2626;">⚠ 현재 샘플 데이터 · 실시간 데이터는 로그인 후 제공</span>
+      <span class="sec-head-title">정밀 데이터 분석</span>
+      <span class="ml-auto text-xs" style="color:#dc2626;">⚠ 샘플 데이터</span>
     </div>
     <div style="position:relative;">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="bg-surface-container-high border-b border-outline-variant">
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Data Category</th>
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Analysis Result</th>
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Risk Level</th>
-          <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">확인 방법</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-outline-variant text-sm">
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">등기부 갑구 (소유권)</td>
-          <td class="px-5 py-3 mono text-xs">Clean — No Seizures</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">등기부 을구 (근저당)</td>
-          <td class="px-5 py-3 mono text-xs">Mortgage 2건 · 2.1억 KRW</td>
-          <td class="px-5 py-3"><span class="chip-danger px-2 py-0.5 rounded-full text-xs font-bold uppercase">Danger</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-        </tr>
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">전세가율</td>
-          <td class="px-5 py-3 mono text-xs">77.7% — KB시세 4.12억 기준</td>
-          <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">KB부동산 시세 자동 조회</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">국세 체납</td>
-          <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">홈택스 완납증명 요청</td>
-        </tr>
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">지방세 체납</td>
-          <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">정부24 과세증명 요청</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">HUG 보증보험</td>
-          <td class="px-5 py-3 mono text-xs">조건부 가입 가능 (재확인 필요)</td>
-          <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">HUG 가입조건 시뮬레이션</td>
-        </tr>
-        <tr class="hover:bg-surface-container-low transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">신탁 등기</td>
-          <td class="px-5 py-3 mono text-xs">Not Detected</td>
-          <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-        </tr>
-        <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-          <td class="px-5 py-3 font-medium text-on-surface">소유권 변동 이력</td>
-          <td class="px-5 py-3 mono text-xs">3회 / 24개월 — Unusual</td>
-          <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-          <td class="px-5 py-3 text-xs text-on-surface-variant">등기 이력 자동 분석</td>
-        </tr>
-      </tbody>
-    </table>
-    <!-- 하단 절반 블러 오버레이 -->
-    <div id="forensic-lock-overlay" style="position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.95) 40%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;">
-      <div style="text-align:center;">
-        <div style="font-size:20px;margin-bottom:6px;">🔒</div>
-        <div style="font-size:14px;font-weight:700;color:#041627;margin-bottom:4px;">실시간 정밀 데이터는 로그인 후 제공</div>
-        <div style="font-size:12px;color:#74777d;margin-bottom:14px;">등기부 실시간 조회 · 실거래가 비교 · 경매 현황</div>
-        <button onclick="alert('로그인 기능 준비 중입니다.')"
-          style="padding:10px 24px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
-          무료 로그인하기
-        </button>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-high border-b border-outline-variant">
+            <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Data Category</th>
+            <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Analysis Result</th>
+            <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Risk Level</th>
+            <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">확인 방법</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant text-sm">
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">등기부 갑구 (소유권)</td>
+            <td class="px-5 py-3 mono text-xs">Clean — No Seizures</td>
+            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
+          </tr>
+          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">등기부 을구 (근저당)</td>
+            <td class="px-5 py-3 mono text-xs">Mortgage 2건 · 2.1억 KRW</td>
+            <td class="px-5 py-3"><span class="chip-danger px-2 py-0.5 rounded-full text-xs font-bold uppercase">Danger</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
+          </tr>
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">전세가율</td>
+            <td class="px-5 py-3 mono text-xs">77.7% — KB시세 4.12억 기준</td>
+            <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">KB부동산 시세 자동 조회</td>
+          </tr>
+          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">국세 체납</td>
+            <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
+            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">홈택스 완납증명 요청</td>
+          </tr>
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">지방세 체납</td>
+            <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
+            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">정부24 과세증명 요청</td>
+          </tr>
+          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">HUG 보증보험</td>
+            <td class="px-5 py-3 mono text-xs">조건부 가입 가능 (재확인 필요)</td>
+            <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">HUG 가입조건 시뮬레이션</td>
+          </tr>
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">신탁 등기</td>
+            <td class="px-5 py-3 mono text-xs">Not Detected</td>
+            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
+          </tr>
+          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">소유권 변동 이력</td>
+            <td class="px-5 py-3 mono text-xs">3회 / 24개월 — Unusual</td>
+            <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">등기 이력 자동 분석</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- 잠금 오버레이 -->
+      <div id="forensic-lock-overlay" style="position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.95) 40%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;">
+        <div style="text-align:center;">
+          <div style="font-size:20px;margin-bottom:6px;">🔒</div>
+          <div style="font-size:14px;font-weight:700;color:#041627;margin-bottom:4px;">실시간 정밀 데이터는 로그인 후 제공</div>
+          <div style="font-size:12px;color:#74777d;margin-bottom:14px;">등기부 실시간 조회 · 실거래가 비교 · 경매 현황</div>
+          <button onclick="goLogin()"
+            style="padding:10px 24px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            무료 로그인하기
+          </button>
+        </div>
       </div>
-    </div>
     </div>
   </section>
 
@@ -462,16 +420,12 @@ tailwind.config = {
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">auto_fix_high</span>
       <span class="sec-head-title">계약 시 유의사항</span>
-      
     </div>
-    <!-- 미리보기 1개 -->
     <div class="p-5 flex gap-3 items-start">
       <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
       <p class="text-sm leading-relaxed text-on-surface">잔금 지급 전 을구 기재 선순위 근저당권 및 가압류를 전액 말소할 것을 조건으로 한다...</p>
     </div>
-    <!-- 블러 잠금 영역 -->
     <div style="position:relative;border-top:0.5px solid #c4c6cd;">
-      <!-- 블러 콘텐츠 -->
       <div style="filter:blur(4px);pointer-events:none;padding:12px 0;">
         <div class="p-5 flex gap-3 items-start">
           <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">필수</span>
@@ -486,21 +440,17 @@ tailwind.config = {
           <p class="text-sm text-on-surface">임대 기간 중 임대인의 국세·지방세 체납 사실이 확인될 경우...</p>
         </div>
       </div>
-      <!-- 잠금 오버레이 (중개사 로그인 시 JS로 제거됨) -->
       <div id="clause-lock-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);backdrop-filter:blur(2px);">
         <div style="text-align:center;padding:20px;">
-          <span class="material-symbols-outlined" style="font-size:36px;color:#041627;display:block;margin-bottom:10px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">lock</span>
+          <span class="material-symbols-outlined fill-icon" style="font-size:36px;color:#041627;display:block;margin-bottom:10px;">lock</span>
           <div style="font-size:15px;font-weight:700;color:#041627;margin-bottom:6px;">로그인 후 전체 열람 가능</div>
           <div style="font-size:13px;color:#74777d;margin-bottom:16px;">계약 시 유의사항 전체 · AI 맞춤 특약</div>
-          <button onclick="alert('로그인 기능 준비 중입니다.')"
+          <button onclick="goLogin()"
             style="padding:11px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
             무료 로그인하기
           </button>
         </div>
       </div>
-    </div>
-    <!-- 액션 버튼 -->
-    <div class="flex gap-3 p-5 bg-surface-container-low border-t border-outline-variant">
     </div>
   </section>
 
@@ -523,8 +473,21 @@ tailwind.config = {
   </div>
 </footer>
 
+<!-- ══════════════════════════════════
+     하단 탭 (임차인용)
+══════════════════════════════════ -->
+<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
+  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;">search</span>분석</a>
+  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined fill-icon" style="font-size:22px;">analytics</span>리포트</a>
+  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;">visibility</span>모니터링</a>
+</nav>
+<div style="height:58px;"></div>
+
+<!-- ══════════════════════════════════
+     SCRIPTS
+══════════════════════════════════ -->
 <script>
-// 위험바 애니메이션
+// ── 위험바 애니메이션 ──
 window.addEventListener('load', () => {
   setTimeout(() => {
     document.querySelectorAll('.risk-bar-fill[data-w]').forEach(el => {
@@ -533,24 +496,23 @@ window.addEventListener('load', () => {
   }, 400);
 });
 
-// 체크박스 토글
+// ── 체크박스 토글 (수동 체크 가능) ──
 function toggleCheck(row) {
-  const icon      = row.querySelector('.material-symbols-outlined');
-  const isChecked = icon.classList.contains('fill-icon');
-  const today     = new Date();
-  const d = today.getFullYear()+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+String(today.getDate()).padStart(2,'0');
+  // AI 자동 체크 항목은 토글 비활성
+  if (row.dataset.locked === 'true') return;
 
-  // 우측 영역 (날짜 + 상태)
-  const rightArea = row.querySelector('.chk-right') || row.querySelector('.flex.items-center.gap-3:last-child');
+  const icon = row.querySelector('.material-symbols-outlined');
+  const isChecked = icon.classList.contains('fill-icon');
+  const today = new Date();
+  const d = today.getFullYear()+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+String(today.getDate()).padStart(2,'0');
+  const rightArea = row.querySelector('.chk-right');
 
   if (isChecked) {
-    // 해제
     icon.classList.remove('fill-icon','text-green-600');
     icon.classList.add('text-outline');
     icon.textContent = 'check_box_outline_blank';
     if (rightArea) rightArea.innerHTML = '<span class="text-xs font-bold text-red-700">✗ 미확인</span>';
   } else {
-    // 완료
     icon.classList.add('fill-icon','text-green-600');
     icon.classList.remove('text-outline');
     icon.textContent = 'check_box';
@@ -559,80 +521,112 @@ function toggleCheck(row) {
   updateProgress();
 }
 
-// 진행률 업데이트
 function updateProgress() {
   const total = document.querySelectorAll('.chk-row').length;
   const done  = document.querySelectorAll('.chk-row .fill-icon').length;
-  const pct   = Math.round(done / total * 100);
-  document.getElementById('progress-label').textContent = `${done} / ${total} (${pct}%)`;
-  document.getElementById('progress-bar').style.width = pct + '%';
+  const pct   = total > 0 ? Math.round(done / total * 100) : 0;
+  const lbl = document.getElementById('chk-progress-label');
+  if (lbl) lbl.textContent = `${done} / ${total} 완료`;
+  const bar = document.getElementById('progress-bar');
+  if (bar) bar.style.width = pct + '%';
+  const oldLbl = document.getElementById('progress-label');
+  if (oldLbl) oldLbl.textContent = `${done} / ${total} (${pct}%)`;
+}
+
+// ── 임차인 로그인 ──
+function isLoggedIn() {
+  return localStorage.getItem('bb_tenant_logged_in') === 'true';
+}
+
+function getTenantName() {
+  return localStorage.getItem('bb_tenant_name') || '';
+}
+
+function onUserBtnClick() {
+  if (isLoggedIn()) {
+    // 간단한 메뉴 (계정/로그아웃)
+    if (confirm((getTenantName() || '사용자') + '님으로 로그인 중입니다.\n로그아웃하시겠습니까?')) {
+      localStorage.removeItem('bb_tenant_logged_in');
+      localStorage.removeItem('bb_tenant_name');
+      updateUserBtn();
+      location.reload();
+    }
+  } else {
+    // 로그인 페이지로 이동 (현재 URL을 redirect 파라미터로)
+    location.href = '/pages/login.html?redirect=' + encodeURIComponent(location.pathname + location.search);
+  }
+}
+
+function goLogin() {
+  location.href = '/pages/login.html?redirect=' + encodeURIComponent(location.pathname + location.search);
+}
+
+function updateUserBtn() {
+  const lbl = document.getElementById('user-btn-label');
+  if (!lbl) return;
+  if (isLoggedIn()) {
+    lbl.textContent = (getTenantName() || '내 계정');
+    // 로그인된 경우 잠금 오버레이 제거
+    document.getElementById('forensic-lock-overlay')?.remove();
+    document.getElementById('clause-lock-overlay')?.remove();
+    document.querySelectorAll('[style*="filter:blur"]').forEach(el => {
+      el.style.filter = 'none';
+      el.style.pointerEvents = 'auto';
+    });
+  } else {
+    lbl.textContent = '로그인';
+  }
+}
+
+// ── 공유 ──
+function doShare() {
+  if (navigator.share) {
+    navigator.share({ title: "부동산 블랙박스 분석 리포트", url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => alert("링크가 복사되었습니다."))
+      .catch(() => alert("주소창에서 직접 복사해주세요."));
+  }
 }
 </script>
+
+<!-- 서비스 워커 -->
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js');
-  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
 </script>
 
-
-
+<!-- 메타 표시 + 카카오맵 -->
 <script>
 (function() {
   const p = new URLSearchParams(window.location.search);
 
-  // ── 중개사 로그인 확인 ──
-  const agencyLogin = p.get('agency') || sessionStorage.getItem('bb_agency_login') || '';
-  const isAgency    = !!agencyLogin;
-
-  if (isAgency) {
-    // 중개사 모드 배지 표시
-    document.addEventListener('DOMContentLoaded', () => {
-      const badge = document.createElement('div');
-      badge.style.cssText = 'position:fixed;top:60px;right:12px;z-index:99;background:#041627;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;';
-      badge.innerHTML = '<span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">verified</span> 중개사 모드';
-      document.body.appendChild(badge);
-
-      // 정밀 데이터 블러 오버레이 제거
-      const forensicOverlay = document.getElementById('forensic-lock-overlay');
-      if (forensicOverlay) forensicOverlay.remove();
-      // 계약 유의사항 잠금 해제
-      const clauseOverlay = document.getElementById('clause-lock-overlay');
-      if (clauseOverlay) clauseOverlay.remove();
-      // 블러 처리된 요소 해제
-      document.querySelectorAll('[style*="filter:blur"], [style*="filter: blur"]').forEach(el => {
-        el.style.filter = 'none';
-        el.style.pointerEvents = 'auto';
-      });
-    });
-  }
-
-  // 파라미터 없으면 sessionStorage에서 복원
+  // URL 파라미터 또는 sessionStorage에서 데이터 가져오기
   const address  = p.get('address')  || sessionStorage.getItem('bb_address') || '';
   const _score   = p.get('score')    || sessionStorage.getItem('bb_score')   || '';
-  const _risk    = p.get('risk')      || sessionStorage.getItem('bb_risk')    || '';
+  const _risk    = p.get('risk')     || sessionStorage.getItem('bb_risk')    || '';
+  const deposit  = p.get('deposit')  || sessionStorage.getItem('bb_deposit') || '';
+  const contract = p.get('contract') || sessionStorage.getItem('bb_contract')|| '전세';
 
-  // 분석 결과 없으면 안내 화면 표시
+  // 분석 결과 없으면 안내
   if (!address && !sessionStorage.getItem('bb_address')) {
-    var emptyDiv = document.createElement('div');
+    const emptyDiv = document.createElement('div');
     emptyDiv.style.cssText = 'text-align:center;padding:60px 20px;background:#fff;border:1px solid #dde0e6;border-radius:12px;margin-bottom:20px;';
     emptyDiv.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">📋</div>' +
       '<div style="font-size:20px;font-weight:900;color:#041627;margin-bottom:8px;">분석 결과가 없습니다</div>' +
       '<div style="font-size:14px;color:#74777d;margin-bottom:24px;">먼저 매물 주소를 입력하고 분석을 시작해주세요</div>';
-    var goBtn = document.createElement('button');
-    goBtn.textContent = '🔍 분석 시작하기';
+    const goBtn = document.createElement('button');
+    goBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">search</span> 분석 시작하기';
     goBtn.style.cssText = 'padding:12px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;';
-    goBtn.onclick = function(){ location.href = '/pages/analyze.html'; };
+    goBtn.onclick = () => location.href = '/pages/analyze.html';
     emptyDiv.appendChild(goBtn);
     document.querySelector('main').insertBefore(emptyDiv, document.querySelector('main').firstChild);
   }
-  const score    = parseInt(_score || '78');
-  const risk     = _risk || 'warning';
-  const deposit  = p.get('deposit') || '';
-  const contract = p.get('contract') || '전세';
 
-  // ── 주소 파싱 ──
+  const score = parseInt(_score || '78') || 78;
+
+  // ── 주소 ──
   const addrEl = document.getElementById('meta-addr-val');
   if (addrEl) {
     if (address) {
@@ -646,59 +640,30 @@ if ('serviceWorker' in navigator) {
     }
   }
 
-  // ── 유형 추정 (주소 키워드로) ──
+  // ── 유형 추정 ──
   const typeEl = document.getElementById('meta-type-val');
   if (typeEl && address) {
-    if (/오피스텔/.test(address))      typeEl.textContent = '업무시설 (오피스텔)';
+    if (/오피스텔/.test(address))           typeEl.textContent = '업무시설 (오피스텔)';
     else if (/빌라|다세대|연립/.test(address)) typeEl.textContent = '다세대주택 (빌라)';
-    else if (/아파트/.test(address))   typeEl.textContent = '공동주택 (아파트)';
-    else                               typeEl.textContent = '주거시설';
+    else if (/아파트/.test(address))        typeEl.textContent = '공동주택 (아파트)';
+    else                                    typeEl.textContent = '주거시설';
   }
 
   // ── 계약 유형 ──
   const contractEl = document.getElementById('meta-contract-val');
-  const _contractFinal = contract || sessionStorage.getItem('bb_contract') || '';
-  if (contractEl) contractEl.textContent = _contractFinal || '정보 없음';
-  const _contract = contract || sessionStorage.getItem('bb_contract') || '전세';
-
-  // ── 계약유형별 체크리스트 동적 적용 ──
-  // applyContractChecklist는 하단 script에 정의되므로 window.onload 후 실행
-  window.addEventListener('load', function() {
-    if (typeof applyContractChecklist === 'function') {
-      applyContractChecklist(_contract);
-    }
-  });
-
-  // ── 계약유형 배지 표시 ──
-  const typeBadge = document.getElementById('contract-type-badge');
-  if (typeBadge && _contract) {
-    const badgeMap = {
-      '전세': { bg:'#eff6ff', color:'#1e40af', text:'🏠 전세 분석' },
-      '월세': { bg:'#f0fdf4', color:'#166534', text:'💳 월세 분석' },
-      '매매': { bg:'#fff7ed', color:'#9a3412', text:'🔑 매매 분석' },
-    };
-    const b = badgeMap[_contract];
-    if (b) {
-      typeBadge.style.background = b.bg;
-      typeBadge.style.color = b.color;
-      typeBadge.textContent = b.text;
-      typeBadge.style.display = 'inline-block';
-    }
-  }
+  if (contractEl) contractEl.textContent = contract || '정보 없음';
 
   // ── 보증금 ──
-  const _depositFinal = deposit || sessionStorage.getItem('bb_deposit') || '';
   const depositEl = document.getElementById('meta-deposit-val');
   if (depositEl) {
-    if (_depositFinal) {
-      // 만원 단위 → 억/만 표시
-      const num = parseInt(_depositFinal);
+    if (deposit) {
+      const num = parseInt(deposit);
       if (!isNaN(num)) {
         const uk = Math.floor(num / 10000);
         const man = num % 10000;
         depositEl.textContent = uk > 0 ? (man > 0 ? uk + '억 ' + man + '만원' : uk + '억원') : num + '만원';
       } else {
-        depositEl.textContent = _depositFinal;
+        depositEl.textContent = deposit;
       }
     } else {
       depositEl.textContent = '입력 정보 없음';
@@ -706,17 +671,14 @@ if ('serviceWorker' in navigator) {
     }
   }
 
-  // ── KB 시세 (Mock — 실제 API 연동 후 대체) ──
+  // ── KB 시세 / 전세가율 ──
   const priceEl = document.getElementById('meta-price-val');
   if (priceEl) priceEl.textContent = 'API 연동 후 표시';
-
-  // ── 전세가율 ──
   const ratioEl = document.getElementById('meta-ratio-val');
   if (ratioEl) ratioEl.textContent = '— (시세 조회 후 계산)';
 
-  // ── 카카오맵 초기화 ──
+  // ── 카카오맵 ──
   if (address) {
-    // SDK 로드 완료 후 초기화
     if (typeof kakao !== 'undefined' && kakao.maps) {
       kakao.maps.load(() => initKakaoMap(address));
     } else {
@@ -740,58 +702,53 @@ if ('serviceWorker' in navigator) {
   // ── 점수 게이지 ──
   const scoreNum = document.querySelector('.gauge-num');
   if (scoreNum) scoreNum.textContent = score;
-
-  const arc = document.querySelector('.gauge-arc');
+  const arc = document.getElementById('gauge-arc');
   if (arc) {
-    const offset = Math.round(490 - (score/100)*490);
+    const offset = Math.round(528 - (score/100)*528);
     arc.style.setProperty('--offset', offset);
-    arc.style.strokeDashoffset = 490;
-    arc.style.animation = 'none';
-    arc.getBoundingClientRect();
-    arc.style.animation = 'drawArc 1.2s cubic-bezier(.4,0,.2,1) forwards';
   }
 
   // ── 위험 칩 ──
-  const chip = document.querySelector('.score-chip');
-  const desc = document.querySelector('.score-desc');
-  if (chip) {
+  const chip = document.getElementById('score-chip');
+  const desc = document.getElementById('score-desc');
+  if (chip && desc) {
     if (score >= 80) {
-      chip.className = 'score-chip chip-safe';
+      chip.className = 'mt-6 px-6 py-2 chip-safe text-lg font-bold';
+      chip.style.borderRadius = '9999px';
       chip.textContent = '✓ 안전 (Safe)';
-      if(desc) desc.textContent = '주요 위험 요소가 발견되지 않았습니다.';
+      desc.textContent = '주요 위험 요소가 발견되지 않았습니다.';
     } else if (score >= 60) {
-      chip.className = 'score-chip chip-warn';
+      chip.className = 'mt-6 px-6 py-2 chip-warning text-lg font-bold';
+      chip.style.borderRadius = '9999px';
       chip.textContent = '⚠ 보통 (Caution)';
-      if(desc) desc.textContent = '일부 잠재적 위험 요소가 발견되었습니다. 아래 리포트를 면밀히 검토하십시오.';
+      desc.innerHTML = '해당 부동산은 일부 잠재적 위험 요소가 발견되었습니다.<br>계약 전 아래 리포트 내용을 면밀히 검토하십시오.';
     } else {
-      chip.className = 'score-chip chip-danger';
+      chip.className = 'mt-6 px-6 py-2 chip-danger text-lg font-bold';
+      chip.style.borderRadius = '9999px';
       chip.textContent = '⛔ 고위험 (Danger)';
-      if(desc) desc.textContent = '복수의 위험 요소가 발견되었습니다. 전문가 자문 후 계약 여부를 결정하십시오.';
+      desc.textContent = '복수의 위험 요소가 발견되었습니다. 전문가 자문 후 계약 여부를 결정하십시오.';
     }
   }
+
+  // ── 체크리스트 적용 ──
+  window.addEventListener('load', () => {
+    if (typeof applyContractChecklist === 'function') applyContractChecklist(contract);
+    updateUserBtn();
+  });
 })();
 
-// ── 카카오맵 초기화 ──
 function initKakaoMap(address) {
   if (!address || typeof kakao === 'undefined') return;
   const container = document.getElementById('kakao-map');
   if (!container) return;
-
   const geocoder = new kakao.maps.services.Geocoder();
   geocoder.addressSearch(address, function(result, status) {
     if (status === kakao.maps.services.Status.OK) {
       const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-      const map = new kakao.maps.Map(container, {
-        center: coords,
-        level: 4,
-        draggable: false,
-        scrollwheel: false,
-      });
-      const marker = new kakao.maps.Marker({ map, position: coords });
-      // 링크 버튼에 좌표 저장
+      const map = new kakao.maps.Map(container, { center: coords, level: 4, draggable: false, scrollwheel: false });
+      new kakao.maps.Marker({ map, position: coords });
       window._mapCoords = { lat: result[0].y, lng: result[0].x };
     } else {
-      // 주소 검색 실패 시 기본 UI
       container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a2b3c;color:#8192a7;font-size:12px;">지도를 불러올 수 없습니다</div>';
     }
   });
@@ -799,39 +756,13 @@ function initKakaoMap(address) {
 
 function openKakaoMapLink() {
   const p = new URLSearchParams(window.location.search);
-  const address = encodeURIComponent(p.get('address') || '');
+  const address = encodeURIComponent(p.get('address') || sessionStorage.getItem('bb_address') || '');
   window.open('https://map.kakao.com/?q=' + address, '_blank');
 }
 </script>
 
+<!-- 계약유형별 체크리스트 -->
 <script>
-function doShare() {
-  var isLoggedIn = localStorage.getItem("bb_logged_in") === "true";
-  if (!isLoggedIn) {
-    if (confirm("공유 기능은 로그인 후 이용할 수 있습니다.\n로그인하시겠습니까?")) {
-      alert("로그인 기능 준비 중입니다. 곧 카카오 로그인이 지원됩니다.");
-    }
-    return;
-  }
-  if (navigator.share) {
-    navigator.share({ title: "부동산 블랙박스 분석 리포트", url: window.location.href });
-  } else {
-    navigator.clipboard.writeText(window.location.href)
-      .then(function(){ alert("링크가 복사되었습니다."); })
-      .catch(function(){ alert("주소창에서 직접 복사해주세요."); });
-  }
-}
-</script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
-  <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">search</span>분석</a>
-  <a href="/pages/report.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>리포트</a>
-  <a href="/pages/monitoring.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#74777d;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링</a>
-</nav>
-<div style="height:58px;"></div>
-
-<script>
-// ── 계약유형별 체크리스트 ──
 const CHECKLISTS = {
   '전세': [
     { done:false, text:'임대인 신분증 대조 및 등기부 소유자 일치 확인',      req:true  },
@@ -874,24 +805,18 @@ const CHECKLISTS = {
 function applyContractChecklist(contract) {
   const raw = CHECKLISTS[contract] || CHECKLISTS['전세'];
 
-  // ── URL 파라미터에서 AI 분석 결과 읽기 ──
   const p = new URLSearchParams(window.location.search);
-  const score    = parseInt(p.get('score') || sessionStorage.getItem('bb_score') || '0');
-  const risk     = p.get('risk') || sessionStorage.getItem('bb_risk') || '';
-  const deposit  = parseInt(p.get('deposit') || sessionStorage.getItem('bb_deposit') || '0');
+  const score = parseInt(p.get('score') || sessionStorage.getItem('bb_score') || '0');
 
-  // ── AI 자동 판단 결과 (Mock → 실제 API 연동 후 대체) ──
-  // 실제 서비스에서는 /api/analyze 응답값을 sessionStorage에 저장 후 여기서 읽음
   const analysisResult = JSON.parse(sessionStorage.getItem('bb_analysis') || 'null') || {
-    registryClean:    score >= 70,   // 등기부 갑구 이상 없음
-    mortgageDetected: score < 80,    // 근저당 감지 여부
-    trustDetected:    false,         // 신탁 등기 감지
-    jeonseRatioOk:    score >= 75,   // 전세가율 80% 이하
-    taxClearOk:       score >= 65,   // 세금 체납 없음 (Mock)
-    auctionClear:     score >= 60,   // 경매 없음
+    registryClean:    score >= 70,
+    mortgageDetected: score < 80,
+    trustDetected:    false,
+    jeonseRatioOk:    score >= 75,
+    taxClearOk:       score >= 65,
+    auctionClear:     score >= 60,
   };
 
-  // ── 계약유형별 AI 자동 체크 항목 정의 ──
   const AI_AUTO = {
     '전세': {
       '등기부 을구 — 근저당·가압류 확인 및 말소 특약':        !analysisResult.mortgageDetected,
@@ -911,26 +836,22 @@ function applyContractChecklist(contract) {
   };
 
   const autoMap = AI_AUTO[contract] || AI_AUTO['전세'];
-
-  // ── 아이템에 AI 자동 체크 적용 ──
   const items = raw.map(item => ({
     ...item,
-    done:    autoMap[item.text] === true,   // AI가 확인한 항목
-    aiDone:  autoMap[item.text] === true,   // AI 자동 여부 표시
+    done:    autoMap[item.text] === true,
+    aiDone:  autoMap[item.text] === true,
   }));
 
   const container = document.querySelector('.chk-container');
   if (!container) return;
 
-  container.innerHTML = items.map((item, i) => {
-    const icon = item.done
-      ? `<span class="material-symbols-outlined fill-icon text-green-600">check_box</span>`
-      : `<span class="material-symbols-outlined text-outline">check_box_outline_blank</span>`;
-    const reqBadge = item.req
+  container.innerHTML = items.map((item) => {
+    const iconClass   = item.done ? 'fill-icon text-green-600' : 'text-outline';
+    const iconText    = item.done ? 'check_box' : 'check_box_outline_blank';
+    const reqBadge    = item.req
       ? `<span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full" style="font-size:10px;">필수</span>`
       : `<span class="mono text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant" style="font-size:10px;">권장</span>`;
 
-    // AI 자동 체크 vs 미확인 표시
     let statusHtml;
     if (item.aiDone) {
       statusHtml = `<span class="text-xs font-bold text-green-700" style="display:flex;align-items:center;gap:3px;">
@@ -940,23 +861,22 @@ function applyContractChecklist(contract) {
       statusHtml = `<span class="text-xs font-bold text-red-700">✗ 직접 확인 필요</span>`;
     }
 
-    // AI 자동 체크 항목은 클릭 불가 (이미 확인됨)
-    const clickable = item.aiDone ? '' : 'onclick="toggleCheck(this)"';
-    const cursor    = item.aiDone ? 'default' : 'pointer';
+    const onClickAttr = item.aiDone ? '' : 'onclick="toggleCheck(this)"';
+    const lockAttr    = item.aiDone ? 'data-locked="true"' : '';
+    const cursor      = item.aiDone ? 'default' : 'pointer';
 
-    return `<div class="chk-row" ${clickable} style="cursor:${cursor};">
+    return `<div class="chk-row" ${onClickAttr} ${lockAttr} style="cursor:${cursor};">
       <div class="flex items-center gap-3">
-        ${icon}
+        <span class="material-symbols-outlined ${iconClass}">${iconText}</span>
         <span class="text-sm ${item.done ? 'font-medium text-primary' : 'text-on-surface-variant'}">${item.text}</span>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 chk-right">
         ${reqBadge}
         ${statusHtml}
       </div>
     </div>`;
   }).join('');
 
-  // 섹션 제목 업데이트
   const titleEl = document.getElementById('chk-section-title');
   if (titleEl) {
     const typeNames = { '전세':'전세 계약', '월세':'월세 계약', '매매':'매매 계약' };
@@ -965,19 +885,7 @@ function applyContractChecklist(contract) {
 
   updateProgress();
 }
-
-// 기존 updateProgress 오버라이드
-function updateProgress() {
-  const total = document.querySelectorAll('.chk-row').length;
-  const done  = document.querySelectorAll('.chk-row svg rect[fill="#166534"]').length;
-  const pct   = total > 0 ? Math.round(done / total * 100) : 0;
-  const lbl = document.getElementById('chk-progress-label');
-  if (lbl) lbl.textContent = `${done} / ${total} 완료`;
-  const bar = document.getElementById('progress-bar');
-  if (bar) bar.style.width = pct + '%';
-  const oldLbl = document.getElementById('progress-label');
-  if (oldLbl) oldLbl.textContent = `${done} / ${total} (${pct}%)`;
-}
 </script>
+
 </body>
 </html>

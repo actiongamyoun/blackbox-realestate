@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>매물 분석 — 부동산 블랙박스</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link rel="manifest" href="/manifest.json"/>
 <meta name="theme-color" content="#041627"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -13,168 +14,55 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-height:100vh;display:flex;flex-direction:column;}
-
-/* 헤더 */
-.hd{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;}
-.hd-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.hd-logo-icon{width:34px;height:34px;border-radius:8px;background:#041627;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.hd-logo-name{font-size:15px;font-weight:900;color:#041627;letter-spacing:-0.3px;line-height:1.1;}
-.hd-logo-eng{font-size:9px;color:#8192a7;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;}
-.hd-back{display:flex;align-items:center;gap:6px;font-size:14px;color:#74777d;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px 10px;border-radius:6px;transition:background .12s;}
-.hd-back:hover{background:#f5f3f4;color:#041627;}
-
-/* 메인 */
 .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px 60px;}
-
-/* 안내 헤더 */
 .page-head{text-align:center;margin-bottom:36px;}
 .page-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;background:#041627;font-size:12px;color:#fff;margin-bottom:16px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;}
 .page-badge-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;}
 .page-title{font-size:32px;font-weight:900;color:#041627;letter-spacing:-1px;margin-bottom:10px;line-height:1.2;}
 .page-sub{font-size:16px;color:#74777d;line-height:1.7;}
-
-/* 분석 카드 */
-.analyze-card{
-  width:100%;max-width:560px;
-  background:#fff;
-  border:1.5px solid #041627;
-  border-radius:16px;
-  padding:28px 24px;
-  box-shadow:0 4px 24px rgba(4,22,39,.08);
-}
-
-/* STEP 라벨 */
-.step-label{
-  display:flex;align-items:center;gap:8px;
-  font-size:11px;font-weight:700;letter-spacing:1.5px;
-  color:#8192a7;text-transform:uppercase;
-  margin-bottom:8px;font-family:'IBM Plex Mono',monospace;
-}
-.step-circle{
-  width:20px;height:20px;border-radius:50%;
-  background:#041627;color:#fff;
-  font-size:10px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'IBM Plex Mono',monospace;
-}
+.analyze-card{width:100%;max-width:560px;background:#fff;border:1.5px solid #041627;border-radius:16px;padding:28px 24px;box-shadow:0 4px 24px rgba(4,22,39,.08);}
+.step-label{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:1.5px;color:#8192a7;text-transform:uppercase;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;}
+.step-circle{width:20px;height:20px;border-radius:50%;background:#041627;color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;}
 .step-circle.done{background:#22c55e;}
-
-/* 입력 */
-.addr-input{
-  width:100%;padding:13px 14px;
-  border:1px solid #c4c6cd;border-radius:8px;
-  font-size:15px;font-family:inherit;
-  outline:none;color:#041627;background:#fff;
-  transition:border .15s;
-}
+.addr-input{width:100%;padding:13px 14px;border:1px solid #c4c6cd;border-radius:8px;font-size:15px;font-family:inherit;outline:none;color:#041627;background:#fff;transition:border .15s;}
 .addr-input:focus{border-color:#041627;}
 .addr-input::placeholder{color:#aaa;}
-
-/* 자동완성 */
-.suggestions-wrap{
-  position:relative;width:100%;margin-top:-1px;
-  display:none;z-index:50;
-}
-.suggestions-box{
-  background:#fff;border:1px solid #c4c6cd;
-  border-top:none;border-radius:0 0 8px 8px;
-  box-shadow:0 4px 16px rgba(0,0,0,.08);
-  max-height:240px;overflow-y:auto;
-}
-.sug-item{
-  padding:12px 16px;font-size:14px;cursor:pointer;
-  border-bottom:0.5px solid #f0f0ee;
-  display:flex;gap:10px;align-items:flex-start;
-  transition:background .1s;
-}
+.suggestions-wrap{position:relative;width:100%;margin-top:-1px;display:none;z-index:50;}
+.suggestions-box{background:#fff;border:1px solid #c4c6cd;border-top:none;border-radius:0 0 8px 8px;box-shadow:0 4px 16px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;}
+.sug-item{padding:12px 16px;font-size:14px;cursor:pointer;border-bottom:0.5px solid #f0f0ee;display:flex;gap:10px;align-items:flex-start;transition:background .1s;}
 .sug-item:last-child{border-bottom:none;}
 .sug-item:hover,.sug-item.active{background:#f5f3f4;}
 .sug-pin{color:#8192a7;font-size:12px;flex-shrink:0;margin-top:2px;}
 .sug-road{font-weight:600;color:#041627;font-size:14px;}
 .sug-jibun{font-size:12px;color:#8192a7;margin-top:2px;}
-
-/* 구분선 */
 .divider{border:none;border-top:1px dashed #e4e7ec;margin:20px 0;}
-
-/* 상세주소 */
-.selected-addr-tag{
-  display:flex;align-items:center;gap:8px;
-  background:#f0f4ff;border-radius:6px;
-  padding:8px 12px;margin-bottom:10px;
-  font-size:13px;font-weight:600;color:#041627;
-}
+.selected-addr-tag{display:flex;align-items:center;gap:8px;background:#f0f4ff;border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:13px;font-weight:600;color:#041627;}
 .selected-addr-tag svg{flex-shrink:0;}
-
-/* 분석 버튼 */
-.analyze-btn{
-  width:100%;padding:16px;margin-top:16px;
-  background:#041627;color:#fff;
-  font-size:16px;font-weight:900;
-  border:none;border-radius:10px;
-  cursor:pointer;font-family:inherit;
-  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;
-}
+.analyze-btn{width:100%;padding:16px;margin-top:16px;background:#041627;color:#fff;font-size:16px;font-weight:900;border:none;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .analyze-btn:hover:not(:disabled){opacity:.88;transform:translateY(-1px);}
 .analyze-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
-
-/* 힌트 */
 .hint{font-size:12px;color:#8192a7;margin-top:8px;line-height:1.6;}
 .hint-red{color:#dc2626;}
-
-/* 로딩 스피너 */
 @keyframes spin{to{transform:rotate(360deg);}}
 .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
-
-/* 모바일 */
-@media(max-width:600px){
-  .hd{padding:0 16px;height:52px;}
-  .hd-logo-name{font-size:14px;}
-  .main{padding:28px 16px 48px;}
-  .page-title{font-size:26px;}
-  .page-sub{font-size:14px;}
-  .analyze-card{padding:22px 18px;}
-  .addr-input{font-size:14px;padding:12px 13px;}
-}
-
-  /* 계약 유형 선택 */
-  .contract-types { display:flex; gap:8px; margin-bottom:0; }
-  .contract-btn {
-    flex:1; padding:10px 8px; border:1.5px solid #dde0e6;
-    border-radius:8px; font-size:13px; font-weight:600;
-    color:#74777d; background:#fff; cursor:pointer;
-    font-family:inherit; transition:all .15s; text-align:center;
-  }
-  .contract-btn:hover { border-color:#041627; color:#041627; }
-  .contract-btn.selected { border-color:#041627; background:#041627; color:#fff; }
-
-  /* 보증금/월세 입력 */
-  .deposit-wrap { display:flex; gap:8px; align-items:center; }
-  .deposit-input {
-    flex:1; padding:11px 14px; border:1px solid #c4c6cd;
-    border-radius:8px; font-size:14px; font-family:inherit;
-    outline:none; color:#041627;
-  }
-  .deposit-input:focus { border-color:#041627; }
-  .deposit-unit {
-    font-size:13px; color:#74777d; font-weight:600;
-    white-space:nowrap;
-  }
-
-  /* 계약유형별 안내 배지 */
-  .contract-notice {
-    padding:10px 14px; border-radius:8px;
-    font-size:12px; line-height:1.6; margin-top:10px;
-    display:none;
-  }
-  .cn-jeonse  { background:#eff6ff; border-left:3px solid #3b82f6; color:#1e40af; }
-  .cn-monthly { background:#f0fdf4; border-left:3px solid #22c55e; color:#166534; }
-  .cn-sale    { background:#fff7ed; border-left:3px solid #f97316; color:#9a3412; }
-
+@media(max-width:600px){.main{padding:28px 16px 48px;}.page-title{font-size:26px;}.page-sub{font-size:14px;}.analyze-card{padding:22px 18px;}.addr-input{font-size:14px;padding:12px 13px;}}
+.contract-types{display:flex;gap:8px;margin-bottom:0;}
+.contract-btn{flex:1;padding:10px 8px;border:1.5px solid #dde0e6;border-radius:8px;font-size:13px;font-weight:600;color:#74777d;background:#fff;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center;}
+.contract-btn:hover{border-color:#041627;color:#041627;}
+.contract-btn.selected{border-color:#041627;background:#041627;color:#fff;}
+.deposit-wrap{display:flex;gap:8px;align-items:center;}
+.deposit-input{flex:1;padding:11px 14px;border:1px solid #c4c6cd;border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:#041627;}
+.deposit-input:focus{border-color:#041627;}
+.deposit-unit{font-size:13px;color:#74777d;font-weight:600;white-space:nowrap;}
+.contract-notice{padding:10px 14px;border-radius:8px;font-size:12px;line-height:1.6;margin-top:10px;display:none;}
+.cn-jeonse{background:#eff6ff;border-left:3px solid #3b82f6;color:#1e40af;}
+.cn-monthly{background:#f0fdf4;border-left:3px solid #22c55e;color:#166534;}
+.cn-sale{background:#fff7ed;border-left:3px solid #f97316;color:#9a3412;}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 </style>
 </head>
 <body>
 
-<!-- 헤더 -->
 <header style="display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;background:#fff;border-bottom:1px solid #dde0e6;position:sticky;top:0;z-index:50;">
   <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
     <div style="width:34px;height:34px;border-radius:8px;background:#041627;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -192,16 +80,21 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
     </div>
   </a>
   <div style="display:flex;align-items:center;gap:8px;">
-    <button onclick="doShare()" style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;" onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
-      🔗 공유
+    <button onclick="doShare()"
+      style="display:flex;align-items:center;gap:5px;padding:7px 14px;background:transparent;border:1px solid #dde0e6;border-radius:7px;font-size:13px;font-weight:600;color:#041627;cursor:pointer;font-family:inherit;transition:all .12s;"
+      onmouseover="this.style.borderColor='#041627'" onmouseout="this.style.borderColor='#dde0e6'">
+      <span class="material-symbols-outlined" style="font-size:16px;">share</span> 공유
     </button>
-    <button onclick="window.location.href='/pages/dashboard.html'" style="padding:7px 16px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-      💼 중개사
+    <!-- 임차인 로그인 버튼 (중개사 버튼 제거됨) -->
+    <button id="user-btn" onclick="onUserBtnClick()"
+      style="display:flex;align-items:center;gap:6px;padding:7px 14px;background:#041627;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .12s;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+      <span class="material-symbols-outlined" style="font-size:16px;">person</span>
+      <span id="user-btn-label">로그인</span>
     </button>
   </div>
 </header>
 
-<!-- 메인 -->
 <main class="main">
   <div class="page-head">
     <div class="page-badge">
@@ -216,31 +109,26 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
   </div>
 
   <div class="analyze-card">
-
-    <!-- STEP 1 -->
     <div class="step-label">
       <div class="step-circle" id="step1-circle">1</div>
       도로명 주소 검색
     </div>
     <input class="addr-input" id="addr-input" type="text"
-      placeholder="도로명 주소 입력 (예: 역삼로 123, 센텀순환로 33)"
+      placeholder="도로명 주소 입력 (예: 마린시티1로 30)"
       autocomplete="off"
       oninput="onInput(this.value)"
       onkeydown="onKeydown(event)"/>
 
-    <!-- 자동완성 드롭다운 -->
     <div class="suggestions-wrap" id="sug-wrap">
       <div class="suggestions-box" id="sug-box"></div>
     </div>
 
-    <!-- STEP 2 (주소 선택 후 표시) -->
     <div id="step2-wrap" style="display:none;">
       <hr class="divider"/>
       <div class="step-label">
         <div class="step-circle done" id="step2-circle">✓</div>
         상세 주소 입력 <span class="hint-red" style="font-size:11px;font-weight:700;">* 필수</span>
       </div>
-      <!-- 선택된 도로명 태그 -->
       <div class="selected-addr-tag" id="selected-tag">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <circle cx="7" cy="6" r="3" stroke="#041627" stroke-width="1.3"/>
@@ -249,13 +137,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
         <span id="selected-road-text"></span>
       </div>
       <input class="addr-input" id="detail-input" type="text"
-        placeholder="동·층·호수 입력 (예: 102동 1203호, 3층 301호)"
+        placeholder="동·층·호수 입력 (예: 102동 1203호)"
         oninput="onDetailInput()"
         onkeydown="if(event.key==='Enter') doAnalyze()"/>
       <div class="hint">아파트·오피스텔은 동·호수, 빌라·단독주택은 층·호수를 입력하세요</div>
     </div>
 
-    <!-- STEP 3: 계약 유형 (주소 선택 후 표시) -->
     <div id="step3-wrap" style="display:none;">
       <hr class="divider"/>
       <div class="step-label">
@@ -267,7 +154,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
         <button class="contract-btn" id="btn-monthly" onclick="selectContract('월세')">💳 월세</button>
         <button class="contract-btn" id="btn-sale"    onclick="selectContract('매매')">🔑 매매</button>
       </div>
-      <!-- 계약유형별 안내 -->
       <div class="contract-notice cn-jeonse"  id="cn-jeonse">
         <strong>전세</strong> — HUG 보증보험 가입 가능 여부, 전세가율(80% 이하 권장), 선순위 근저당을 중점 분석합니다.
       </div>
@@ -279,7 +165,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
       </div>
     </div>
 
-    <!-- STEP 4: 금액 입력 (계약 유형 선택 후 표시) -->
     <div id="step4-wrap" style="display:none;">
       <hr class="divider"/>
       <div class="step-label">
@@ -287,14 +172,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
         <span id="step4-label">보증금 입력</span>
         <span class="hint-red" style="font-size:11px;font-weight:700;margin-left:4px;">* 필수</span>
       </div>
-      <!-- 전세/매매: 보증금/매매가 단일 입력 -->
       <div id="deposit-single" class="deposit-wrap">
         <input class="deposit-input" id="deposit-input" type="number"
           placeholder="금액 입력 (만원 단위, 예: 32000)"
           oninput="updateBtn()" min="0" step="100"/>
         <span class="deposit-unit">만원</span>
       </div>
-      <!-- 월세: 보증금 + 월세 분리 입력 -->
       <div id="deposit-monthly" style="display:none;flex-direction:column;gap:8px;">
         <div class="deposit-wrap">
           <input class="deposit-input" id="deposit-m-input" type="number"
@@ -310,11 +193,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
       <div class="hint" id="amount-hint">정확한 금액을 입력할수록 전세가율 분석이 정확해집니다</div>
     </div>
 
-    <!-- 분석 버튼 -->
     <button class="analyze-btn" id="analyze-btn" disabled onclick="doAnalyze()">
       주소를 먼저 검색하세요
     </button>
-
   </div>
 </main>
 
@@ -322,7 +203,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:#f8f9fb;color:#1b1c1d;min-
 let _suggs = [], _selIdx = -1, _debounce = null;
 let _selectedAddr = null;
 
-// ── 주소 입력 ──
 function onInput(val) {
   clearTimeout(_debounce);
   _selIdx = -1;
@@ -359,23 +239,15 @@ function selectSugg(idx) {
   const s = _suggs[idx];
   if (!s) return;
   _selectedAddr = s;
-
-  // 입력창에 선택된 주소
   document.getElementById('addr-input').value = s.roadAddr;
-
-  // STEP1 완료 표시
   const c1 = document.getElementById('step1-circle');
   c1.textContent = '✓';
   c1.style.background = '#22c55e';
-
   hideSugg();
-
-  // STEP2 표시
   document.getElementById('selected-road-text').textContent = s.roadAddr;
   document.getElementById('step2-wrap').style.display = 'block';
   document.getElementById('step3-wrap').style.display = 'block';
   document.getElementById('detail-input').focus();
-
   updateBtn();
 }
 
@@ -384,7 +256,6 @@ function hideSugg() {
   _suggs = [];
 }
 
-// ── 키보드 탐색 ──
 function onKeydown(e) {
   if (e.key === 'ArrowDown') {
     _selIdx = Math.min(_selIdx + 1, _suggs.length - 1);
@@ -405,52 +276,38 @@ function highlightSugg(idx) {
   });
 }
 
-// 외부 클릭 닫기
 document.addEventListener('click', e => {
   if (!e.target.closest('#sug-wrap') && e.target.id !== 'addr-input') hideSugg();
 });
 
-// ── 상세주소 입력 ──
 function onDetailInput() { updateBtn(); }
 
 let _contractType = '';
 
 function selectContract(type) {
   _contractType = type;
-  // 버튼 스타일
   ['jeonse','monthly','sale'].forEach(k => {
     document.getElementById('btn-' + k)?.classList.remove('selected');
   });
   const keyMap = { '전세':'jeonse', '월세':'monthly', '매매':'sale' };
   document.getElementById('btn-' + keyMap[type])?.classList.add('selected');
-
-  // 안내 배지
   ['cn-jeonse','cn-monthly','cn-sale'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
   const noticeMap = { '전세':'cn-jeonse', '월세':'cn-monthly', '매매':'cn-sale' };
   document.getElementById(noticeMap[type]).style.display = 'block';
-
-  // STEP4 표시 + 라벨 변경
   document.getElementById('step4-wrap').style.display = 'block';
   const lbl = document.getElementById('step4-label');
   if (type === '전세')  { lbl.textContent = '전세 보증금'; }
   if (type === '월세')  { lbl.textContent = '보증금 + 월세'; }
   if (type === '매매')  { lbl.textContent = '매매 희망가'; }
-
-  // 월세 분리/단일 토글
   document.getElementById('deposit-single').style.display  = type === '월세' ? 'none'  : 'flex';
   document.getElementById('deposit-monthly').style.display = type === '월세' ? 'flex'  : 'none';
-
-  // 힌트 변경
   const hint = document.getElementById('amount-hint');
   if (type === '매매') hint.textContent = '매매 희망가 입력 시 주변 시세와 비교 분석합니다';
   else hint.textContent = '정확한 금액을 입력할수록 전세가율 분석이 정확해집니다';
-
-  // STEP3 완료 표시
   const c3 = document.getElementById('step3-circle');
   c3.textContent = '✓'; c3.style.background = '#22c55e';
-
   updateBtn();
 }
 
@@ -467,24 +324,14 @@ function updateBtn() {
   const btn    = document.getElementById('analyze-btn');
   const detail = document.getElementById('detail-input')?.value.trim() || '';
   const deposit = getDepositStr();
-
-  if (!_selectedAddr) {
-    btn.disabled = true; btn.innerHTML = '주소를 먼저 검색하세요'; return;
-  }
-  if (detail.length < 2) {
-    btn.disabled = true; btn.innerHTML = '동·호수를 입력하세요'; return;
-  }
-  if (!_contractType) {
-    btn.disabled = true; btn.innerHTML = '계약 유형을 선택하세요'; return;
-  }
-  if (!deposit) {
-    btn.disabled = true; btn.innerHTML = '금액을 입력하세요'; return;
-  }
+  if (!_selectedAddr) { btn.disabled = true; btn.innerHTML = '주소를 먼저 검색하세요'; return; }
+  if (detail.length < 2) { btn.disabled = true; btn.innerHTML = '동·호수를 입력하세요'; return; }
+  if (!_contractType) { btn.disabled = true; btn.innerHTML = '계약 유형을 선택하세요'; return; }
+  if (!deposit) { btn.disabled = true; btn.innerHTML = '금액을 입력하세요'; return; }
   btn.disabled = false;
   btn.innerHTML = '🔍 ' + _contractType + ' 분석 시작하기';
 }
 
-// ── 분석 실행 ──
 async function doAnalyze() {
   if (!_selectedAddr) return;
   const detail = document.getElementById('detail-input').value.trim();
@@ -495,40 +342,27 @@ async function doAnalyze() {
     setTimeout(() => inp.style.outline = '', 1800);
     return;
   }
-
   const fullAddr = _selectedAddr.roadAddr + ' ' + detail;
   const btn = document.getElementById('analyze-btn');
   btn.innerHTML = '<span class="spinner"></span> 분석 중...';
   btn.disabled = true;
-
   try {
     const depositVal = getDepositStr();
-    const params = new URLSearchParams({
-      address:  fullAddr,
-      contract: _contractType,
-      deposit:  depositVal,
-    });
+    const params = new URLSearchParams({ address:fullAddr, contract:_contractType, deposit:depositVal });
     if (_selectedAddr.admCd)   params.set('lawdCd',  _selectedAddr.admCd.slice(0, 5));
     if (_selectedAddr.bdMgtSn) params.set('bdMgtSn', _selectedAddr.bdMgtSn);
-
     const res  = await fetch('/api/analyze?' + params.toString());
     if (!res.ok) throw new Error('서버 오류 ' + res.status);
     const data = await res.json();
     if (!data || !data.ok) throw new Error((data && data.error) || '분석 실패');
-
-    window._analysisResult = data;
-    // 세션에 결과 저장
     sessionStorage.setItem('bb_address',  fullAddr);
     sessionStorage.setItem('bb_score',    String(data.score || 78));
     sessionStorage.setItem('bb_risk',     data.riskLevel || 'warning');
     sessionStorage.setItem('bb_contract', _contractType);
     sessionStorage.setItem('bb_deposit',  getDepositStr());
-    // 탭 활성화
     if (typeof activateTabs === 'function') activateTabs();
-
     btn.innerHTML = '✓ 분석 완료!';
     btn.style.background = '#166534';
-
     setTimeout(() => {
       window.location.href = '/pages/report.html'
         + '?address='  + encodeURIComponent(fullAddr)
@@ -537,7 +371,6 @@ async function doAnalyze() {
         + '&contract=' + encodeURIComponent(_contractType)
         + '&deposit='  + encodeURIComponent(getDepositStr());
     }, 600);
-
   } catch(err) {
     console.error(err);
     btn.disabled = false;
@@ -554,39 +387,66 @@ async function doAnalyze() {
   }
 }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
+// ── 임차인 로그인 ──
+function isLoggedIn() { return localStorage.getItem('bb_tenant_logged_in') === 'true'; }
+function getTenantName() { return localStorage.getItem('bb_tenant_name') || ''; }
+
+function onUserBtnClick() {
+  if (isLoggedIn()) {
+    if (confirm((getTenantName() || '사용자') + '님으로 로그인 중입니다.\n로그아웃하시겠습니까?')) {
+      localStorage.removeItem('bb_tenant_logged_in');
+      localStorage.removeItem('bb_tenant_name');
+      updateUserBtn();
+    }
+  } else {
+    location.href = '/pages/login.html?redirect=' + encodeURIComponent(location.pathname);
+  }
 }
+
+function updateUserBtn() {
+  const lbl = document.getElementById('user-btn-label');
+  if (!lbl) return;
+  lbl.textContent = isLoggedIn() ? (getTenantName() || '내 계정') : '로그인';
+}
+
+function doShare() {
+  if (navigator.share) {
+    navigator.share({ title: "부동산 블랙박스", url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href).then(() => alert("링크가 복사되었습니다."));
+  }
+}
+
+window.addEventListener('load', updateUserBtn);
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <nav style="position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:stretch;height:58px;background:#fff;border-top:1px solid #dde0e6;box-shadow:0 -2px 10px rgba(0,0,0,.06);">
   <a href="/pages/analyze.html" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#041627;font-size:11px;font-weight:900;flex:1;border-top:2.5px solid #041627;padding:6px 0;font-family:'Noto Sans KR',sans-serif;">
     <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">search</span>분석
   </a>
-  <button onclick="checkBeforeNav('report')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:#b0b3bb;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;cursor:pointer;opacity:0.5;" id="tab-report">
-    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">analytics</span>리포트
+  <button onclick="checkBeforeNav('report')" id="tab-report"
+    style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:#b0b3bb;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;cursor:pointer;opacity:0.5;">
+    <span class="material-symbols-outlined" style="font-size:22px;">analytics</span>리포트
   </button>
-  <button onclick="checkBeforeNav('monitor')" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:#b0b3bb;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;cursor:pointer;opacity:0.5;" id="tab-monitor">
-    <span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">visibility</span>모니터링
+  <button onclick="checkBeforeNav('monitor')" id="tab-monitor"
+    style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:#b0b3bb;font-size:11px;font-weight:600;flex:1;border-top:2.5px solid transparent;padding:6px 0;font-family:'Noto Sans KR',sans-serif;cursor:pointer;opacity:0.5;">
+    <span class="material-symbols-outlined" style="font-size:22px;">visibility</span>모니터링
   </button>
 </nav>
 <div style="height:58px;"></div>
-<div style="height:58px;"></div>
+
 <script>
 function checkBeforeNav(tab) {
-  // 분석 완료 여부 확인
   var hasResult = sessionStorage.getItem('bb_address') && sessionStorage.getItem('bb_score');
-
   if (hasResult) {
-    // 분석 결과 있으면 바로 이동
     var params = '?address=' + encodeURIComponent(sessionStorage.getItem('bb_address') || '')
                + '&score='   + (sessionStorage.getItem('bb_score') || '78')
                + '&risk='    + (sessionStorage.getItem('bb_risk')  || 'warning');
     if (tab === 'report')  window.location.href = '/pages/report.html'      + params;
     if (tab === 'monitor') window.location.href = '/pages/monitoring.html'  + params;
   } else {
-    // 분석 결과 없으면 안내
     showNoResultToast();
   }
 }
@@ -594,49 +454,24 @@ function checkBeforeNav(tab) {
 function showNoResultToast() {
   var existing = document.getElementById('no-result-toast');
   if (existing) return;
-
   var toast = document.createElement('div');
   toast.id = 'no-result-toast';
-  toast.style.cssText = [
-    'position:fixed', 'bottom:72px', 'left:50%', 'transform:translateX(-50%)',
-    'background:#041627', 'color:#fff', 'padding:12px 20px', 'border-radius:10px',
-    'font-size:13px', 'font-weight:600', 'z-index:200',
-    'white-space:nowrap', 'box-shadow:0 4px 16px rgba(0,0,0,.2)',
-    'font-family:Noto Sans KR,sans-serif',
-    'animation:fadeInUp .25s ease'
-  ].join(';');
+  toast.style.cssText = 'position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:#041627;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:200;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2);font-family:Noto Sans KR,sans-serif;animation:fadeInUp .25s ease;';
   toast.innerHTML = '🔍 먼저 주소를 입력하고 분석을 시작해주세요';
   document.body.appendChild(toast);
   setTimeout(function(){ toast.remove(); }, 2500);
 }
 
-// 분석 완료 후 탭 활성화
 function activateTabs() {
   ['tab-report','tab-monitor'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (el) {
-      el.style.opacity = '1';
-      el.style.color   = '#74777d';
-    }
+    if (el) { el.style.opacity = '1'; el.style.color = '#74777d'; }
   });
 }
 
-// 페이지 로드 시 기존 결과 있으면 탭 활성화
 window.addEventListener('load', function() {
-  if (sessionStorage.getItem('bb_address') && sessionStorage.getItem('bb_score')) {
-    activateTabs();
-  }
+  if (sessionStorage.getItem('bb_address') && sessionStorage.getItem('bb_score')) activateTabs();
 });
-
-// 분석 완료 이벤트 감지 (doAnalyze 성공 후 호출)
-var _origDoAnalyze = window.doAnalyze;
 </script>
-
-<style>
-@keyframes fadeInUp {
-  from { opacity:0; transform:translateX(-50%) translateY(8px); }
-  to   { opacity:1; transform:translateX(-50%) translateY(0); }
-}
-</style>
 </body>
 </html>
