@@ -774,13 +774,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">예산 (만원)</label>
+          <label class="form-label">예산 최대 (만원)</label>
           <input class="form-input" id="cli-budget" type="number" placeholder="30000"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">희망 평형 (㎡)</label>
+          <input class="form-input" id="cli-area-size" type="number" placeholder="84"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">최소 방 개수</label>
+          <select class="form-select" id="cli-rooms">
+            <option value="">무관</option>
+            <option value="1">1개 이상</option>
+            <option value="2">2개 이상</option>
+            <option value="3">3개 이상</option>
+          </select>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">희망 지역 / 조건</label>
-        <input class="form-input" id="cli-area" type="text" placeholder="강남구 역삼동, 방 2개 이상"/>
+        <input class="form-input" id="cli-area" type="text" placeholder="강남구 역삼동, 아파트 선호 등"/>
       </div>
       <div class="form-group">
         <label class="form-label">메모</label>
@@ -1456,19 +1471,71 @@ function submitSchedule() {
 }
 
 function submitClient() {
-  const name   = document.getElementById('cli-name').value.trim();
-  const phone  = document.getElementById('cli-phone').value.trim();
-  const type   = document.getElementById('cli-type').value;
-  const budget = document.getElementById('cli-budget').value;
-  const area   = document.getElementById('cli-area').value.trim();
-  const memo   = document.getElementById('cli-memo').value.trim();
+  const name     = document.getElementById('cli-name').value.trim();
+  const phone    = document.getElementById('cli-phone').value.trim();
+  const type     = document.getElementById('cli-type').value;
+  const budget   = document.getElementById('cli-budget').value;
+  const areaSize = document.getElementById('cli-area-size').value;
+  const rooms    = document.getElementById('cli-rooms').value;
+  const area     = document.getElementById('cli-area').value.trim();
+  const memo     = document.getElementById('cli-memo').value.trim();
   if (!name) { toast('고객명을 입력하세요'); return; }
 
-  _clients.push({ id: Date.now().toString(), name, phone, type, budget, area, memo, createdAt: new Date().toISOString() });
+  const newClient = {
+    id: Date.now().toString(), name, phone, type,
+    budget, areaSize, rooms, area, memo,
+    interests: '[]',
+    memos: JSON.stringify([]),
+    createdAt: new Date().toISOString()
+  };
+  _clients.push(newClient);
   saveLocal('clients', _clients);
+
+  // 조건에 맞는 매물 자동 매칭
+  const matched = autoMatchProps(newClient);
   closeModal('client');
-  renderClients();
-  toast('고객 저장 완료 (로컬)');
+  renderClients(); renderProps();
+  toast('고객 저장 완료' + (matched > 0 ? ' · 관심매물 ' + matched + '개 자동 매칭' : ''));
+}
+
+// 고객 조건 → 매물 자동 매칭
+function autoMatchProps(client) {
+  let count = 0;
+  _props.forEach(p => {
+    if (!matchClientToProp(client, p)) return;
+    // 이미 방문자에 있으면 skip
+    const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+    if (visitors.some(v => v.name === client.name)) return;
+    // 관심고객으로 자동 등록
+    visitors.push({
+      name: client.name,
+      date: new Date().toISOString().split('T')[0],
+      price: '', interest: '자동매칭',
+      memo: '고객 조건 자동 매칭',
+      addedAt: new Date().toISOString(),
+      autoMatched: true
+    });
+    p.visitors = JSON.stringify(visitors);
+    // 고객 interests에도 추가
+    const interests = client.interests ? JSON.parse(client.interests) : [];
+    if (!interests.includes(p.id)) interests.push(p.id);
+    client.interests = JSON.stringify(interests);
+    count++;
+  });
+  if (count > 0) {
+    saveLocal('props', _props);
+    saveLocal('clients', _clients);
+  }
+  return count;
+}
+
+// 고객 조건과 매물 매칭 여부
+function matchClientToProp(client, prop) {
+  // 계약 유형 일치
+  if (client.type && prop.contract && client.type !== prop.contract) return false;
+  // 예산 이하
+  if (client.budget && prop.deposit && parseInt(prop.deposit) > parseInt(client.budget)) return false;
+  return true;
 }
 
 function submitContract() {
@@ -1589,35 +1656,64 @@ function openClientDetail(i) {
   const c = _clients[i];
 
   document.getElementById('cd-name').textContent   = c.name;
-  document.getElementById('cd-sub').textContent    = c.phone || '연락처 없음';
-  document.getElementById('cd-type').textContent   = c.type  || '—';
+  document.getElementById('cd-sub').textContent    = (c.phone || '연락처 없음');
+  document.getElementById('cd-type').textContent   = c.type   || '—';
   document.getElementById('cd-budget').textContent = c.budget ? parseInt(c.budget).toLocaleString()+'만원' : '—';
-  document.getElementById('cd-area').textContent   = c.area  || '—';
+  document.getElementById('cd-size').textContent   = (c.areaSize ? c.areaSize+'㎡' : '—') + (c.rooms ? ' / 방'+c.rooms+'개+' : '');
+  document.getElementById('cd-area').textContent   = c.area   || '—';
 
-  // 본 매물 목록 (매물 visitors에서 이 고객 찾기)
-  const visitedProps = _props.filter(p => {
+  // 관심 매물 목록 (매물 visitors에서 이 고객 찾기)
+  const interestProps = _props.filter(p => {
     const visitors = p.visitors ? JSON.parse(p.visitors) : [];
     return visitors.some(v => v.name === c.name);
   });
   const propsEl = document.getElementById('cd-props-list');
-  propsEl.innerHTML = visitedProps.length
-    ? visitedProps.map((p, pi) => {
-        const visitors = JSON.parse(p.visitors || '[]');
-        const visit    = visitors.find(v => v.name === c.name) || {};
-        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border2);cursor:pointer;" onclick="openPropReport(${_props.indexOf(p)})">
-          <span class="material-symbols-outlined" style="font-size:15px;color:var(--text3);">home_work</span>
-          <div style="flex:1;">
-            <div style="font-size:12px;font-weight:600;color:var(--navy);">${p.address} ${p.detail||''}</div>
-            <div style="font-size:11px;color:var(--text3);">${visit.date||''} ${visit.price ? '· '+parseInt(visit.price).toLocaleString()+'만원 협의' : ''} ${visit.interest ? '· 관심도: '+visit.interest : ''}</div>
+  if (interestProps.length) {
+    propsEl.innerHTML = interestProps.map(p => {
+      const visitors = JSON.parse(p.visitors || '[]');
+      const visit    = visitors.find(v => v.name === c.name) || {};
+      const propIdx  = _props.indexOf(p);
+      const riskCol  = parseInt(p.score) >= 80 ? '#22c55e' : parseInt(p.score) >= 60 ? '#f59e0b' : '#ef4444';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;">
+        <span class="material-symbols-outlined" style="font-size:18px;color:var(--text3);flex-shrink:0;">home_work</span>
+        <div style="flex:1;cursor:pointer;" onclick="openPropReport(${propIdx})">
+          <div style="font-size:12px;font-weight:700;color:var(--navy);">${p.address} ${p.detail||''}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+            ${p.contract} ${p.deposit ? '· '+parseInt(p.deposit).toLocaleString()+'만' : ''}
+            ${visit.date ? '· '+visit.date : ''}
+            ${visit.interest ? '· 관심도: '+visit.interest : ''}
+            ${visit.autoMatched ? '· <span style="color:var(--info);">자동매칭</span>' : ''}
           </div>
-          <span class="material-symbols-outlined" style="font-size:14px;color:var(--text3);">open_in_new</span>
-        </div>`;
-      }).join('')
-    : '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px;"><span class="material-symbols-outlined" style="font-size:24px;display:block;margin-bottom:4px;">home_work</span>본 매물 없음</div>';
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${p.score ? `<span style="font-size:11px;font-weight:700;color:${riskCol};font-family:'IBM Plex Mono',monospace;">${p.score}점</span>` : ''}
+          <button onclick="removeInterest('${p.id}','${c.name}')" title="관심 제외"
+            style="border:none;background:none;cursor:pointer;padding:3px;border-radius:4px;color:var(--text3);"
+            onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='var(--text3)'">
+            <span class="material-symbols-outlined" style="font-size:16px;">heart_minus</span>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    propsEl.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:16px;"><span class="material-symbols-outlined" style="font-size:28px;display:block;margin-bottom:6px;color:#ddd;">home_work</span>관심 매물 없음</div>';
+  }
 
-  // 상담 메모
   renderClientMemos(c);
   openModal('client-detail');
+}
+
+// 관심 매물 제외
+function removeInterest(propId, clientName) {
+  if (!confirm(clientName + '의 관심매물에서 제외하시겠습니까?')) return;
+  const p = _props.find(pr => pr.id === propId);
+  if (!p) return;
+  const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+  p.visitors = JSON.stringify(visitors.filter(v => v.name !== clientName));
+  saveLocal('props', _props);
+  renderProps();
+  openClientDetail(_currentClientIdx); // 새로고침
+  toast('관심 매물에서 제외했습니다');
 }
 
 function renderClientMemos(c) {
@@ -1867,5 +1963,147 @@ const DEMO_TODOS = [
   { id:'3', text:'강남 역삼동 등기부 재확인', priority:'urgent', done:false },
 ];
 </script>
+
+<!-- ══ 고객 상세 모달 ══ -->
+<div class="modal-bg" id="modal-client-detail">
+  <div class="modal" style="max-width:520px;max-height:88vh;overflow-y:auto;">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">person</span>
+        </div>
+        <div>
+          <div class="modal-title" id="cd-name">—</div>
+          <div style="font-size:11px;color:var(--text3);" id="cd-sub">—</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('client-detail')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div style="padding:0;">
+      <!-- 기본 정보 -->
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border2);background:#fafafa;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">희망 유형</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-type">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">예산</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-budget">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">평형/방수</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-size">—</div>
+          </div>
+          <div style="grid-column:1/-1;">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">희망 지역/조건</div>
+            <div style="font-size:13px;color:var(--text);" id="cd-area">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 관심 매물 목록 -->
+      <div style="padding:12px 20px;border-bottom:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;">home_work</span>
+            관심 매물
+          </div>
+        </div>
+        <div id="cd-props-list">
+          <div style="font-size:12px;color:var(--text3);text-align:center;padding:16px;">관심 매물 없음</div>
+        </div>
+      </div>
+
+      <!-- 상담 메모 -->
+      <div style="padding:12px 20px;border-bottom:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;">chat_bubble</span>
+            상담 메모
+          </div>
+          <button onclick="addClientMemo()" style="display:flex;align-items:center;gap:3px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:3px 8px;border-radius:5px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">add</span> 추가
+          </button>
+        </div>
+        <div id="cd-memo-list"></div>
+        <div id="cd-memo-input-wrap" style="display:none;margin-top:8px;">
+          <textarea id="cd-memo-input" class="form-textarea" placeholder="상담 내용, 특이사항..." style="min-height:60px;margin-bottom:6px;"></textarea>
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn-ghost" style="font-size:12px;padding:5px 10px;" onclick="cancelClientMemo()">취소</button>
+            <button class="btn-primary" style="font-size:12px;padding:5px 12px;" onclick="submitClientMemo()">저장</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 액션 -->
+      <div style="padding:12px 20px;display:flex;gap:8px;">
+        <button class="btn-ghost" style="flex:1;justify-content:center;font-size:12px;" onclick="addScheduleForClient()">
+          <span class="material-symbols-outlined" style="font-size:15px;">event</span> 일정 추가
+        </button>
+        <button class="btn-primary" style="flex:1;justify-content:center;font-size:12px;" onclick="addContractForClient()">
+          <span class="material-symbols-outlined" style="font-size:15px;">description</span> 계약 연결
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 계약 상세 모달 ══ -->
+<div class="modal-bg" id="modal-contract-detail">
+  <div class="modal" style="max-width:520px;max-height:88vh;overflow-y:auto;">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="con-detail-addr">—</div>
+        <div style="font-size:11px;color:var(--text3);" id="con-detail-sub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('contract-detail')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div style="padding:0;">
+      <!-- 단계 -->
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border2);">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">진행 단계</div>
+        <div style="display:flex;gap:6px;" id="con-stage-btns"></div>
+      </div>
+      <!-- 체크리스트 -->
+      <div style="padding:14px 20px;border-bottom:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;">checklist</span> 체크리스트
+          </div>
+          <span style="font-size:11px;color:var(--text3);" id="con-chk-label">0 / 0</span>
+        </div>
+        <div style="height:5px;background:#f0f0ee;border-radius:3px;overflow:hidden;margin-bottom:10px;">
+          <div id="con-chk-bar" style="height:100%;background:var(--navy);border-radius:3px;width:0%;transition:width .3s;"></div>
+        </div>
+        <div id="con-chk-list"></div>
+      </div>
+      <!-- 히스토리 -->
+      <div style="padding:14px 20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;">history</span> 진행 히스토리
+          </div>
+          <button onclick="addConHistory()" style="display:flex;align-items:center;gap:3px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:3px 8px;border-radius:5px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">add</span> 추가
+          </button>
+        </div>
+        <div id="con-history-list"></div>
+        <div id="con-history-input-wrap" style="display:none;margin-top:8px;">
+          <textarea id="con-history-input" class="form-textarea" placeholder="계약금 납부, 특약 협의..." style="min-height:60px;margin-bottom:6px;"></textarea>
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn-ghost" style="font-size:12px;padding:5px 10px;" onclick="cancelConHistory()">취소</button>
+            <button class="btn-primary" style="font-size:12px;padding:5px 12px;" onclick="submitConHistory()">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
