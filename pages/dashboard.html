@@ -885,27 +885,32 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 // ════════════════════════════════
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8CFdJNXRRbW58waE8cLQcirhgJiwrjnrsUYEbbd7P4WSBlNxIrbCYX9nAFy04sgPFkA/exec';
 
+// GET 방식으로만 통신 (CORS 해결)
 async function dbGet(params) {
   const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
   const res = await fetch(url);
   return res.json();
 }
 
+// POST도 GET으로 (Apps Script CORS 우회)
 async function dbPost(body) {
-  const res = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+  // data 객체는 JSON 문자열로 변환
+  const params = {};
+  Object.keys(body).forEach(k => {
+    params[k] = typeof body[k] === 'object' ? JSON.stringify(body[k]) : body[k];
   });
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
   return res.json();
 }
 
 // ── 실제 로그인 (Apps Script) ──
 async function doLoginRemote(id, pw) {
   try {
-    const data = await dbGet({ action: 'login', agencyId: id, pw });
+    const data = await dbGet({ action: 'login', agencyId: id, pw: pw });
     return data;
   } catch(e) {
+    console.error('로그인 오류:', e);
     return { ok: false, error: '서버 연결 실패: ' + e.message };
   }
 }
@@ -913,9 +918,10 @@ async function doLoginRemote(id, pw) {
 // ── 회원가입 (Apps Script) ──
 async function doRegisterRemote(id, name, pw) {
   try {
-    const data = await dbPost({ action: 'register', agencyId: id, agencyName: name, pw });
+    const data = await dbGet({ action: 'register', agencyId: id, agencyName: name, pw: pw });
     return data;
   } catch(e) {
+    console.error('등록 오류:', e);
     return { ok: false, error: '서버 연결 실패: ' + e.message };
   }
 }
