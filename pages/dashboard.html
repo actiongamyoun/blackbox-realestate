@@ -255,6 +255,36 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .form-row .form-group{margin-bottom:0;}
 
+/* ── 매물 주소 자동완성 (네임스페이스 prop-sug-*) ── */
+.prop-sug-wrap{
+  position:relative;width:100%;
+  display:none;z-index:50;
+  margin-top:-2px;
+}
+.prop-sug-box{
+  background:#fff;
+  border:1.5px solid var(--border);
+  border-top:none;
+  border-radius:0 0 10px 10px;
+  box-shadow:0 6px 20px rgba(0,0,0,.12);
+  max-height:280px;overflow-y:auto;
+}
+.prop-sug-item{
+  padding:10px 12px;
+  font-size:13px;cursor:pointer;
+  border-bottom:0.5px solid var(--border2);
+  display:flex;gap:8px;align-items:flex-start;
+  transition:background .1s;
+}
+.prop-sug-item:last-child{border-bottom:none;}
+.prop-sug-item:hover, .prop-sug-item.active{background:var(--bg);}
+.prop-sug-item.disabled{cursor:not-allowed;opacity:.55;background:#fafafa;}
+.prop-sug-item.disabled:hover{background:#fafafa;}
+.prop-sug-pin{color:var(--text3);font-size:14px;flex-shrink:0;margin-top:1px;}
+.prop-sug-complex{font-size:13px;font-weight:700;color:var(--navy);}
+.prop-sug-road{font-size:11px;color:var(--text3);margin-top:2px;font-family:'IBM Plex Mono',monospace;}
+.prop-sug-empty{padding:14px;text-align:center;font-size:12px;color:var(--text3);}
+
 /* ── 칩 (체크박스 형태) ── */
 .chip-group{display:flex;flex-wrap:wrap;gap:6px;}
 .chip{
@@ -557,13 +587,50 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       </button>
     </div>
     <div class="sheet-body">
+      <!-- 단지 검색 -->
       <div class="form-group">
-        <label class="form-label">도로명 주소 *</label>
-        <input class="form-input" id="prop-addr" type="text" placeholder="해운대로 123"/>
+        <label class="form-label">단지명 / 도로명 주소 *</label>
+        <input class="form-input" id="prop-addr-search" type="text"
+          placeholder="아파트명 또는 도로명 검색 (예: 두산위브, 마린시티)"
+          autocomplete="off"
+          oninput="onPropAddrInput(this.value)"
+          onkeydown="onPropAddrKeydown(event)"/>
+        <!-- 자동완성 드롭다운 -->
+        <div class="prop-sug-wrap" id="prop-sug-wrap">
+          <div class="prop-sug-box" id="prop-sug-box"></div>
+        </div>
+        <div id="prop-search-hint" class="hint" style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5;">
+          <span class="ms ms-sm" style="font-size:13px;color:var(--info);">smart_toy</span>
+          단지명 또는 도로명을 입력하면 자동완성됩니다 · <strong>현재는 아파트만 지원</strong>
+        </div>
       </div>
+
+      <!-- 선택된 단지 표시 -->
+      <div id="prop-complex-display" style="display:none;background:var(--info-bg);border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:14px;">
+        <div style="display:flex;align-items:flex-start;gap:8px;">
+          <span class="ms ms-sm ms-fill" style="color:var(--info);font-size:18px;flex-shrink:0;margin-top:1px;">apartment</span>
+          <div style="flex:1;min-width:0;">
+            <div id="prop-complex-name" style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:2px;"></div>
+            <div id="prop-complex-addr" style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;"></div>
+          </div>
+          <button onclick="clearPropAddr()" style="border:none;background:none;cursor:pointer;color:var(--text3);padding:4px;flex-shrink:0;" title="다시 검색">
+            <span class="ms ms-sm">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 숨김 필드: 매물 데이터로 저장 -->
+      <input type="hidden" id="prop-addr"/>
+      <input type="hidden" id="prop-complex-name-hidden"/>
+      <input type="hidden" id="prop-sido"/>
+      <input type="hidden" id="prop-gu"/>
+      <input type="hidden" id="prop-dong"/>
+      <input type="hidden" id="prop-bdmgtsn"/>
+
+      <!-- 동/호수 -->
       <div class="form-group">
-        <label class="form-label">상세주소</label>
-        <input class="form-input" id="prop-detail" type="text" placeholder="102동 501호"/>
+        <label class="form-label">동·호수 *</label>
+        <input class="form-input" id="prop-detail" type="text" placeholder="예: 102동 501호"/>
       </div>
       <div class="form-row" style="margin-bottom:14px;">
         <div class="form-group">
@@ -1204,6 +1271,166 @@ function escapeHtml(s) {
 }
 
 // ════════════════════════════════
+// 매물 주소 자동완성 (analyze.html과 충돌 방지 — 네임스페이스 _prop*)
+// ════════════════════════════════
+let _propSuggs        = [];
+let _propSelIdx       = -1;
+let _propDebounce     = null;
+let _propSelectedAddr = null;
+
+function onPropAddrInput(val) {
+  clearTimeout(_propDebounce);
+  _propSelIdx = -1;
+  if (!val || val.length < 2) { hidePropSugg(); return; }
+  _propDebounce = setTimeout(() => fetchPropSugg(val), 300);
+}
+
+async function fetchPropSugg(query) {
+  try {
+    const res  = await fetch('/api/address?query=' + encodeURIComponent(query));
+    const data = await res.json();
+    if (!data.ok || !data.results) { hidePropSugg(); return; }
+    _propSuggs = data.results;
+    renderPropSugg(_propSuggs);
+  } catch(e) {
+    console.error('주소 검색 오류:', e);
+    hidePropSugg();
+  }
+}
+
+function renderPropSugg(list) {
+  const wrap = document.getElementById('prop-sug-wrap');
+  const box  = document.getElementById('prop-sug-box');
+  if (!list || !list.length) {
+    box.innerHTML = '<div class="prop-sug-empty">검색 결과가 없습니다</div>';
+    wrap.style.display = 'block';
+    return;
+  }
+  // 아파트(bdNm 있는 것)만 필터 → 별도 표시
+  const apts    = list.filter(s => s.bdNm && s.bdNm.trim());
+  const nonApts = list.filter(s => !s.bdNm || !s.bdNm.trim());
+
+  let html = '';
+  if (apts.length) {
+    html += apts.map((s, i) => {
+      const realIdx = list.indexOf(s);
+      return `<div class="prop-sug-item" data-idx="${realIdx}" onclick="selectPropSugg(${realIdx})">
+        <span class="ms ms-sm prop-sug-pin">apartment</span>
+        <div style="flex:1;min-width:0;">
+          <div class="prop-sug-complex">${escapeHtml(s.bdNm)}</div>
+          <div class="prop-sug-road">${escapeHtml(s.roadAddr)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  // bdNm 없는 항목은 "지원 안 됨" 으로 비활성화 표시
+  if (nonApts.length && !apts.length) {
+    html += nonApts.slice(0, 3).map(s => `
+      <div class="prop-sug-item disabled" title="현재는 아파트만 지원합니다">
+        <span class="ms ms-sm prop-sug-pin">block</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:var(--text3);">${escapeHtml(s.roadAddr)}</div>
+          <div class="prop-sug-road">아파트가 아님 · 등록 불가</div>
+        </div>
+      </div>`).join('');
+    html += '<div class="prop-sug-empty">현재는 아파트만 지원 가능합니다</div>';
+  }
+  if (!apts.length && !nonApts.length) {
+    html = '<div class="prop-sug-empty">검색 결과가 없습니다</div>';
+  }
+  box.innerHTML = html;
+  wrap.style.display = 'block';
+}
+
+function selectPropSugg(idx) {
+  const s = _propSuggs[idx];
+  if (!s) return;
+  if (!s.bdNm || !s.bdNm.trim()) {
+    toast('현재는 아파트만 지원 가능합니다');
+    return;
+  }
+  _propSelectedAddr = s;
+
+  // 검색창에 단지명 표시
+  document.getElementById('prop-addr-search').value = s.bdNm;
+
+  // 선택 표시 박스 채움
+  document.getElementById('prop-complex-name').textContent = s.bdNm;
+  document.getElementById('prop-complex-addr').textContent = s.roadAddr;
+  document.getElementById('prop-complex-display').style.display = 'block';
+
+  // 숨김 필드 채움 (저장용)
+  document.getElementById('prop-addr').value                = s.roadAddr || '';
+  document.getElementById('prop-complex-name-hidden').value = s.bdNm     || '';
+  document.getElementById('prop-sido').value                = s.siNm     || '';
+  document.getElementById('prop-gu').value                  = s.sggNm    || '';
+  document.getElementById('prop-dong').value                = s.emdNm    || '';
+  document.getElementById('prop-bdmgtsn').value             = s.bdMgtSn  || '';
+
+  // 힌트 메시지 변경
+  const hint = document.getElementById('prop-search-hint');
+  hint.innerHTML = '<span class="ms ms-sm" style="font-size:13px;color:var(--safe);">check_circle</span> ' +
+    '단지 선택 완료 · 동·호수를 입력하세요';
+
+  hidePropSugg();
+  // 동/호수 입력란으로 포커스 이동
+  setTimeout(() => document.getElementById('prop-detail').focus(), 50);
+}
+
+function hidePropSugg() {
+  const wrap = document.getElementById('prop-sug-wrap');
+  if (wrap) wrap.style.display = 'none';
+  _propSelIdx = -1;
+}
+
+function onPropAddrKeydown(e) {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    const apts = _propSuggs.filter(s => s.bdNm && s.bdNm.trim());
+    _propSelIdx = Math.min(_propSelIdx + 1, apts.length - 1);
+    highlightPropSugg(_propSelIdx);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _propSelIdx = Math.max(_propSelIdx - 1, 0);
+    highlightPropSugg(_propSelIdx);
+  } else if (e.key === 'Enter' && _propSelIdx >= 0) {
+    e.preventDefault();
+    const apts = _propSuggs.filter(s => s.bdNm && s.bdNm.trim());
+    const target = apts[_propSelIdx];
+    if (target) selectPropSugg(_propSuggs.indexOf(target));
+  } else if (e.key === 'Escape') {
+    hidePropSugg();
+  }
+}
+
+function highlightPropSugg(idx) {
+  const items = document.querySelectorAll('#prop-sug-box .prop-sug-item:not(.disabled)');
+  items.forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+}
+
+function clearPropAddr() {
+  _propSelectedAddr = null;
+  document.getElementById('prop-addr-search').value = '';
+  document.getElementById('prop-complex-display').style.display = 'none';
+  ['prop-addr','prop-complex-name-hidden','prop-sido','prop-gu','prop-dong','prop-bdmgtsn'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('prop-search-hint').innerHTML =
+    '<span class="ms ms-sm" style="font-size:13px;color:var(--info);">smart_toy</span> ' +
+    '단지명 또는 도로명을 입력하면 자동완성됩니다 · <strong>현재는 아파트만 지원</strong>';
+  document.getElementById('prop-addr-search').focus();
+}
+
+// 매물 시트 외부 클릭 시 자동완성 닫기
+document.addEventListener('click', e => {
+  if (!e.target.closest('#prop-sug-wrap') && e.target.id !== 'prop-addr-search') {
+    hidePropSugg();
+  }
+});
+
+// ════════════════════════════════
 // 칩 그룹 헬퍼 (UI: chip-group)
 // ════════════════════════════════
 /**
@@ -1691,10 +1918,9 @@ function renderProps() {
     const visitors = (p.visitors ? JSON.parse(p.visitors) : []);
     const visitorHtml = visitors.length
       ? visitors.map((v, vi) => {
-          // 이미 이 매물+고객으로 계약이 있는지 확인
+          // 이미 이 매물+고객으로 계약이 있는지 확인 (propId + clientName)
           const linkedContract = _contracts.find(c =>
-            c.address === (p.address + (p.detail ? ' ' + p.detail : '').trim()) &&
-            c.clientName === v.name
+            c.propId === p.id && c.clientName === v.name
           );
           return `
         <div class="prop-visitor-item">
@@ -1731,8 +1957,8 @@ function renderProps() {
       <div class="prop-body">
         <div class="prop-score-row">
           <div style="flex:1;min-width:0;">
-            <div class="prop-addr">${escapeHtml(p.address)}</div>
-            ${p.detail ? `<div class="prop-detail">${escapeHtml(p.detail)}</div>` : ''}
+            <div class="prop-addr">${escapeHtml(p.complexName || p.address)}${p.detail ? ' <span style="font-size:12px;color:var(--text2);font-weight:600;">' + escapeHtml(p.detail) + '</span>' : ''}</div>
+            ${p.complexName ? `<div class="prop-detail">${escapeHtml(p.address)}</div>` : ''}
             <div class="prop-meta">${escapeHtml(p.contract || '')} · ${p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—'}${monthlyStr}</div>
             ${extras.length ? `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${escapeHtml(extras.join(' · '))}</div>` : ''}
           </div>
@@ -1853,14 +2079,18 @@ function openPropertyForCreate() {
     '<span class="ms ms-sm" style="color:#fff;">add_home</span> 등록 & 분석';
   document.getElementById('prop-delete-wrap').style.display = 'none';
   // 폼 리셋
-  ['prop-addr','prop-detail','prop-deposit','prop-monthly','prop-area-min','prop-area-max','prop-memo']
+  ['prop-detail','prop-deposit','prop-monthly','prop-area-min','prop-area-max','prop-memo']
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('prop-contract').value = '전세';
   document.getElementById('prop-movein').value = '';
   clearChipGroup('prop-rooms-chips');
   clearChipGroup('prop-direction-chips');
   togglePropMonthly();
+  // 자동완성 리셋
+  clearPropAddr();
   openSheet('property');
+  // 검색창에 포커스
+  setTimeout(() => document.getElementById('prop-addr-search').focus(), 200);
 }
 
 // 매물 시트 초기화 (편집 모드)
@@ -1872,7 +2102,32 @@ function openPropertyForEdit(i) {
   document.getElementById('prop-submit-btn').innerHTML =
     '<span class="ms ms-sm" style="color:#fff;">save</span> 저장';
   document.getElementById('prop-delete-wrap').style.display = 'block';
-  document.getElementById('prop-addr').value     = p.address || '';
+
+  // 자동완성: 기존 단지 정보 복원
+  if (p.complexName) {
+    document.getElementById('prop-addr-search').value = p.complexName;
+    document.getElementById('prop-complex-name').textContent = p.complexName;
+    document.getElementById('prop-complex-addr').textContent = p.address || '';
+    document.getElementById('prop-complex-display').style.display = 'block';
+    document.getElementById('prop-search-hint').innerHTML =
+      '<span class="ms ms-sm" style="font-size:13px;color:var(--safe);">check_circle</span> ' +
+      '기존 단지 · 변경하려면 X 버튼 후 재검색';
+  } else {
+    // 구버전 매물 (단지명 없음) — 자유 입력 호환
+    document.getElementById('prop-addr-search').value = p.address || '';
+    document.getElementById('prop-complex-display').style.display = 'none';
+    document.getElementById('prop-search-hint').innerHTML =
+      '<span class="ms ms-sm" style="font-size:13px;color:var(--warn);">warning</span> ' +
+      '단지 정보 없는 구버전 매물 · 재검색하면 자동 보완됩니다';
+  }
+  // 숨김 필드 채움
+  document.getElementById('prop-addr').value                = p.address || '';
+  document.getElementById('prop-complex-name-hidden').value = p.complexName || '';
+  document.getElementById('prop-sido').value                = p.sido || '';
+  document.getElementById('prop-gu').value                  = p.gu || '';
+  document.getElementById('prop-dong').value                = p.dong || '';
+  document.getElementById('prop-bdmgtsn').value             = p.bdMgtSn || '';
+
   document.getElementById('prop-detail').value   = p.detail || '';
   document.getElementById('prop-contract').value = p.contract || '전세';
   document.getElementById('prop-deposit').value  = p.deposit || '';
@@ -1907,25 +2162,46 @@ function togglePropMonthly() {
 }
 
 function submitProperty() {
-  const addr     = document.getElementById('prop-addr').value.trim();
-  const detail   = document.getElementById('prop-detail').value.trim();
-  const contract = document.getElementById('prop-contract').value;
-  const deposit  = document.getElementById('prop-deposit').value;
-  const monthly  = document.getElementById('prop-monthly').value;
-  const areaMin  = document.getElementById('prop-area-min').value;
-  const areaMax  = document.getElementById('prop-area-max').value;
-  const movein   = document.getElementById('prop-movein').value;
-  const memo     = document.getElementById('prop-memo').value.trim();
-  const rooms      = getChipValue ('prop-rooms-chips', 'rooms');
-  const directions = getChipValues('prop-direction-chips', 'dir');
+  const addr        = document.getElementById('prop-addr').value.trim();
+  const complexName = document.getElementById('prop-complex-name-hidden').value.trim();
+  const sido        = document.getElementById('prop-sido').value.trim();
+  const gu          = document.getElementById('prop-gu').value.trim();
+  const dong        = document.getElementById('prop-dong').value.trim();
+  const bdMgtSn     = document.getElementById('prop-bdmgtsn').value.trim();
+  const detail      = document.getElementById('prop-detail').value.trim();
+  const contract    = document.getElementById('prop-contract').value;
+  const deposit     = document.getElementById('prop-deposit').value;
+  const monthly     = document.getElementById('prop-monthly').value;
+  const areaMin     = document.getElementById('prop-area-min').value;
+  const areaMax     = document.getElementById('prop-area-max').value;
+  const movein      = document.getElementById('prop-movein').value;
+  const memo        = document.getElementById('prop-memo').value.trim();
+  const rooms       = getChipValue ('prop-rooms-chips', 'rooms');
+  const directions  = getChipValues('prop-direction-chips', 'dir');
 
-  if (!addr) { toast('주소를 입력하세요'); return; }
+  if (!addr) {
+    toast('단지를 검색해서 선택하세요');
+    document.getElementById('prop-addr-search').focus();
+    return;
+  }
+  // 신규 등록 시 단지명 필수 (편집은 구버전 호환을 위해 허용)
+  if (_editingPropIdx < 0 && !complexName) {
+    toast('아파트 단지를 선택하세요');
+    document.getElementById('prop-addr-search').focus();
+    return;
+  }
+  if (!detail) {
+    toast('동·호수를 입력하세요');
+    document.getElementById('prop-detail').focus();
+    return;
+  }
 
   if (_editingPropIdx >= 0) {
     // 편집
     const p = _props[_editingPropIdx];
     Object.assign(p, {
-      address: addr, detail, contract, deposit,
+      address: addr, complexName, sido, gu, dong, bdMgtSn,
+      detail, contract, deposit,
       monthly: contract === '월세' ? monthly : '',
       areaMin, areaMax, moveinDate: movein, memo,
       rooms,
@@ -1944,7 +2220,8 @@ function submitProperty() {
   // 신규 등록
   const prop = {
     id: Date.now().toString(),
-    address: addr, detail, contract, deposit,
+    address: addr, complexName, sido, gu, dong, bdMgtSn,
+    detail, contract, deposit,
     monthly: contract === '월세' ? monthly : '',
     areaMin, areaMax, moveinDate: movein, memo,
     rooms,
@@ -1962,8 +2239,9 @@ function submitProperty() {
   prop.agencyId = _agencyId;
   savePropToServer(prop);
 
-  // AI 분석 호출
-  fetch('/api/analyze?address=' + encodeURIComponent(addr + ' ' + detail) + '&contract=' + encodeURIComponent(contract) + '&deposit=' + encodeURIComponent(deposit))
+  // AI 분석 호출 (도로명주소 + 동/호수 + 계약유형 + 보증금)
+  const fullAddr = (addr + ' ' + detail).trim();
+  fetch('/api/analyze?address=' + encodeURIComponent(fullAddr) + '&contract=' + encodeURIComponent(contract) + '&deposit=' + encodeURIComponent(deposit))
     .then(r => r.json()).then(data => {
       if (data.ok) {
         prop.score = data.score;
@@ -2234,7 +2512,7 @@ function autoMatchProps(client) {
  * 4. 최소 방 개수 (매물 방수 ≥ 고객 최소)
  * 5. 방향 일치 (고객이 선호 방향 지정 + 매물이 방향 지정 → 교집합)
  * 6. 입주일 범위 겹침
- * 7. 지역 매칭 (주소 → 고객 희망 지역 칩)
+ * 7. 지역 매칭 (구조화된 시/구/동 우선, fallback 주소 텍스트)
  *
  * 정보 누락 시: 해당 조건은 통과로 간주 (관대 매칭)
  */
@@ -2248,13 +2526,11 @@ function matchClientToProp(client, prop) {
   }
 
   // 3. 평형 범위 겹침
-  // 매물 [pMin, pMax], 고객 [cMin, cMax] — 둘이 겹치는지
   const pMin = parseFloat(prop.areaMin);
-  const pMax = parseFloat(prop.areaMax) || pMin;   // 매물 최대 미지정 시 단일값
+  const pMax = parseFloat(prop.areaMax) || pMin;
   const cMin = parseFloat(client.areaMin);
   const cMax = parseFloat(client.areaMax) || cMin;
   if (!isNaN(pMin) && !isNaN(cMin)) {
-    // 겹치지 않으면 매칭 X: pMax < cMin 또는 cMax < pMin
     if (!isNaN(pMax) && !isNaN(cMax)) {
       if (pMax < cMin || cMax < pMin) return false;
     }
@@ -2276,17 +2552,29 @@ function matchClientToProp(client, prop) {
   }
 
   // 6. 입주일 범위
-  // 매물 입주가능일이 고객 희망 범위 안에 있어야
   if (prop.moveinDate && (client.moveinFrom || client.moveinTo)) {
     const propDate = prop.moveinDate;
     if (client.moveinFrom && propDate < client.moveinFrom) return false;
     if (client.moveinTo   && propDate > client.moveinTo)   return false;
   }
 
-  // 7. 지역 매칭
+  // 7. 지역 매칭 — 구조화된 시/구/동 우선, fallback 주소 텍스트
   const clientRegions = client.regions ? JSON.parse(client.regions) : [];
-  if (clientRegions.length && window.BB_REGION_HELPERS) {
-    if (!window.BB_REGION_HELPERS.addressMatchesChips(prop.address, clientRegions)) return false;
+  if (clientRegions.length) {
+    let matched = false;
+    if (prop.sido || prop.gu || prop.dong) {
+      // 매물이 구조화된 위치 정보 보유 → 정확 비교
+      matched = clientRegions.some(chip => {
+        if (chip.sido && chip.sido !== prop.sido) return false;
+        if (chip.gu   && chip.gu   !== prop.gu)   return false;
+        if (chip.dong && chip.dong !== prop.dong) return false;
+        return true;
+      });
+    } else if (window.BB_REGION_HELPERS) {
+      // fallback: 주소 문자열 매칭 (구버전 매물)
+      matched = window.BB_REGION_HELPERS.addressMatchesChips(prop.address, clientRegions);
+    }
+    if (!matched) return false;
   }
 
   return true;
@@ -2351,13 +2639,12 @@ function openClientDetail(i) {
       const visit    = visitors.find(v => v.name === c.name) || {};
       const propIdx  = _props.indexOf(p);
       const colorVar = riskColorVar(p.score);
-      const fullAddr = (p.address + (p.detail ? ' ' + p.detail : '')).trim();
-      const linkedContract = _contracts.find(co => co.address === fullAddr && co.clientName === c.name);
+      const linkedContract = _contracts.find(co => co.propId === p.id && co.clientName === c.name);
       const visitorIdx = visitors.indexOf(visit);
       return `<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;">
-        <span class="ms ms-sm" style="font-size:18px;color:var(--text3);flex-shrink:0;">home_work</span>
+        <span class="ms ms-sm" style="font-size:18px;color:var(--text3);flex-shrink:0;">apartment</span>
         <div style="flex:1;min-width:0;cursor:pointer;" onclick="openPropReport(${propIdx})">
-          <div style="font-size:12px;font-weight:700;color:var(--navy);">${escapeHtml(p.address)} ${escapeHtml(p.detail||'')}</div>
+          <div style="font-size:12px;font-weight:700;color:var(--navy);">${escapeHtml(p.complexName || p.address)} ${escapeHtml(p.detail||'')}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px;">
             ${escapeHtml(p.contract || '')} ${p.deposit ? '· '+parseInt(p.deposit).toLocaleString()+'만' : ''}
             ${visit.date ? '· '+escapeHtml(visit.date) : ''}
@@ -2521,8 +2808,8 @@ function linkContract(propIdx, visitorIdx) {
 
   const fullAddr = (p.address + (p.detail ? ' ' + p.detail : '')).trim();
 
-  // 이미 연결된 계약이 있는지 확인
-  const existing = _contracts.find(c => c.address === fullAddr && c.clientName === v.name);
+  // 이미 연결된 계약이 있는지 확인 (propId + clientName)
+  const existing = _contracts.find(c => c.propId === p.id && c.clientName === v.name);
   if (existing) {
     toast('이미 연결된 계약이 있습니다 (' + existing.stage + ')');
     openContractDetail(existing.id);
@@ -2530,10 +2817,14 @@ function linkContract(propIdx, visitorIdx) {
   }
 
   // 검토 단계로 신규 계약 생성
+  // 주소는 단지명 우선 (없으면 도로명) + 동/호수
+  const displayAddr = (p.complexName || p.address) + (p.detail ? ' ' + p.detail : '');
   const newContract = {
     id: Date.now().toString(),
     agencyId: _agencyId,
-    address: fullAddr,
+    address: displayAddr.trim(),
+    addressFull: (p.address + (p.detail ? ' ' + p.detail : '')).trim(),  // 도로명주소 (검색용)
+    complexName: p.complexName || '',
     clientName: v.name,
     clientPhone: '',
     contract: p.contract || '전세',
