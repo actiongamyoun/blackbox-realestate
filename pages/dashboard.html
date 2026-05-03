@@ -344,6 +344,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   .pipeline{grid-template-columns:1fr 1fr;}
   .page{padding:16px;}
 }
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
@@ -449,12 +450,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <span class="material-symbols-outlined" style="font-size:16px;">login</span>
         로그인
       </button>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button onclick="showRegister()" class="btn-ghost" style="flex:1;justify-content:center;font-size:13px;">
-          사무소 등록
-        </button>
-        <button onclick="doDemo()" class="btn-ghost" style="flex:1;justify-content:center;font-size:13px;">
-          데모 체험
+      <div style="margin-top:12px;">
+        <button onclick="showRegister()" class="btn-ghost" style="width:100%;justify-content:center;font-size:13px;">
+          <span class="material-symbols-outlined" style="font-size:15px;">how_to_reg</span>
+          신규 사무소 등록
         </button>
       </div>
       <!-- 회원가입 폼 -->
@@ -999,15 +998,6 @@ function doLogin() {
   enterDashboard(id);
 }
 
-function doDemo() {
-  _agencyId = 'demo';
-  localStorage.setItem('bb_current_agency', 'demo');
-  _props     = DEMO_PROPS;
-  _contracts = DEMO_CONTRACTS;
-  _schedule  = DEMO_SCHEDULE;
-  _todos     = DEMO_TODOS;
-  enterDashboard('demo');
-}
 
 function doLogout() {
   localStorage.removeItem('bb_current_agency');
@@ -1381,7 +1371,6 @@ async function doRegister() {
   document.getElementById('login-id').value = id;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
 
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
