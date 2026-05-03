@@ -397,11 +397,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
   <div class="sb-bottom">
     <button class="sb-settings" onclick="showPage('settings',this)">
-      <span class="material-symbols-outlined" style="font-size:16px;">settings</span>
+      <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
       설정 · 대시보드 구성
     </button>
     <button class="sb-settings" onclick="doLogout()" style="color:#ef4444;">
-      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>
+      <span class="material-symbols-outlined" style="font-size:16px;color:#ef4444;">logout</span>
       로그아웃
     </button>
   </div>
@@ -434,7 +434,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <div id="page-login" style="display:flex;align-items:center;justify-content:center;flex:1;padding:40px;">
     <div style="width:100%;max-width:360px;">
       <div style="text-align:center;margin-bottom:32px;">
-        <span class="material-symbols-outlined" style="font-size:48px;color:var(--navy);font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">security</span>
+        <span class="material-symbols-outlined" style="font-size:56px;color:var(--navy);font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48;">security</span>
         <div style="font-size:22px;font-weight:900;color:var(--navy);margin-top:8px;">중개사 로그인</div>
         <div style="font-size:13px;color:var(--text3);margin-top:4px;">부동산 블랙박스 수첩</div>
       </div>
@@ -613,8 +613,16 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">dashboard_customize</span>
         <span class="card-head-title">대시보드 구성</span>
       </div>
-      <div id="settings-list">
-        <!-- JS로 렌더링 -->
+      <div id="settings-list"></div>
+      <div style="padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="resetSettings()">
+          <span class="material-symbols-outlined" style="font-size:15px;">restart_alt</span>
+          초기화
+        </button>
+        <button class="btn-primary" onclick="saveSettings()">
+          <span class="material-symbols-outlined" style="font-size:15px;">save</span>
+          설정 저장
+        </button>
       </div>
     </div>
   </div>
@@ -849,6 +857,83 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
+<!-- 관심고객 추가 -->
+<div class="modal-bg" id="modal-visitor">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <div class="modal-title">관심고객 등록</div>
+      <button class="modal-close" onclick="closeModal('visitor')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="visitor-prop-addr-label"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">고객명 *</label>
+          <input class="form-input" id="vis-name" type="text" placeholder="김○○"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">방문일</label>
+          <input class="form-input" id="vis-date" type="date"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">협의금액 (만원)</label>
+          <input class="form-input" id="vis-price" type="number" placeholder="31000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">관심도</label>
+          <select class="form-select" id="vis-interest">
+            <option value="높음">높음 ★★★</option>
+            <option value="보통">보통 ★★</option>
+            <option value="낮음">낮음 ★</option>
+            <option value="포기">관심없음</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">메모</label>
+        <textarea class="form-textarea" id="vis-memo" placeholder="협의 내용, 요청사항 등" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('visitor')">취소</button>
+      <button class="btn-primary" onclick="submitVisitor()">
+        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
+        등록
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 특이사항 수정 -->
+<div class="modal-bg" id="modal-prop-edit">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <div class="modal-title">특이사항 수정</div>
+      <button class="modal-close" onclick="closeModal('prop-edit')">
+        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="prop-edit-addr-label"></div>
+      <div class="form-group">
+        <label class="form-label">특이사항 / 메모</label>
+        <textarea class="form-textarea" id="prop-edit-memo" placeholder="임대인 특이사항, 매물 상태, 주의사항 등" style="min-height:100px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('prop-edit')">취소</button>
+      <button class="btn-primary" onclick="submitPropEdit()">
+        <span class="material-symbols-outlined" style="font-size:16px;">save</span>
+        저장
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- 할 일 추가 -->
 <div class="modal-bg" id="modal-todo">
   <div class="modal" style="max-width:360px;">
@@ -1019,8 +1104,12 @@ function enterDashboard(id) {
   const savedName = localStorage.getItem('bb_agency_name_' + id);
   document.getElementById('agency-name').textContent = savedName || id;
   loadLocalData();
-  showPage('today', document.querySelector('.sb-item.active') || document.querySelector('.sb-item'));
+  // 저장된 설정 불러오기
+  const savedSettings = localStorage.getItem('bb_settings_' + id);
+  if (savedSettings) _settings = JSON.parse(savedSettings);
+  showPage('today', document.querySelector('.sb-item'));
   renderAll();
+  applySidebarSettings();
 }
 
 // 자동 로그인
@@ -1120,22 +1209,63 @@ function renderProps() {
   if (!_props.length) { grid.style.display='none'; empty.style.display='block'; return; }
   empty.style.display = 'none'; grid.style.display = 'grid';
   const riskClass = s => parseInt(s) >= 80 ? 'safe' : parseInt(s) >= 60 ? 'warning' : 'danger';
-  grid.innerHTML = _props.map((p,i) => `
-    <div class="prop-card" onclick="openPropDetail(${i})">
+  const riskLabel = s => parseInt(s) >= 80 ? '안전' : parseInt(s) >= 60 ? '주의' : '위험';
+  grid.innerHTML = _props.map((p,i) => {
+    const visitors = (p.visitors ? JSON.parse(p.visitors) : []);
+    const visitorHtml = visitors.length
+      ? visitors.map(v => `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:0.5px solid var(--border2);">
+          <span class="material-symbols-outlined" style="font-size:14px;color:var(--text3);">person</span>
+          <span style="font-size:12px;font-weight:600;color:var(--navy);flex:1;">${v.name}</span>
+          <span style="font-size:11px;color:var(--text3);">${v.date}</span>
+          ${v.price ? `<span style="font-size:11px;color:var(--info);font-family:'IBM Plex Mono',monospace;">${parseInt(v.price).toLocaleString()}만</span>` : ''}
+        </div>`).join('')
+      : `<div style="font-size:11px;color:var(--text3);padding:4px 0;">등록된 관심고객 없음</div>`;
+    return `
+    <div class="prop-card">
       <div class="prop-card-bar ${riskClass(p.score)}"></div>
       <div class="prop-card-body">
-        <div class="prop-addr">${p.address} ${p.detail || ''}</div>
-        <div class="prop-meta">${p.contract} · ${p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—'}</div>
-        <div class="prop-score-row">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
           <div>
-            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">SAFE SCORE</div>
-            <div class="prop-score ${riskClass(p.score)}">${p.score || '—'}</div>
+            <div class="prop-addr">${p.address}</div>
+            ${p.detail ? `<div style="font-size:11px;color:var(--text3);margin-top:1px;">${p.detail}</div>` : ''}
+            <div class="prop-meta" style="margin-top:4px;">${p.contract} · ${p.deposit ? parseInt(p.deposit).toLocaleString()+'만원' : '—'}</div>
           </div>
-          <span class="material-symbols-outlined" style="color:var(--text3);">chevron_right</span>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">SCORE</div>
+            <div class="prop-score ${riskClass(p.score)}" style="font-size:20px;">${p.score || '—'}</div>
+            <div style="font-size:10px;font-weight:700;color:${parseInt(p.score)>=80?'#22c55e':parseInt(p.score)>=60?'#f59e0b':'#ef4444'}">${p.score ? riskLabel(p.score) : ''}</div>
+          </div>
         </div>
+        ${p.memo ? `<div style="margin-top:8px;padding:6px 8px;background:var(--warn-bg);border-radius:5px;font-size:11px;color:var(--warn);">
+          <span class="material-symbols-outlined" style="font-size:12px;vertical-align:middle;">info</span> ${p.memo}
+        </div>` : ''}
       </div>
-      ${p.memo ? `<div class="prop-history">${p.memo}</div>` : ''}
-    </div>`).join('');
+
+      <!-- 관심고객 섹션 -->
+      <div style="padding:10px 14px;border-top:1px solid var(--border2);background:#fafafa;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1px;display:flex;align-items:center;gap:4px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">group</span>
+            관심고객 ${visitors.length ? '('+visitors.length+'명)' : ''}
+          </div>
+          <button onclick="openAddVisitor(${i})" style="display:flex;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:2px 6px;border-radius:4px;border:1px solid var(--border);">
+            <span class="material-symbols-outlined" style="font-size:13px;">person_add</span> 추가
+          </button>
+        </div>
+        <div>${visitorHtml}</div>
+      </div>
+
+      <!-- 액션 버튼 -->
+      <div style="display:flex;border-top:1px solid var(--border2);">
+        <button onclick="openPropReport(${i})" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);font-family:inherit;border-right:1px solid var(--border2);">
+          <span class="material-symbols-outlined" style="font-size:15px;">analytics</span>AI 분석 리포트
+        </button>
+        <button onclick="openPropEdit(${i})" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);font-family:inherit;">
+          <span class="material-symbols-outlined" style="font-size:15px;">edit_note</span>특이사항 수정
+        </button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderClients() {
@@ -1213,18 +1343,52 @@ function renderAlerts() {
 
 function renderSettings() {
   const items = [
-    { key:'today',     label:'오늘 현황 탭' },
-    { key:'props',     label:'담당 매물 탭' },
-    { key:'clients',   label:'고객 수첩 탭' },
-    { key:'contracts', label:'계약 진행 탭' },
-    { key:'alerts',    label:'위험 알림 탭' },
+    { key:'today',     label:'오늘 현황 탭',  icon:'today' },
+    { key:'props',     label:'담당 매물 탭',  icon:'home_work' },
+    { key:'clients',   label:'고객 수첩 탭',  icon:'people' },
+    { key:'contracts', label:'계약 진행 탭',  icon:'description' },
+    { key:'alerts',    label:'위험 알림 탭',  icon:'notifications' },
   ];
   const el = document.getElementById('settings-list');
   el.innerHTML = items.map(item => `
     <div class="setting-item">
-      <span class="setting-label">${item.label}</span>
-      <button class="toggle ${_settings[item.key] ? 'on' : ''}" onclick="toggleSetting('${item.key}',this)"></button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="material-symbols-outlined" style="font-size:18px;color:var(--text3);">${item.icon}</span>
+        <span class="setting-label">${item.label}</span>
+      </div>
+      <button class="toggle ${_settings[item.key] ? 'on' : ''}" 
+        onclick="toggleSetting('${item.key}',this)" 
+        title="${_settings[item.key] ? '표시 중' : '숨김'}">
+      </button>
     </div>`).join('');
+}
+
+function saveSettings() {
+  localStorage.setItem('bb_settings_' + _agencyId, JSON.stringify(_settings));
+  // 사이드바 메뉴 표시/숨김 반영
+  applySidebarSettings();
+  toast('✅ 설정이 저장되었습니다');
+}
+
+function resetSettings() {
+  _settings = { today:true, props:true, clients:true, contracts:true, alerts:true };
+  renderSettings();
+  applySidebarSettings();
+  toast('설정이 초기화되었습니다');
+}
+
+function applySidebarSettings() {
+  const map = {
+    today:     '[onclick*="today"]',
+    props:     '[onclick*="props"]',
+    clients:   '[onclick*="clients"]',
+    contracts: '[onclick*="contracts"]',
+    alerts:    '[onclick*="alerts"]',
+  };
+  Object.entries(map).forEach(([key, selector]) => {
+    const el = document.querySelector('.sb-item' + selector);
+    if (el) el.style.display = _settings[key] ? 'flex' : 'none';
+  });
 }
 
 // ════════════════════════════════
@@ -1335,15 +1499,74 @@ function toggleTodo(i) {
 function toggleSetting(key, btn) {
   _settings[key] = !_settings[key];
   btn.classList.toggle('on', _settings[key]);
-  localStorage.setItem('bb_settings_' + _agencyId, JSON.stringify(_settings));
+  btn.title = _settings[key] ? '표시 중' : '숨김';
+  // 저장은 "설정 저장" 버튼으로 (즉시 저장 X)
 }
 
-function openPropDetail(i) {
+let _currentPropIdx = -1;
+
+function openPropReport(i) {
   const p = _props[i];
+  // 중개사 로그인 상태를 sessionStorage에 저장 → 리포트에서 확인
+  sessionStorage.setItem('bb_agency_login', _agencyId);
+  sessionStorage.setItem('bb_address',  p.address + ' ' + (p.detail||''));
+  sessionStorage.setItem('bb_score',    p.score || '75');
+  sessionStorage.setItem('bb_risk',     p.risk  || 'warning');
+  sessionStorage.setItem('bb_contract', p.contract || '전세');
+  sessionStorage.setItem('bb_deposit',  p.deposit  || '');
   const url = '/pages/report.html?address=' + encodeURIComponent(p.address + ' ' + (p.detail||''))
-    + '&score=' + (p.score||75) + '&risk=' + (p.risk||'warning')
-    + '&contract=' + (p.contract||'전세') + '&deposit=' + (p.deposit||'');
+    + '&score='    + (p.score    || 75)
+    + '&risk='     + (p.risk     || 'warning')
+    + '&contract=' + encodeURIComponent(p.contract || '전세')
+    + '&deposit='  + (p.deposit  || '')
+    + '&agency='   + encodeURIComponent(_agencyId);
   window.open(url, '_blank');
+}
+
+function openAddVisitor(i) {
+  _currentPropIdx = i;
+  const p = _props[i];
+  document.getElementById('visitor-prop-addr-label').textContent = '📍 ' + p.address + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('vis-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('vis-name').value = '';
+  document.getElementById('vis-price').value = '';
+  document.getElementById('vis-memo').value = '';
+  openModal('visitor');
+}
+
+function submitVisitor() {
+  const name     = document.getElementById('vis-name').value.trim();
+  const date     = document.getElementById('vis-date').value;
+  const price    = document.getElementById('vis-price').value;
+  const interest = document.getElementById('vis-interest').value;
+  const memo     = document.getElementById('vis-memo').value.trim();
+  if (!name) { toast('고객명을 입력하세요'); return; }
+
+  const p = _props[_currentPropIdx];
+  const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+  visitors.unshift({ name, date, price, interest, memo, addedAt: new Date().toISOString() });
+  p.visitors = JSON.stringify(visitors);
+  saveLocal('props', _props);
+  closeModal('visitor');
+  renderProps();
+  toast('✅ 관심고객 등록 완료');
+}
+
+function openPropEdit(i) {
+  _currentPropIdx = i;
+  const p = _props[i];
+  document.getElementById('prop-edit-addr-label').textContent = '📍 ' + p.address + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('prop-edit-memo').value = p.memo || '';
+  openModal('prop-edit');
+}
+
+function submitPropEdit() {
+  const memo = document.getElementById('prop-edit-memo').value.trim();
+  _props[_currentPropIdx].memo = memo;
+  saveLocal('props', _props);
+  closeModal('prop-edit');
+  renderProps();
+  toast('✅ 특이사항 저장 완료');
 }
 
 function openClientDetail(i) { toast('고객 상세 기능 준비 중'); }

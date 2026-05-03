@@ -443,7 +443,7 @@ tailwind.config = {
       </tbody>
     </table>
     <!-- 하단 절반 블러 오버레이 -->
-    <div style="position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.95) 40%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;">
+    <div id="forensic-lock-overlay" style="position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(to bottom,transparent,rgba(255,255,255,.95) 40%);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;">
       <div style="text-align:center;">
         <div style="font-size:20px;margin-bottom:6px;">🔒</div>
         <div style="font-size:14px;font-weight:700;color:#041627;margin-bottom:4px;">실시간 정밀 데이터는 로그인 후 제공</div>
@@ -486,12 +486,12 @@ tailwind.config = {
           <p class="text-sm text-on-surface">임대 기간 중 임대인의 국세·지방세 체납 사실이 확인될 경우...</p>
         </div>
       </div>
-      <!-- 잠금 오버레이 -->
-      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);backdrop-filter:blur(2px);">
+      <!-- 잠금 오버레이 (중개사 로그인 시 JS로 제거됨) -->
+      <div id="clause-lock-overlay" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.7);backdrop-filter:blur(2px);">
         <div style="text-align:center;padding:20px;">
-          <div style="font-size:28px;margin-bottom:10px;">🔒</div>
+          <span class="material-symbols-outlined" style="font-size:36px;color:#041627;display:block;margin-bottom:10px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">lock</span>
           <div style="font-size:15px;font-weight:700;color:#041627;margin-bottom:6px;">로그인 후 전체 열람 가능</div>
-          <div style="font-size:13px;color:#74777d;margin-bottom:16px;">계약 시 유의사항 전체 · AI 맞춤 특약 · 계약서 자동 작성</div>
+          <div style="font-size:13px;color:#74777d;margin-bottom:16px;">계약 시 유의사항 전체 · AI 맞춤 특약</div>
           <button onclick="alert('로그인 기능 준비 중입니다.')"
             style="padding:11px 28px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
             무료 로그인하기
@@ -581,12 +581,39 @@ if ('serviceWorker' in navigator) {
 <script>
 (function() {
   const p = new URLSearchParams(window.location.search);
+
+  // ── 중개사 로그인 확인 ──
+  const agencyLogin = p.get('agency') || sessionStorage.getItem('bb_agency_login') || '';
+  const isAgency    = !!agencyLogin;
+
+  if (isAgency) {
+    // 중개사 모드 배지 표시
+    document.addEventListener('DOMContentLoaded', () => {
+      const badge = document.createElement('div');
+      badge.style.cssText = 'position:fixed;top:60px;right:12px;z-index:99;background:#041627;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;';
+      badge.innerHTML = '<span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">verified</span> 중개사 모드';
+      document.body.appendChild(badge);
+
+      // 정밀 데이터 블러 오버레이 제거
+      const forensicOverlay = document.getElementById('forensic-lock-overlay');
+      if (forensicOverlay) forensicOverlay.remove();
+      // 계약 유의사항 잠금 해제
+      const clauseOverlay = document.getElementById('clause-lock-overlay');
+      if (clauseOverlay) clauseOverlay.remove();
+      // 블러 처리된 요소 해제
+      document.querySelectorAll('[style*="filter:blur"], [style*="filter: blur"]').forEach(el => {
+        el.style.filter = 'none';
+        el.style.pointerEvents = 'auto';
+      });
+    });
+  }
+
   // 파라미터 없으면 sessionStorage에서 복원
   const address  = p.get('address')  || sessionStorage.getItem('bb_address') || '';
   const _score   = p.get('score')    || sessionStorage.getItem('bb_score')   || '';
   const _risk    = p.get('risk')      || sessionStorage.getItem('bb_risk')    || '';
 
-  // 분석 결과 없으면 안내 화면 표시 (주소 파라미터 + 세션 둘 다 없을 때만)
+  // 분석 결과 없으면 안내 화면 표시
   if (!address && !sessionStorage.getItem('bb_address')) {
     var emptyDiv = document.createElement('div');
     emptyDiv.style.cssText = 'text-align:center;padding:60px 20px;background:#fff;border:1px solid #dde0e6;border-radius:12px;margin-bottom:20px;';
