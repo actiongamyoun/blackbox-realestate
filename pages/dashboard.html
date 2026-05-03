@@ -2,489 +2,324 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>부동산 블랙박스 — 중개사 수첩</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>블랙박스 — 중개사 수첩</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 <link rel="manifest" href="/manifest.json"/>
 <meta name="theme-color" content="#041627"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png"/>
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/icon-32.png"/>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --navy:#041627; --navy-mid:#1a2b3c; --navy-light:#2d4a6a;
-  --bg:#f8f9fb; --white:#fff; --border:#dde0e6; --border2:#eaecf0;
-  --text:#1b1c1d; --text2:#44474c; --text3:#74777d;
-  --danger-bg:#fff1f1; --danger:#991b1b;
-  --warn-bg:#fffbeb;   --warn:#92400e;
-  --safe-bg:#f0fdf4;   --safe:#166534;
-  --info-bg:#eff6ff;   --info:#1e40af;
+  --navy:#041627; --navy2:#1a2b3c;
+  --bg:#f5f6f8; --white:#fff;
+  --border:#e4e7ec; --border2:#f0f2f5;
+  --text:#111827; --text2:#374151; --text3:#9ca3af;
+  --danger:#dc2626; --danger-bg:#fef2f2;
+  --warn:#d97706;  --warn-bg:#fffbeb;
+  --safe:#16a34a;  --safe-bg:#f0fdf4;
+  --info:#2563eb;  --info-bg:#eff6ff;
+  --tab-h:60px; --header-h:52px;
 }
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 .mono{font-family:'IBM Plex Mono',monospace;}
-.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;}
-.fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+.ms{font-family:'Material Symbols Outlined';font-size:22px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;line-height:1;vertical-align:middle;display:inline-block;}
+.ms-fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+.ms-sm{font-size:16px;}
+.ms-lg{font-size:28px;}
 
-/* ── 레이아웃 ── */
-.app{display:flex;min-height:100vh;}
-
-/* ── 사이드바 ── */
-.sidebar{
-  width:220px;flex-shrink:0;
+/* ── 헤더 ── */
+.header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:var(--header-h);
   background:var(--navy);
-  display:flex;flex-direction:column;
-  position:fixed;top:0;left:0;bottom:0;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
 }
-.sb-logo{
-  display:flex;align-items:center;gap:10px;
-  padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);
-}
-.sb-logo-icon{
-  width:32px;height:32px;border-radius:7px;
-  background:rgba(255,255,255,.12);
-  display:flex;align-items:center;justify-content:center;
-}
-.sb-logo-name{font-size:14px;font-weight:900;color:#fff;letter-spacing:-0.3px;}
-.sb-logo-sub{font-size:9px;color:#8192a7;letter-spacing:1px;font-family:'IBM Plex Mono',monospace;}
+.header-logo{display:flex;align-items:center;gap:8px;}
+.header-logo-icon{width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;}
+.header-logo-name{font-size:15px;font-weight:900;color:#fff;letter-spacing:-0.3px;}
+.header-logo-sub{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:1px;font-family:'IBM Plex Mono',monospace;}
+.header-agency{text-align:right;}
+.header-agency-name{font-size:12px;font-weight:700;color:#fff;}
+.header-agency-id{font-size:10px;color:rgba(255,255,255,.5);font-family:'IBM Plex Mono',monospace;}
 
-.sb-agency{
-  margin:12px;padding:10px 12px;
-  background:rgba(255,255,255,.06);
-  border-radius:8px;border:1px solid rgba(255,255,255,.08);
+/* ── 콘텐츠 ── */
+.content{
+  padding-top:var(--header-h);
+  padding-bottom:calc(var(--tab-h) + 8px);
+  min-height:100vh;
 }
-.sb-agency-label{font-size:10px;color:#8192a7;margin-bottom:2px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;}
-.sb-agency-name{font-size:13px;font-weight:700;color:#fff;}
-.sb-agency-id{font-size:10px;color:#8192a7;font-family:'IBM Plex Mono',monospace;}
-
-.sb-nav{flex:1;padding:8px 0;}
-.sb-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 16px;
-  font-size:13px;font-weight:500;color:#8192a7;
-  cursor:pointer;transition:all .12s;
-  border-left:3px solid transparent;
-  border:none;background:none;width:100%;text-align:left;font-family:inherit;
-}
-.sb-item:hover{color:#fff;background:rgba(255,255,255,.06);}
-.sb-item.active{color:#fff;background:rgba(255,255,255,.1);border-left:3px solid #fff;}
-.sb-item .material-symbols-outlined{font-size:18px;}
-.sb-badge{
-  margin-left:auto;min-width:18px;height:18px;
-  background:rgba(220,38,38,.8);color:#fff;
-  border-radius:9px;font-size:10px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 5px;font-family:'IBM Plex Mono',monospace;
-}
-.sb-badge.green{background:rgba(22,163,74,.8);}
-
-.sb-bottom{
-  padding:12px;border-top:1px solid rgba(255,255,255,.08);
-}
-.sb-settings{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 12px;border-radius:7px;
-  font-size:12px;color:#8192a7;cursor:pointer;
-  border:none;background:none;width:100%;font-family:inherit;
-  transition:all .12s;
-}
-.sb-settings:hover{color:#fff;background:rgba(255,255,255,.06);}
-
-/* ── 메인 콘텐츠 ── */
-.main{margin-left:220px;flex:1;display:flex;flex-direction:column;}
-
-/* ── 탑바 ── */
-.topbar{
-  position:sticky;top:0;z-index:30;
-  background:var(--white);border-bottom:1px solid var(--border);
-  height:56px;display:flex;align-items:center;
-  justify-content:space-between;padding:0 24px;
-}
-.topbar-title{font-size:16px;font-weight:700;color:var(--navy);}
-.topbar-actions{display:flex;gap:8px;align-items:center;}
-.btn-primary{
-  display:flex;align-items:center;gap:6px;
-  padding:8px 16px;background:var(--navy);color:#fff;
-  border:none;border-radius:8px;font-size:13px;font-weight:700;
-  cursor:pointer;font-family:inherit;transition:opacity .12s;
-}
-.btn-primary:hover{opacity:.88;}
-.btn-ghost{
-  display:flex;align-items:center;gap:6px;
-  padding:8px 14px;background:var(--white);color:var(--text);
-  border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;
-  cursor:pointer;font-family:inherit;transition:all .12s;
-}
-.btn-ghost:hover{border-color:var(--navy);}
-
-/* ── 페이지 컨텐츠 ── */
-.page{display:none;padding:20px 24px;}
+.page{display:none;padding:12px;}
 .page.active{display:block;}
 
-/* ── 섹션 카드 ── */
-.card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:10px;overflow:hidden;margin-bottom:16px;
+/* ── 하단 탭 ── */
+.bottom-tab{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  height:var(--tab-h);
+  background:var(--white);
+  border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
 }
-.card-head{
-  display:flex;align-items:center;gap:8px;
-  padding:12px 16px;background:#f5f3f4;
-  border-bottom:1px solid var(--border);
+.tab-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;
+  border:none;background:none;cursor:pointer;
+  font-size:10px;font-weight:600;color:var(--text3);
+  font-family:inherit;padding:6px 0;
+  position:relative;transition:color .15s;
 }
-.card-head-title{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--navy);text-transform:uppercase;}
+.tab-item.active{color:var(--navy);}
+.tab-item.active .ms{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
+.tab-badge{
+  position:absolute;top:6px;right:calc(50% - 14px);
+  min-width:16px;height:16px;border-radius:8px;
+  background:var(--danger);color:#fff;
+  font-size:9px;font-weight:700;
+  display:none;align-items:center;justify-content:center;
+  padding:0 4px;font-family:'IBM Plex Mono',monospace;
+}
+.tab-badge.show{display:flex;}
 
-/* ── KPI 그리드 ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-.kpi{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:10px;padding:16px;
-}
-.kpi-label{font-size:11px;color:var(--text3);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;}
-.kpi-val{font-size:28px;font-weight:900;color:var(--navy);line-height:1;font-family:'IBM Plex Mono',monospace;}
-.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+/* ── 카드 ── */
+.card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:10px;}
+.card-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border2);}
+.card-head-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--navy);text-transform:uppercase;flex:1;}
 
-/* ── 오늘 일정 ── */
-.schedule-item{
-  display:flex;align-items:flex-start;gap:12px;
-  padding:12px 16px;border-bottom:1px solid var(--border2);
+/* ── KPI ── */
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.kpi{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:14px;}
+.kpi-label{font-size:10px;color:var(--text3);margin-bottom:4px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;}
+.kpi-val{font-size:26px;font-weight:900;color:var(--navy);line-height:1;font-family:'IBM Plex Mono',monospace;}
+.kpi-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.kpi.danger{border-left:3px solid var(--danger);}
+.kpi.danger .kpi-val{color:var(--danger);}
+
+/* ── 리스트 아이템 ── */
+.list-item{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 14px;border-bottom:1px solid var(--border2);
   cursor:pointer;transition:background .1s;
+  -webkit-user-select:none;user-select:none;
 }
-.schedule-item:last-child{border-bottom:none;}
-.schedule-item:hover{background:#fafafa;}
-.schedule-time{
-  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;
-  color:var(--navy);min-width:40px;margin-top:2px;
-}
-.schedule-type{
-  width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px;
-}
-.st-visit{background:#3b82f6;}
-.st-contract{background:#22c55e;}
-.st-consult{background:#f59e0b;}
-.st-other{background:#8192a7;}
-.schedule-content{flex:1;}
-.schedule-client{font-size:13px;font-weight:600;color:var(--navy);}
-.schedule-addr{font-size:11px;color:var(--text3);margin-top:1px;}
-.schedule-memo{font-size:11px;color:var(--text2);margin-top:3px;}
+.list-item:last-child{border-bottom:none;}
+.list-item:active{background:var(--bg);}
 
-/* ── 할 일 ── */
-.todo-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 16px;border-bottom:1px solid var(--border2);
-  cursor:pointer;transition:background .1s;
-}
+/* ── 매물 카드 ── */
+.prop-card{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.prop-card-bar{height:3px;}
+.prop-card-bar.safe{background:var(--safe);}
+.prop-card-bar.warn{background:var(--warn);}
+.prop-card-bar.danger{background:var(--danger);}
+.prop-body{padding:14px;}
+.prop-addr{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.prop-detail{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.prop-score-row{display:flex;align-items:center;justify-content:space-between;}
+.prop-score{font-size:24px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
+.prop-score.safe{color:var(--safe);}
+.prop-score.warn{color:var(--warn);}
+.prop-score.danger{color:var(--danger);}
+.prop-memo{padding:10px 14px;background:#fafafa;border-top:1px solid var(--border2);font-size:12px;color:var(--text2);display:flex;align-items:flex-start;gap:6px;}
+.prop-visitors{padding:10px 14px;border-top:1px solid var(--border2);}
+.prop-visitor-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.prop-visitor-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border2);}
+.prop-visitor-item:last-child{border-bottom:none;}
+.prop-actions{display:flex;border-top:1px solid var(--border2);}
+.prop-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--navy);font-family:inherit;}
+.prop-action-btn:last-child{border-left:1px solid var(--border2);}
+.prop-action-btn:active{background:var(--bg);}
+
+/* ── 파이프라인 (모바일: 세로 스택) ── */
+.pipeline-stage{background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.pipeline-stage-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);}
+.pipeline-stage-title{font-size:12px;font-weight:700;color:var(--navy);font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;}
+.pipeline-count{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.pipeline-item{padding:12px 14px;border-bottom:1px solid var(--border2);cursor:pointer;}
+.pipeline-item:last-child{border-bottom:none;}
+.pipeline-item:active{background:var(--bg);}
+.pipeline-item-addr{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;}
+.pipeline-item-meta{font-size:11px;color:var(--text3);}
+.pipeline-item-memo{font-size:11px;color:var(--text2);margin-top:4px;padding-top:4px;border-top:0.5px solid var(--border2);}
+.pipeline-add{padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px;color:var(--text3);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;}
+.pipeline-add:active{background:var(--bg);}
+
+/* ── 투두 ── */
+.todo-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border2);cursor:pointer;}
 .todo-item:last-child{border-bottom:none;}
-.todo-item:hover{background:#fafafa;}
-.todo-check{
-  width:18px;height:18px;border-radius:4px;flex-shrink:0;
-  border:1.5px solid #c4c6cd;display:flex;align-items:center;justify-content:center;
-  transition:all .12s;
-}
+.todo-item:active{background:var(--bg);}
+.todo-check{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
 .todo-check.done{background:var(--navy);border-color:var(--navy);}
-.todo-text{font-size:13px;color:var(--text);flex:1;}
+.todo-text{flex:1;font-size:13px;}
 .todo-text.done{text-decoration:line-through;color:var(--text3);}
-.todo-tag{
-  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;
-  font-family:'IBM Plex Mono',monospace;
-}
+.todo-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;}
 .tag-urgent{background:var(--danger-bg);color:var(--danger);}
 .tag-normal{background:var(--info-bg);color:var(--info);}
 
-/* ── 매물 카드 ── */
-.prop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-.prop-card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:10px;overflow:hidden;cursor:pointer;
-  transition:box-shadow .15s;
-}
-.prop-card:hover{box-shadow:0 4px 16px rgba(4,22,39,.08);}
-.prop-card-bar{height:4px;}
-.prop-card-bar.danger{background:#ef4444;}
-.prop-card-bar.warning{background:#f59e0b;}
-.prop-card-bar.safe{background:#22c55e;}
-.prop-card-body{padding:14px;}
-.prop-addr{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px;}
-.prop-meta{font-size:11px;color:var(--text3);}
-.prop-score-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
-.prop-score{font-size:22px;font-weight:900;font-family:'IBM Plex Mono',monospace;}
-.prop-score.danger{color:#ef4444;}
-.prop-score.warning{color:#f59e0b;}
-.prop-score.safe{color:#22c55e;}
-.prop-history{
-  padding:10px 14px;
-  background:#fafafa;border-top:1px solid var(--border2);
-  font-size:11px;color:var(--text3);line-height:1.6;
-}
+/* ── 일정 ── */
+.sch-item{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border2);}
+.sch-item:last-child{border-bottom:none;}
+.sch-time{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--navy);min-width:38px;padding-top:2px;}
+.sch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.sch-visit{background:#3b82f6;}
+.sch-contract{background:#22c55e;}
+.sch-consult{background:#f59e0b;}
+.sch-other{background:var(--text3);}
+.sch-content{flex:1;}
+.sch-title{font-size:13px;font-weight:600;color:var(--navy);}
+.sch-sub{font-size:11px;color:var(--text3);margin-top:1px;}
 
-/* ── 계약 파이프라인 ── */
-.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:16px;}
-.pipe-col{border-right:1px solid var(--border);}
-.pipe-col:last-child{border-right:none;}
-.pipe-head{
-  padding:10px 14px;background:#f5f3f4;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.pipe-head-title{font-size:11px;font-weight:700;color:var(--navy);font-family:'IBM Plex Mono',monospace;}
-.pipe-count{
-  width:20px;height:20px;border-radius:50%;
-  background:var(--navy);color:#fff;
-  font-size:10px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'IBM Plex Mono',monospace;
-}
-.pipe-items{padding:8px;min-height:120px;}
-.pipe-item{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:7px;padding:10px;margin-bottom:8px;
-  cursor:pointer;transition:all .12s;
-}
-.pipe-item:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(4,22,39,.06);}
-.pipe-item-addr{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:3px;}
-.pipe-item-client{font-size:11px;color:var(--text3);}
-.pipe-item-memo{font-size:11px;color:var(--text2);margin-top:4px;padding-top:4px;border-top:1px solid var(--border2);}
-
-/* ── 위험 알림 ── */
-.alert-item{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:12px 16px;border-bottom:1px solid var(--border2);
-}
+/* ── 알림 ── */
+.alert-item{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border2);}
 .alert-item:last-child{border-bottom:none;}
 .alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
-.alert-dot.danger{background:#ef4444;}
-.alert-dot.warning{background:#f59e0b;}
-.alert-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px;}
-.alert-desc{font-size:11px;color:var(--text3);}
+.alert-dot.danger{background:var(--danger);}
+.alert-dot.warn{background:var(--warn);}
 
-/* ── 모달 ── */
-.modal-bg{
-  position:fixed;inset:0;background:rgba(4,22,39,.4);
-  z-index:200;display:flex;align-items:center;justify-content:center;
-  display:none;
+/* ── 설정 ── */
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid var(--border2);}
+.setting-item:last-child{border-bottom:none;}
+.toggle{width:42px;height:24px;border-radius:12px;background:#ddd;position:relative;cursor:pointer;border:none;transition:background .2s;}
+.toggle.on{background:var(--navy);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:21px;}
+
+/* ── 빈 상태 ── */
+.empty{padding:40px 20px;text-align:center;}
+.empty .ms{font-size:40px;color:#ddd;display:block;margin-bottom:10px;}
+.empty-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.empty-sub{font-size:12px;color:var(--text3);margin-bottom:16px;}
+
+/* ── FAB (플로팅 버튼) ── */
+.fab{
+  position:fixed;right:16px;bottom:calc(var(--tab-h) + 16px);
+  width:52px;height:52px;border-radius:50%;
+  background:var(--navy);color:#fff;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(4,22,39,.3);
+  z-index:90;transition:transform .15s;
 }
-.modal-bg.open{display:flex;}
-.modal{
-  background:var(--white);border-radius:12px;
-  width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
-  box-shadow:0 20px 60px rgba(4,22,39,.2);
+.fab:active{transform:scale(.94);}
+
+/* ── 바텀 시트 (모달 대체) ── */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:flex-end;}
+.sheet-bg.open{display:flex;}
+.sheet{
+  width:100%;background:var(--white);
+  border-radius:18px 18px 0 0;
+  max-height:92vh;overflow-y:auto;
+  padding-bottom:env(safe-area-inset-bottom);
+  animation:slideUp .25s ease;
 }
-.modal-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;border-bottom:1px solid var(--border);
-}
-.modal-title{font-size:15px;font-weight:700;color:var(--navy);}
-.modal-close{
-  width:28px;height:28px;border-radius:6px;border:none;
-  background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-.modal-body{padding:20px;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:#e4e7ec;margin:10px auto 0;}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border2);}
+.sheet-title{font-size:16px;font-weight:700;color:var(--navy);}
+.sheet-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.sheet-body{padding:16px 18px;}
+.sheet-footer{padding:12px 18px;border-top:1px solid var(--border2);display:flex;gap:8px;}
+
+/* ── 폼 ── */
 .form-group{margin-bottom:14px;}
-.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;}
-.form-input{
-  width:100%;padding:9px 12px;
-  border:1px solid var(--border);border-radius:7px;
-  font-size:13px;font-family:inherit;outline:none;color:var(--text);
-  transition:border .12s;
-}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;color:var(--text);background:var(--white);transition:border .15s;-webkit-appearance:none;}
 .form-input:focus{border-color:var(--navy);}
+.form-select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;background:var(--white);cursor:pointer;-webkit-appearance:none;}
+.form-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;resize:vertical;min-height:80px;-webkit-appearance:none;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.form-select{
-  width:100%;padding:9px 12px;
-  border:1px solid var(--border);border-radius:7px;
-  font-size:13px;font-family:inherit;outline:none;
-  background:var(--white);cursor:pointer;
-}
-.form-textarea{
-  width:100%;padding:9px 12px;
-  border:1px solid var(--border);border-radius:7px;
-  font-size:13px;font-family:inherit;outline:none;
-  resize:vertical;min-height:80px;
-}
-.modal-footer{
-  padding:12px 20px;border-top:1px solid var(--border);
-  display:flex;gap:8px;justify-content:flex-end;
-}
+
+/* ── 버튼 ── */
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s;width:100%;}
+.btn-primary:active{opacity:.85;}
+.btn-ghost{display:flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;background:var(--white);color:var(--navy);border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;}
+.btn-ghost:active{background:var(--bg);}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;width:auto;}
+
+/* ── 로그인 화면 ── */
+.login-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--white);}
+.login-icon{width:72px;height:72px;border-radius:18px;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
 
 /* ── 토스트 ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  background:var(--navy);color:#fff;padding:10px 20px;border-radius:8px;
-  font-size:13px;font-weight:600;z-index:300;
-  animation:fadeUp .25s ease;font-family:inherit;
-  white-space:nowrap;box-shadow:0 4px 16px rgba(4,22,39,.2);
+@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.toast{position:fixed;bottom:calc(var(--tab-h) + 12px);left:50%;transform:translateX(-50%);background:rgba(4,22,39,.92);color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;z-index:500;white-space:nowrap;animation:fadeUp .2s ease;font-family:inherit;backdrop-filter:blur(8px);}
+
+/* ── PC 보조 레이아웃 ── */
+@media(min-width:768px){
+  .content{max-width:480px;margin:0 auto;}
+  .bottom-tab{max-width:480px;left:50%;transform:translateX(-50%);}
+  .fab{right:calc(50% - 240px + 16px);}
+  .sheet{max-width:480px;margin:0 auto;}
+  .toast{max-width:400px;}
 }
 
-/* ── 설정 패널 ── */
-.setting-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;border-bottom:1px solid var(--border2);
-}
-.setting-item:last-child{border-bottom:none;}
-.setting-label{font-size:13px;color:var(--text);}
-.toggle{
-  width:36px;height:20px;border-radius:10px;background:#ddd;
-  position:relative;cursor:pointer;transition:background .2s;border:none;
-}
-.toggle.on{background:var(--navy);}
-.toggle::after{
-  content:'';position:absolute;top:3px;left:3px;
-  width:14px;height:14px;border-radius:50%;background:#fff;
-  transition:left .2s;
-}
-.toggle.on::after{left:19px;}
-
-/* ── 반응형 ── */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform .2s;}
-  .sidebar.open{transform:translateX(0);}
-  .main{margin-left:0;}
-  .kpi-grid{grid-template-columns:1fr 1fr;}
-  .prop-grid{grid-template-columns:1fr;}
-  .pipeline{grid-template-columns:1fr 1fr;}
-  .page{padding:16px;}
-}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- ══ 사이드바 ══ -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-icon">
-      <span class="material-symbols-outlined" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">security</span>
+<!-- ══ 헤더 ══ -->
+<header class="header" id="main-header">
+  <div class="header-logo">
+    <div class="header-logo-icon">
+      <span class="ms" style="font-size:18px;color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">security</span>
     </div>
     <div>
-      <div class="sb-logo-name">블랙박스</div>
-      <div class="sb-logo-sub">중개사 수첩</div>
+      <div class="header-logo-name">블랙박스 수첩</div>
+      <div class="header-logo-sub">REAL ESTATE BLACKBOX</div>
     </div>
   </div>
-
-  <div class="sb-agency" id="agency-info">
-    <div class="sb-agency-label">AGENCY</div>
-    <div class="sb-agency-name" id="agency-name">하나부동산</div>
-    <div class="sb-agency-id mono" id="agency-id">로그인 필요</div>
+  <div class="header-agency" id="header-agency" style="display:none;">
+    <div class="header-agency-name" id="header-agency-name">—</div>
+    <div class="header-agency-id mono" id="header-agency-id">—</div>
   </div>
+  <button onclick="confirmLogout()" id="header-logout" style="display:none;border:none;background:rgba(255,255,255,.1);border-radius:8px;padding:6px 10px;cursor:pointer;">
+    <span class="ms ms-sm" style="color:rgba(255,255,255,.8);">logout</span>
+  </button>
+</header>
 
-  <nav class="sb-nav">
-    <button class="sb-item active" onclick="showPage('today',this)">
-      <span class="material-symbols-outlined">today</span>
-      오늘
-      <span class="sb-badge" id="badge-today">2</span>
-    </button>
-    <button class="sb-item" onclick="showPage('props',this)">
-      <span class="material-symbols-outlined">home_work</span>
-      담당 매물
-      <span class="sb-badge green" id="badge-props">0</span>
-    </button>
-    <button class="sb-item" onclick="showPage('clients',this)">
-      <span class="material-symbols-outlined">people</span>
-      고객 수첩
-    </button>
-    <button class="sb-item" onclick="showPage('contracts',this)">
-      <span class="material-symbols-outlined">description</span>
-      계약 진행
-      <span class="sb-badge" id="badge-contracts">0</span>
-    </button>
-    <button class="sb-item" onclick="showPage('alerts',this)">
-      <span class="material-symbols-outlined">notifications</span>
-      위험 알림
-      <span class="sb-badge" id="badge-alerts">0</span>
-    </button>
-  </nav>
+<!-- ══ 콘텐츠 ══ -->
+<div class="content">
 
-  <div class="sb-bottom">
-    <button class="sb-settings" onclick="showPage('settings',this)">
-      <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
-      설정 · 대시보드 구성
-    </button>
-    <button class="sb-settings" onclick="doLogout()" style="color:#ef4444;">
-      <span class="material-symbols-outlined" style="font-size:16px;color:#ef4444;">logout</span>
-      로그아웃
-    </button>
-  </div>
-</aside>
-
-<!-- ══ 메인 ══ -->
-<div class="main">
-
-  <!-- 탑바 -->
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <button onclick="toggleSidebar()" style="display:none;border:none;background:none;cursor:pointer;" id="menu-btn">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <div class="topbar-title" id="topbar-title">오늘 현황</div>
+  <!-- ── 로그인 ── -->
+  <div id="page-login" class="login-page">
+    <div class="login-icon">
+      <span class="ms" style="font-size:36px;color:#fff;font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48;">security</span>
     </div>
-    <div class="topbar-actions">
-      <button class="btn-ghost" onclick="openModal('schedule')">
-        <span class="material-symbols-outlined" style="font-size:16px;">event</span>
-        일정 추가
-      </button>
-      <button class="btn-primary" onclick="openModal('property')">
-        <span class="material-symbols-outlined" style="font-size:16px;">add</span>
-        매물 등록
-      </button>
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:22px;font-weight:900;color:var(--navy);margin-bottom:4px;">중개사 로그인</div>
+      <div style="font-size:13px;color:var(--text3);">부동산 블랙박스 수첩</div>
     </div>
-  </div>
-
-  <!-- ══════ 로그인 화면 ══════ -->
-  <div id="page-login" style="display:flex;align-items:center;justify-content:center;flex:1;padding:40px;">
     <div style="width:100%;max-width:360px;">
-      <div style="text-align:center;margin-bottom:32px;">
-        <span class="material-symbols-outlined" style="font-size:56px;color:var(--navy);font-variation-settings:'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 48;">security</span>
-        <div style="font-size:22px;font-weight:900;color:var(--navy);margin-top:8px;">중개사 로그인</div>
-        <div style="font-size:13px;color:var(--text3);margin-top:4px;">부동산 블랙박스 수첩</div>
-      </div>
       <div class="form-group">
-        <label class="form-label">사무소명 (ID)</label>
-        <input class="form-input" id="login-id" type="text" placeholder="예: hana_busan_01"/>
+        <label class="form-label">사무소 ID</label>
+        <input class="form-input" id="login-id" type="text" placeholder="예: hana_busan_01" autocomplete="username"/>
       </div>
       <div class="form-group">
         <label class="form-label">비밀번호</label>
-        <input class="form-input" id="login-pw" type="password" placeholder="비밀번호 입력"/>
+        <input class="form-input" id="login-pw" type="password" placeholder="비밀번호" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()"/>
       </div>
-      <button class="btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:14px;" onclick="doLogin()">
-        <span class="material-symbols-outlined" style="font-size:16px;">login</span>
-        로그인
+      <button class="btn-primary" onclick="doLogin()" id="login-btn">
+        <span class="ms ms-sm" style="color:#fff;">login</span> 로그인
       </button>
-      <div style="margin-top:12px;">
-        <button onclick="showRegister()" class="btn-ghost" style="width:100%;justify-content:center;font-size:13px;">
-          <span class="material-symbols-outlined" style="font-size:15px;">how_to_reg</span>
-          신규 사무소 등록
-        </button>
-      </div>
-      <!-- 회원가입 폼 -->
-      <div id="register-form" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px;">사무소 신규 등록</div>
-        <div class="form-group">
-          <label class="form-label">사무소 ID (영문/숫자)</label>
-          <input class="form-input" id="reg-id" type="text" placeholder="예: hana_busan_01"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">사무소명</label>
-          <input class="form-input" id="reg-name" type="text" placeholder="예: 하나부동산"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">비밀번호</label>
-          <input class="form-input" id="reg-pw" type="password" placeholder="비밀번호 설정"/>
-        </div>
-        <button class="btn-primary" style="width:100%;justify-content:center;" onclick="doRegister()">
-          <span class="material-symbols-outlined" style="font-size:16px;">how_to_reg</span>
-          등록하기
+      <div style="text-align:center;margin-top:16px;">
+        <button onclick="showRegisterSheet()" style="background:none;border:none;color:var(--info);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+          신규 사무소 등록 →
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ══════ 오늘 탭 ══════ -->
+  <!-- ── 오늘 ── -->
   <div class="page" id="page-today">
-    <div class="kpi-grid">
+    <div class="kpi-row">
       <div class="kpi">
         <div class="kpi-label">오늘 일정</div>
-        <div class="kpi-val" id="kpi-today-schedule">0</div>
+        <div class="kpi-val" id="kpi-today">0</div>
         <div class="kpi-sub">약속·방문·계약</div>
       </div>
       <div class="kpi">
@@ -497,159 +332,152 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <div class="kpi-val" id="kpi-contracts">0</div>
         <div class="kpi-sub">검토~계약 단계</div>
       </div>
-      <div class="kpi" style="border-left:3px solid #ef4444;">
+      <div class="kpi danger">
         <div class="kpi-label">위험 알림</div>
-        <div class="kpi-val" id="kpi-alerts" style="color:#ef4444;">0</div>
+        <div class="kpi-val" id="kpi-alerts">0</div>
         <div class="kpi-sub">즉시 확인 필요</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <!-- 오늘 일정 -->
-      <div class="card">
-        <div class="card-head">
-          <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">event</span>
-          <span class="card-head-title">오늘 일정</span>
-          <button onclick="openModal('schedule')" style="margin-left:auto;border:none;background:none;cursor:pointer;color:var(--text3);">
-            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
-          </button>
-        </div>
-        <div id="today-schedule-list">
-          <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
-            <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">event_available</span>
-            오늘 일정이 없습니다
-          </div>
-        </div>
-      </div>
-
-      <!-- 할 일 -->
-      <div class="card">
-        <div class="card-head">
-          <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">checklist</span>
-          <span class="card-head-title">오늘 할 일</span>
-          <button onclick="openModal('todo')" style="margin-left:auto;border:none;background:none;cursor:pointer;color:var(--text3);">
-            <span class="material-symbols-outlined" style="font-size:16px;">add</span>
-          </button>
-        </div>
-        <div id="todo-list">
-          <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
-            <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">task_alt</span>
-            할 일이 없습니다
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════ 매물 탭 ══════ -->
-  <div class="page" id="page-props">
-    <div id="props-empty" style="text-align:center;padding:60px 20px;">
-      <span class="material-symbols-outlined" style="font-size:48px;color:var(--text3);display:block;margin-bottom:12px;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 48;">home_work</span>
-      <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;">등록된 매물이 없습니다</div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">주소를 입력하면 AI가 자동으로 분석합니다</div>
-      <button class="btn-primary" onclick="openModal('property')">
-        <span class="material-symbols-outlined" style="font-size:16px;">add</span>
-        첫 매물 등록하기
-      </button>
-    </div>
-    <div class="prop-grid" id="props-grid" style="display:none;"></div>
-  </div>
-
-  <!-- ══════ 고객 탭 ══════ -->
-  <div class="page" id="page-clients">
-    <div style="background:var(--info-bg);border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;">
-      <span class="material-symbols-outlined" style="color:var(--info);font-size:18px;flex-shrink:0;">lock</span>
-      <div style="font-size:12px;color:var(--info);line-height:1.6;">
-        <strong>개인정보 보호</strong> — 고객 정보는 이 기기에만 저장됩니다. 서버에 전송되지 않습니다.
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-      <button class="btn-primary" onclick="openModal('client')">
-        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
-        고객 추가
-      </button>
-    </div>
     <div class="card">
-      <div id="clients-list">
-        <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
-          <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">people</span>
-          등록된 고객이 없습니다
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════ 계약 탭 ══════ -->
-  <div class="page" id="page-contracts">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-      <button class="btn-primary" onclick="openModal('contract')">
-        <span class="material-symbols-outlined" style="font-size:16px;">add</span>
-        계약 추가
-      </button>
-    </div>
-    <div class="card" style="overflow:visible;">
-      <div class="pipeline" id="pipeline-board">
-        <!-- JS로 렌더링 -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════ 위험 알림 탭 ══════ -->
-  <div class="page" id="page-alerts">
-    <div class="card">
-      <div id="alerts-list">
-        <div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">
-          <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;color:#22c55e;">check_circle</span>
-          위험 알림이 없습니다
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════ 설정 탭 ══════ -->
-  <div class="page" id="page-settings">
-    <div class="card" style="max-width:480px;">
       <div class="card-head">
-        <span class="material-symbols-outlined" style="font-size:16px;color:var(--navy);">dashboard_customize</span>
+        <span class="ms ms-sm" style="color:var(--navy);">today</span>
+        <span class="card-head-title">오늘 일정</span>
+        <button onclick="openSheet('schedule')" style="border:none;background:none;cursor:pointer;">
+          <span class="ms ms-sm" style="color:var(--text3);">add</span>
+        </button>
+      </div>
+      <div id="today-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="ms ms-sm" style="color:var(--navy);">checklist</span>
+        <span class="card-head-title">오늘 할 일</span>
+        <button onclick="openSheet('todo')" style="border:none;background:none;cursor:pointer;">
+          <span class="ms ms-sm" style="color:var(--text3);">add</span>
+        </button>
+      </div>
+      <div id="todo-list"></div>
+    </div>
+  </div>
+
+  <!-- ── 매물 ── -->
+  <div class="page" id="page-props">
+    <div id="props-empty" class="empty" style="display:none;">
+      <span class="ms">home_work</span>
+      <div class="empty-title">등록된 매물이 없습니다</div>
+      <div class="empty-sub">우측 하단 + 버튼으로 매물을 등록하세요</div>
+    </div>
+    <div id="props-list"></div>
+  </div>
+
+  <!-- ── 고객 ── -->
+  <div class="page" id="page-clients">
+    <div style="background:var(--info-bg);border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;gap:8px;align-items:center;">
+      <span class="ms ms-sm" style="color:var(--info);flex-shrink:0;">lock</span>
+      <div style="font-size:12px;color:var(--info);line-height:1.5;"><strong>개인정보 보호</strong> — 이 기기에만 저장됩니다</div>
+    </div>
+    <div id="clients-empty" class="empty" style="display:none;">
+      <span class="ms">people</span>
+      <div class="empty-title">등록된 고객이 없습니다</div>
+      <div class="empty-sub">우측 하단 + 버튼으로 고객을 추가하세요</div>
+    </div>
+    <div class="card" id="clients-card" style="display:none;">
+      <div id="clients-list"></div>
+    </div>
+  </div>
+
+  <!-- ── 계약 ── -->
+  <div class="page" id="page-contracts">
+    <div id="contracts-empty" class="empty" style="display:none;">
+      <span class="ms">description</span>
+      <div class="empty-title">진행 중인 계약이 없습니다</div>
+    </div>
+    <div id="pipeline-list"></div>
+  </div>
+
+  <!-- ── 설정 ── -->
+  <div class="page" id="page-settings">
+    <div class="card">
+      <div class="card-head">
+        <span class="ms ms-sm" style="color:var(--navy);">tune</span>
         <span class="card-head-title">대시보드 구성</span>
       </div>
       <div id="settings-list"></div>
-      <div style="padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;">
-        <button class="btn-ghost" onclick="resetSettings()">
-          <span class="material-symbols-outlined" style="font-size:15px;">restart_alt</span>
-          초기화
+      <div style="padding:12px 14px;border-top:1px solid var(--border2);display:flex;gap:8px;">
+        <button class="btn-ghost btn-sm" onclick="resetSettings()">초기화</button>
+        <button class="btn-primary btn-sm" onclick="saveSettings()">
+          <span class="ms ms-sm" style="color:#fff;">save</span> 저장
         </button>
-        <button class="btn-primary" onclick="saveSettings()">
-          <span class="material-symbols-outlined" style="font-size:15px;">save</span>
-          설정 저장
-        </button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:10px;">
+      <div class="list-item" onclick="confirmLogout()" style="cursor:pointer;">
+        <span class="ms ms-sm" style="color:var(--danger);">logout</span>
+        <span style="font-size:14px;color:var(--danger);font-weight:600;">로그아웃</span>
       </div>
     </div>
   </div>
 
-</div><!-- /main -->
-</div><!-- /app -->
+</div><!-- /content -->
 
-<!-- ══ 모달들 ══ -->
+<!-- ══ 하단 탭 ══ -->
+<nav class="bottom-tab" id="bottom-tab" style="display:none;">
+  <button class="tab-item active" id="tab-today" onclick="showPage('today',this)">
+    <span class="ms">today</span>
+    오늘
+    <span class="tab-badge" id="badge-today"></span>
+  </button>
+  <button class="tab-item" id="tab-props" onclick="showPage('props',this)">
+    <span class="ms">home_work</span>
+    매물
+    <span class="tab-badge" id="badge-props"></span>
+  </button>
+  <button class="tab-item" id="tab-clients" onclick="showPage('clients',this)">
+    <span class="ms">people</span>
+    고객
+  </button>
+  <button class="tab-item" id="tab-contracts" onclick="showPage('contracts',this)">
+    <span class="ms">description</span>
+    계약
+    <span class="tab-badge" id="badge-contracts"></span>
+  </button>
+  <button class="tab-item" id="tab-settings" onclick="showPage('settings',this)">
+    <span class="ms">settings</span>
+    설정
+  </button>
+</nav>
+
+<!-- ══ FAB ══ -->
+<button class="fab" id="fab-btn" style="display:none;" onclick="onFabClick()">
+  <span class="ms" style="color:#fff;font-size:26px;">add</span>
+</button>
+
+<!-- ══════════════════════════════════════
+     바텀 시트들
+══════════════════════════════════════ -->
+
 <!-- 매물 등록 -->
-<div class="modal-bg" id="modal-property">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">매물 등록</div>
-      <button class="modal-close" onclick="closeModal('property')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<div class="sheet-bg" id="sheet-property">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">매물 등록</div>
+      <button class="sheet-close" onclick="closeSheet('property')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
+    <div class="sheet-body">
       <div class="form-group">
         <label class="form-label">도로명 주소 *</label>
-        <input class="form-input" id="prop-addr" type="text" placeholder="예: 역삼로 123"/>
+        <input class="form-input" id="prop-addr" type="text" placeholder="역삼로 123"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">상세주소</label>
+        <input class="form-input" id="prop-detail" type="text" placeholder="102동 501호"/>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">상세주소</label>
-          <input class="form-input" id="prop-detail" type="text" placeholder="101동 502호"/>
-        </div>
         <div class="form-group">
           <label class="form-label">계약 유형</label>
           <select class="form-select" id="prop-contract">
@@ -658,46 +486,40 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
             <option value="매매">매매</option>
           </select>
         </div>
-      </div>
-      <div class="form-row">
         <div class="form-group">
           <label class="form-label">보증금 (만원)</label>
           <input class="form-input" id="prop-deposit" type="number" placeholder="32000"/>
         </div>
-        <div class="form-group" id="prop-monthly-wrap">
-          <label class="form-label">월세 (만원)</label>
-          <input class="form-input" id="prop-monthly" type="number" placeholder="65"/>
-        </div>
       </div>
       <div class="form-group">
-        <label class="form-label">메모</label>
-        <textarea class="form-textarea" id="prop-memo" placeholder="매물 특이사항, 임대인 정보 등"></textarea>
+        <label class="form-label">특이사항</label>
+        <textarea class="form-textarea" id="prop-memo" placeholder="임대인 특이사항, 주의사항 등" style="min-height:70px;"></textarea>
       </div>
-      <div style="background:var(--info-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--info);">
-        <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">smart_toy</span>
+      <div style="background:var(--info-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--info);display:flex;gap:6px;align-items:center;">
+        <span class="ms ms-sm" style="color:var(--info);">smart_toy</span>
         등록 후 AI가 자동으로 위험도를 분석합니다
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('property')">취소</button>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('property')">취소</button>
       <button class="btn-primary" onclick="submitProperty()">
-        <span class="material-symbols-outlined" style="font-size:16px;">add_home</span>
-        등록 & 분석
+        <span class="ms ms-sm" style="color:#fff;">add_home</span> 등록 & 분석
       </button>
     </div>
   </div>
 </div>
 
 <!-- 일정 추가 -->
-<div class="modal-bg" id="modal-schedule">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">일정 추가</div>
-      <button class="modal-close" onclick="closeModal('schedule')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<div class="sheet-bg" id="sheet-schedule">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">일정 추가</div>
+      <button class="sheet-close" onclick="closeSheet('schedule')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
+    <div class="sheet-body">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">날짜 *</label>
@@ -725,36 +547,35 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
       </div>
       <div class="form-group">
         <label class="form-label">매물 주소</label>
-        <input class="form-input" id="sch-addr" type="text" placeholder="역삼로 123 (선택)"/>
+        <input class="form-input" id="sch-addr" type="text" placeholder="선택사항"/>
       </div>
       <div class="form-group">
         <label class="form-label">메모</label>
-        <textarea class="form-textarea" id="sch-memo" placeholder="미팅 내용, 협의 금액 등" style="min-height:60px;"></textarea>
+        <textarea class="form-textarea" id="sch-memo" placeholder="협의 내용 등" style="min-height:60px;"></textarea>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('schedule')">취소</button>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('schedule')">취소</button>
       <button class="btn-primary" onclick="submitSchedule()">
-        <span class="material-symbols-outlined" style="font-size:16px;">event</span>
-        일정 저장
+        <span class="ms ms-sm" style="color:#fff;">event</span> 저장
       </button>
     </div>
   </div>
 </div>
 
 <!-- 고객 추가 -->
-<div class="modal-bg" id="modal-client">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">고객 추가 (로컬 저장)</div>
-      <button class="modal-close" onclick="closeModal('client')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<div class="sheet-bg" id="sheet-client">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">고객 추가</div>
+      <button class="sheet-close" onclick="closeSheet('client')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
-      <div style="background:var(--safe-bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--safe);margin-bottom:14px;">
-        <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">lock</span>
-        이 기기에만 저장 · 서버 전송 없음
+    <div class="sheet-body">
+      <div style="background:var(--safe-bg);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--safe);margin-bottom:14px;display:flex;gap:6px;align-items:center;">
+        <span class="ms ms-sm" style="color:var(--safe);">lock</span> 이 기기에만 저장 · 서버 전송 없음
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -774,7 +595,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">예산 최대 (만원)</label>
+          <label class="form-label">예산 (만원)</label>
           <input class="form-input" id="cli-budget" type="number" placeholder="30000"/>
         </div>
       </div>
@@ -784,44 +605,44 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
           <input class="form-input" id="cli-area-size" type="number" placeholder="84"/>
         </div>
         <div class="form-group">
-          <label class="form-label">최소 방 개수</label>
+          <label class="form-label">방 개수</label>
           <select class="form-select" id="cli-rooms">
             <option value="">무관</option>
-            <option value="1">1개 이상</option>
-            <option value="2">2개 이상</option>
-            <option value="3">3개 이상</option>
+            <option value="1">1개+</option>
+            <option value="2">2개+</option>
+            <option value="3">3개+</option>
           </select>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">희망 지역 / 조건</label>
-        <input class="form-input" id="cli-area" type="text" placeholder="강남구 역삼동, 아파트 선호 등"/>
+        <input class="form-input" id="cli-area" type="text" placeholder="강남구, 역삼동 등"/>
       </div>
       <div class="form-group">
         <label class="form-label">메모</label>
-        <textarea class="form-textarea" id="cli-memo" placeholder="상담 내용, 특이사항" style="min-height:60px;"></textarea>
+        <textarea class="form-textarea" id="cli-memo" placeholder="상담 내용" style="min-height:60px;"></textarea>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('client')">취소</button>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('client')">취소</button>
       <button class="btn-primary" onclick="submitClient()">
-        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
-        고객 저장
+        <span class="ms ms-sm" style="color:#fff;">person_add</span> 저장
       </button>
     </div>
   </div>
 </div>
 
 <!-- 계약 추가 -->
-<div class="modal-bg" id="modal-contract">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">계약 추가</div>
-      <button class="modal-close" onclick="closeModal('contract')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<div class="sheet-bg" id="sheet-contract">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">계약 추가</div>
+      <button class="sheet-close" onclick="closeSheet('contract')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
+    <div class="sheet-body">
       <div class="form-group">
         <label class="form-label">매물 주소 *</label>
         <input class="form-input" id="con-addr" type="text" placeholder="역삼로 123 502호"/>
@@ -833,7 +654,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         </div>
         <div class="form-group">
           <label class="form-label">연락처</label>
-          <input class="form-input" id="con-phone" type="tel" placeholder="010-0000-0000"/>
+          <input class="form-input" id="con-phone" type="tel" placeholder="010-0000"/>
         </div>
       </div>
       <div class="form-row">
@@ -858,31 +679,95 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">메모 / 히스토리</label>
-        <textarea class="form-textarea" id="con-memo" placeholder="협의 내용, 특약 사항, 진행 상황 등"></textarea>
+        <label class="form-label">메모</label>
+        <textarea class="form-textarea" id="con-memo" placeholder="협의 내용, 특약 사항 등"></textarea>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('contract')">취소</button>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('contract')">취소</button>
       <button class="btn-primary" onclick="submitContract()">
-        <span class="material-symbols-outlined" style="font-size:16px;">description</span>
-        계약 저장
+        <span class="ms ms-sm" style="color:#fff;">description</span> 저장
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 할 일 추가 -->
+<div class="sheet-bg" id="sheet-todo">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">할 일 추가</div>
+      <button class="sheet-close" onclick="closeSheet('todo')">
+        <span class="ms ms-sm">close</span>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">내용 *</label>
+        <input class="form-input" id="todo-text" type="text" placeholder="예: 역삼동 서류 확인"
+          onkeydown="if(event.key==='Enter') submitTodo()"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">중요도</label>
+        <select class="form-select" id="todo-priority">
+          <option value="urgent">긴급</option>
+          <option value="normal">일반</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('todo')">취소</button>
+      <button class="btn-primary" onclick="submitTodo()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- 신규 등록 -->
+<div class="sheet-bg" id="sheet-register">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">신규 사무소 등록</div>
+      <button class="sheet-close" onclick="closeSheet('register')">
+        <span class="ms ms-sm">close</span>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label">사무소 ID (영문/숫자) *</label>
+        <input class="form-input" id="reg-id" type="text" placeholder="예: hana_busan_01" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">사무소명</label>
+        <input class="form-input" id="reg-name" type="text" placeholder="예: 하나부동산"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호 *</label>
+        <input class="form-input" id="reg-pw" type="password" placeholder="비밀번호 설정" autocomplete="new-password"/>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('register')">취소</button>
+      <button class="btn-primary" onclick="doRegister()">
+        <span class="ms ms-sm" style="color:#fff;">how_to_reg</span> 등록
       </button>
     </div>
   </div>
 </div>
 
 <!-- 관심고객 추가 -->
-<div class="modal-bg" id="modal-visitor">
-  <div class="modal" style="max-width:400px;">
-    <div class="modal-head">
-      <div class="modal-title">관심고객 등록</div>
-      <button class="modal-close" onclick="closeModal('visitor')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<div class="sheet-bg" id="sheet-visitor">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">관심고객 추가</div>
+      <button class="sheet-close" onclick="closeSheet('visitor')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
-      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="visitor-prop-addr-label"></div>
+    <div class="sheet-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;padding:8px 10px;background:var(--bg);border-radius:8px;" id="visitor-prop-label"></div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">고객명 *</label>
@@ -901,88 +786,486 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <div class="form-group">
           <label class="form-label">관심도</label>
           <select class="form-select" id="vis-interest">
-            <option value="높음">높음 <span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span><span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span><span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></option>
-            <option value="보통">보통 <span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span><span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></option>
-            <option value="낮음">낮음 <span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></option>
+            <option value="높음">높음</option>
+            <option value="보통">보통</option>
+            <option value="낮음">낮음</option>
             <option value="포기">관심없음</option>
           </select>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">메모</label>
-        <textarea class="form-textarea" id="vis-memo" placeholder="협의 내용, 요청사항 등" style="min-height:60px;"></textarea>
+        <textarea class="form-textarea" id="vis-memo" placeholder="협의 내용" style="min-height:60px;"></textarea>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('visitor')">취소</button>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('visitor')">취소</button>
       <button class="btn-primary" onclick="submitVisitor()">
-        <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
-        등록
+        <span class="ms ms-sm" style="color:#fff;">person_add</span> 등록
       </button>
     </div>
   </div>
 </div>
 
 <!-- 특이사항 수정 -->
-<div class="modal-bg" id="modal-prop-edit">
-  <div class="modal" style="max-width:400px;">
-    <div class="modal-head">
-      <div class="modal-title">특이사항 수정</div>
-      <button class="modal-close" onclick="closeModal('prop-edit')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<div class="sheet-bg" id="sheet-prop-edit">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="sheet-title">특이사항 수정</div>
+      <button class="sheet-close" onclick="closeSheet('prop-edit')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
-      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="prop-edit-addr-label"></div>
+    <div class="sheet-body">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;" id="prop-edit-label"></div>
       <div class="form-group">
-        <label class="form-label">특이사항 / 메모</label>
-        <textarea class="form-textarea" id="prop-edit-memo" placeholder="임대인 특이사항, 매물 상태, 주의사항 등" style="min-height:100px;"></textarea>
+        <textarea class="form-textarea" id="prop-edit-memo" placeholder="임대인 특이사항, 매물 상태, 주의사항 등" style="min-height:120px;"></textarea>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('prop-edit')">취소</button>
+    <div class="sheet-footer">
+      <button class="btn-ghost" onclick="closeSheet('prop-edit')">취소</button>
       <button class="btn-primary" onclick="submitPropEdit()">
-        <span class="material-symbols-outlined" style="font-size:16px;">save</span>
-        저장
+        <span class="ms ms-sm" style="color:#fff;">save</span> 저장
       </button>
     </div>
   </div>
 </div>
 
-<!-- 할 일 추가 -->
-<div class="modal-bg" id="modal-todo">
-  <div class="modal" style="max-width:360px;">
-    <div class="modal-head">
-      <div class="modal-title">할 일 추가</div>
-      <button class="modal-close" onclick="closeModal('todo')">
-        <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+<!-- 고객 상세 -->
+<div class="sheet-bg" id="sheet-client-detail">
+  <div class="sheet" style="max-height:95vh;">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <span class="ms ms-sm" style="color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">person</span>
+        </div>
+        <div>
+          <div class="sheet-title" id="cd-name" style="font-size:15px;"></div>
+          <div style="font-size:11px;color:var(--text3);" id="cd-sub"></div>
+        </div>
+      </div>
+      <button class="sheet-close" onclick="closeSheet('client-detail')">
+        <span class="ms ms-sm">close</span>
       </button>
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">내용 *</label>
-        <input class="form-input" id="todo-text" type="text" placeholder="예: 역삼동 매물 서류 확인"/>
+    <div style="overflow-y:auto;max-height:calc(95vh - 60px);">
+      <!-- 기본 정보 -->
+      <div style="padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--border2);">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">희망유형</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-type">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">예산</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-budget">—</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">평형/방수</div>
+            <div style="font-size:13px;font-weight:700;color:var(--navy);" id="cd-size">—</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);" id="cd-area"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">중요도</label>
-        <select class="form-select" id="todo-priority">
-          <option value="urgent">긴급</option>
-          <option value="normal">일반</option>
-        </select>
+      <!-- 관심 매물 -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <span class="ms ms-sm">home_work</span> 관심 매물
+        </div>
+        <div id="cd-props-list"><div style="font-size:12px;color:var(--text3);text-align:center;padding:12px;">관심 매물 없음</div></div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal('todo')">취소</button>
-      <button class="btn-primary" onclick="submitTodo()">추가</button>
+      <!-- 상담 메모 -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="ms ms-sm">chat_bubble</span> 상담 메모
+          </div>
+          <button onclick="addClientMemo()" style="display:flex;align-items:center;gap:3px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:4px 8px;border-radius:6px;">
+            <span class="ms" style="font-size:13px;">add</span> 추가
+          </button>
+        </div>
+        <div id="cd-memo-list"></div>
+        <div id="cd-memo-input-wrap" style="display:none;margin-top:8px;">
+          <textarea id="cd-memo-input" class="form-textarea" placeholder="상담 내용..." style="min-height:60px;margin-bottom:8px;"></textarea>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-ghost btn-sm" onclick="cancelClientMemo()">취소</button>
+            <button class="btn-primary btn-sm" onclick="submitClientMemo()">저장</button>
+          </div>
+        </div>
+      </div>
+      <!-- 액션 -->
+      <div style="padding:12px 18px;display:flex;gap:8px;padding-bottom:24px;">
+        <button class="btn-ghost" onclick="addScheduleForClient()" style="font-size:13px;">
+          <span class="ms ms-sm">event</span> 일정 추가
+        </button>
+        <button class="btn-primary" onclick="addContractForClient()" style="font-size:13px;">
+          <span class="ms ms-sm" style="color:#fff;">description</span> 계약 연결
+        </button>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- 계약 상세 -->
+<div class="sheet-bg" id="sheet-contract-detail">
+  <div class="sheet" style="max-height:95vh;">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title" id="con-detail-addr" style="font-size:14px;"></div>
+        <div style="font-size:11px;color:var(--text3);" id="con-detail-sub"></div>
+      </div>
+      <button class="sheet-close" onclick="closeSheet('contract-detail')">
+        <span class="ms ms-sm">close</span>
+      </button>
+    </div>
+    <div style="overflow-y:auto;max-height:calc(95vh - 60px);">
+      <!-- 단계 -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;letter-spacing:1px;">진행 단계</div>
+        <div style="display:flex;gap:6px;" id="con-stage-btns"></div>
+      </div>
+      <!-- 체크리스트 -->
+      <div style="padding:12px 18px;border-bottom:1px solid var(--border2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="ms ms-sm">checklist</span> 체크리스트
+          </div>
+          <span style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;" id="con-chk-label">0/0</span>
+        </div>
+        <div style="height:4px;background:#f0f0ee;border-radius:2px;overflow:hidden;margin-bottom:10px;">
+          <div id="con-chk-bar" style="height:100%;background:var(--navy);border-radius:2px;width:0%;transition:width .3s;"></div>
+        </div>
+        <div id="con-chk-list"></div>
+      </div>
+      <!-- 히스토리 -->
+      <div style="padding:12px 18px;padding-bottom:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <span class="ms ms-sm">history</span> 진행 히스토리
+          </div>
+          <button onclick="addConHistory()" style="display:flex;align-items:center;gap:3px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:4px 8px;border-radius:6px;">
+            <span class="ms" style="font-size:13px;">add</span> 추가
+          </button>
+        </div>
+        <div id="con-history-list"></div>
+        <div id="con-history-input-wrap" style="display:none;margin-top:8px;">
+          <textarea id="con-history-input" class="form-textarea" placeholder="계약금 납부, 특약 협의..." style="min-height:60px;margin-bottom:8px;"></textarea>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-ghost btn-sm" onclick="cancelConHistory()">취소</button>
+            <button class="btn-primary btn-sm" onclick="submitConHistory()">저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
 
 // ════════════════════════════════
-// Apps Script DB 레이어
+// 페이지 전환
 // ════════════════════════════════
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (el) el.classList.add('active');
+  // FAB 표시 여부
+  const fab = document.getElementById('fab-btn');
+  fab.style.display = ['today','props','clients','contracts'].includes(id) ? 'flex' : 'none';
+  _currentPage = id;
+}
+
+let _currentPage = 'today';
+
+function onFabClick() {
+  const map = {
+    today:     'schedule',
+    props:     'property',
+    clients:   'client',
+    contracts: 'contract',
+  };
+  const target = map[_currentPage];
+  if (target) openSheet(target);
+}
+
+// ════════════════════════════════
+// 시트 (바텀 시트)
+// ════════════════════════════════
+function openSheet(name) {
+  document.getElementById('sheet-' + name).classList.add('open');
+}
+
+function closeSheet(name) {
+  document.getElementById('sheet-' + name).classList.remove('open');
+}
+
+// 배경 클릭으로 닫기
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('sheet-bg')) {
+    e.target.classList.remove('open');
+  }
+});
+
+// ════════════════════════════════
+// 유틸
+// ════════════════════════════════
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; }, 2200);
+  setTimeout(() => el.remove(), 2500);
+}
+
+function confirmLogout() {
+  if (confirm('로그아웃 하시겠습니까?')) doLogout();
+}
+
+function showRegisterSheet() {
+  openSheet('register');
+}
+
+// ════════════════════════════════
+// 렌더링 — 오늘 일정
+// ════════════════════════════════
+function renderTodaySchedule() {
+  const today = new Date().toISOString().split('T')[0];
+  const items = _schedule.filter(s => s.date === today).sort((a,b) => a.time > b.time ? 1 : -1);
+  const el    = document.getElementById('today-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><span class="ms">event_available</span><div class="empty-sub">오늘 일정이 없습니다</div></div>';
+    return;
+  }
+  const dotClass = { 방문:'sch-visit', 계약:'sch-contract', 상담:'sch-consult', 기타:'sch-other' };
+  el.innerHTML = items.map(s => `
+    <div class="sch-item">
+      <div class="sch-time">${s.time||'—'}</div>
+      <div class="sch-dot ${dotClass[s.type]||'sch-other'}"></div>
+      <div class="sch-content">
+        <div class="sch-title">${s.clientName||'—'} · ${s.type}</div>
+        ${s.address?`<div class="sch-sub">${s.address}</div>`:''}
+        ${s.memo?`<div class="sch-sub" style="color:var(--text2);">${s.memo}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// 렌더링 — 투두
+// ════════════════════════════════
+function renderTodos() {
+  const el = document.getElementById('todo-list');
+  if (!_todos.length) {
+    el.innerHTML = '<div class="empty"><span class="ms">task_alt</span><div class="empty-sub">할 일이 없습니다</div></div>';
+    return;
+  }
+  el.innerHTML = _todos.map((t,i) => `
+    <div class="todo-item" onclick="toggleTodo(${i})">
+      <div class="todo-check ${t.done?'done':''}">
+        ${t.done?'<span class="ms" style="font-size:13px;color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">check</span>':''}
+      </div>
+      <span class="todo-text ${t.done?'done':''}">${t.text}</span>
+      <span class="todo-tag ${t.priority==='urgent'?'tag-urgent':'tag-normal'}">${t.priority==='urgent'?'긴급':'일반'}</span>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// 렌더링 — 매물
+// ════════════════════════════════
+function renderProps() {
+  const el    = document.getElementById('props-list');
+  const empty = document.getElementById('props-empty');
+  if (!_props.length) {
+    empty.style.display = 'block'; el.innerHTML = ''; return;
+  }
+  empty.style.display = 'none';
+  const rc = s => parseInt(s)>=80?'safe':parseInt(s)>=60?'warn':'danger';
+  const rl = s => parseInt(s)>=80?'안전':parseInt(s)>=60?'주의':'위험';
+  el.innerHTML = _props.map((p,i) => {
+    const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+    return `
+    <div class="prop-card">
+      <div class="prop-card-bar ${rc(p.score)}"></div>
+      <div class="prop-body">
+        <div class="prop-addr">${p.address}</div>
+        <div class="prop-detail">${p.detail||''} · ${p.contract} · ${p.deposit?parseInt(p.deposit).toLocaleString()+'만원':'—'}</div>
+        <div class="prop-score-row">
+          <div>
+            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:2px;">SAFE SCORE</div>
+            <div class="prop-score ${rc(p.score)}">${p.score||'—'}</div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:${parseInt(p.score)>=80?'var(--safe)':parseInt(p.score)>=60?'var(--warn)':'var(--danger)'};">${p.score?rl(p.score):''}</span>
+        </div>
+      </div>
+      ${p.memo?`<div class="prop-memo"><span class="ms ms-sm" style="color:var(--warn);flex-shrink:0;">info</span>${p.memo}</div>`:''}
+      <div class="prop-visitors">
+        <div class="prop-visitor-head">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:4px;">
+            <span class="ms ms-sm">group</span> 관심고객 ${visitors.length?'('+visitors.length+'명)':''}
+          </div>
+          <button onclick="openAddVisitor(${i})" style="display:flex;align-items:center;gap:3px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:3px 8px;border-radius:6px;">
+            <span class="ms" style="font-size:13px;">person_add</span> 추가
+          </button>
+        </div>
+        ${visitors.length
+          ? visitors.map(v=>`<div class="prop-visitor-item">
+              <span class="ms ms-sm" style="color:var(--text3);">person</span>
+              <span style="font-size:12px;font-weight:600;color:var(--navy);flex:1;">${v.name}</span>
+              <span style="font-size:11px;color:var(--text3);">${v.date||''}</span>
+              ${v.price?`<span style="font-size:11px;color:var(--info);font-family:'IBM Plex Mono',monospace;margin-left:4px;">${parseInt(v.price).toLocaleString()}만</span>`:''}
+              <span style="font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px;background:${v.interest==='높음'?'var(--safe-bg)':v.interest==='포기'?'#f5f5f5':'var(--info-bg)'};color:${v.interest==='높음'?'var(--safe)':v.interest==='포기'?'var(--text3)':'var(--info)'};">${v.interest||''}</span>
+            </div>`).join('')
+          : '<div style="font-size:12px;color:var(--text3);padding:4px 0;">등록된 관심고객 없음</div>'
+        }
+      </div>
+      <div class="prop-actions">
+        <button class="prop-action-btn" onclick="openPropReport(${i})">
+          <span class="ms ms-sm">analytics</span> AI 리포트
+        </button>
+        <button class="prop-action-btn" onclick="openPropEdit(${i})">
+          <span class="ms ms-sm">edit_note</span> 특이사항
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// 렌더링 — 고객
+// ════════════════════════════════
+function renderClients() {
+  const el    = document.getElementById('clients-list');
+  const empty = document.getElementById('clients-empty');
+  const card  = document.getElementById('clients-card');
+  if (!_clients.length) {
+    empty.style.display='block'; card.style.display='none'; return;
+  }
+  empty.style.display='none'; card.style.display='block';
+  el.innerHTML = _clients.map((c,i) => {
+    const cnt = _props.filter(p => {
+      const vs = p.visitors ? JSON.parse(p.visitors) : [];
+      return vs.some(v => v.name === c.name);
+    }).length;
+    return `
+    <div class="list-item" onclick="openClientDetail(${i})">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;">${c.name?.[0]||'?'}</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:13px;font-weight:700;color:var(--navy);">${c.name}</span>
+          ${cnt?`<span style="font-size:10px;background:var(--info-bg);color:var(--info);padding:1px 6px;border-radius:10px;font-weight:700;">${cnt}개 매물</span>`:''}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${c.phone||'—'} · ${c.type} · ${c.budget?parseInt(c.budget).toLocaleString()+'만원':'예산미정'}</div>
+        ${c.area?`<div style="font-size:11px;color:var(--text2);margin-top:1px;">${c.area}</div>`:''}
+      </div>
+      <span class="ms ms-sm" style="color:var(--text3);">chevron_right</span>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// 렌더링 — 계약 파이프라인
+// ════════════════════════════════
+function renderPipeline() {
+  const stages  = ['검토','협의','계약','완료'];
+  const el      = document.getElementById('pipeline-list');
+  const empty   = document.getElementById('contracts-empty');
+  const hasAny  = _contracts.length > 0;
+  empty.style.display = hasAny ? 'none' : 'block';
+
+  el.innerHTML = stages.map(stage => {
+    const items = _contracts.filter(c => c.stage === stage);
+    return `
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-head">
+        <span class="pipeline-stage-title">${stage}</span>
+        <span class="pipeline-count">${items.length}</span>
+      </div>
+      ${items.map(c => `
+        <div class="pipeline-item" onclick="openContractDetail('${c.id}')">
+          <div class="pipeline-item-addr">${c.address}</div>
+          <div class="pipeline-item-meta">${c.clientName||'—'} · ${c.contract} ${c.deposit?'· '+parseInt(c.deposit).toLocaleString()+'만':''}</div>
+          ${c.memo?`<div class="pipeline-item-memo">${c.memo}</div>`:''}
+        </div>`).join('')}
+      <button class="pipeline-add" onclick="openContractStage('${stage}')">
+        <span class="ms ms-sm" style="color:var(--text3);">add</span> 추가
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// 렌더링 — 알림
+// ════════════════════════════════
+function renderAlerts() {
+  const badge = document.getElementById('badge-alerts');
+  // (위험알림은 오늘 탭 내 KPI로 표시)
+}
+
+// ════════════════════════════════
+// 렌더링 — 설정
+// ════════════════════════════════
+function renderSettings() {
+  const items = [
+    { key:'today',     label:'오늘 현황 탭',  icon:'today' },
+    { key:'props',     label:'담당 매물 탭',  icon:'home_work' },
+    { key:'clients',   label:'고객 수첩 탭',  icon:'people' },
+    { key:'contracts', label:'계약 진행 탭',  icon:'description' },
+  ];
+  const el = document.getElementById('settings-list');
+  el.innerHTML = items.map(item => `
+    <div class="setting-item">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="ms ms-sm" style="color:var(--text3);">${item.icon}</span>
+        <span style="font-size:14px;">${item.label}</span>
+      </div>
+      <button class="toggle ${_settings[item.key]?'on':''}" onclick="toggleSetting('${item.key}',this)"></button>
+    </div>`).join('');
+}
+
+// ════════════════════════════════
+// KPI 업데이트
+// ════════════════════════════════
+function updateKPIs() {
+  const today = new Date().toISOString().split('T')[0];
+  const tCnt  = _schedule.filter(s => s.date === today).length;
+  const aCnt  = _props.filter(p => parseInt(p.score) < 60).length;
+  const cCnt  = _contracts.filter(c => c.stage !== '완료').length;
+
+  document.getElementById('kpi-today').textContent     = tCnt;
+  document.getElementById('kpi-props').textContent     = _props.length;
+  document.getElementById('kpi-contracts').textContent = cCnt;
+  document.getElementById('kpi-alerts').textContent    = aCnt;
+
+  // 뱃지
+  const setBadge = (id, cnt) => {
+    const el = document.getElementById('badge-' + id);
+    if (!el) return;
+    el.textContent = cnt;
+    el.classList.toggle('show', cnt > 0);
+  };
+  setBadge('today', tCnt);
+  setBadge('props', _props.length);
+  setBadge('contracts', cCnt);
+}
+
+function renderAll() {
+  renderTodaySchedule();
+  renderTodos();
+  renderProps();
+  renderClients();
+  renderPipeline();
+  renderAlerts();
+  updateKPIs();
+  renderSettings();
+}
+
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8CFdJNXRRbW58waE8cLQcirhgJiwrjnrsUYEbbd7P4WSBlNxIrbCYX9nAFy04sgPFkA/exec';
 
 // GET 방식으로만 통신 (CORS 해결)
@@ -1107,24 +1390,34 @@ function doLogin() {
 
 function doLogout() {
   localStorage.removeItem('bb_current_agency');
-  _agencyId = '';
+  _agencyId = ''; _props=[]; _contracts=[]; _schedule=[]; _clients=[]; _todos=[];
   document.getElementById('page-login').style.display = 'flex';
+  document.getElementById('bottom-tab').style.display = 'none';
+  document.getElementById('fab-btn').style.display = 'none';
+  document.getElementById('header-agency').style.display = 'none';
+  document.getElementById('header-logout').style.display = 'none';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  showPage('today', document.querySelector('.sb-item'));
 }
 
 function enterDashboard(id) {
+  // 로그인 화면 숨기기
   document.getElementById('page-login').style.display = 'none';
-  document.getElementById('agency-id').textContent = id;
+  document.getElementById('bottom-tab').style.display = 'flex';
+  document.getElementById('fab-btn').style.display = 'flex';
+  document.getElementById('main-header').style.background = 'var(--navy)';
+  document.getElementById('header-agency').style.display = 'block';
+  document.getElementById('header-logout').style.display = 'flex';
   const savedName = localStorage.getItem('bb_agency_name_' + id);
-  document.getElementById('agency-name').textContent = savedName || id;
+  document.getElementById('header-agency-name').textContent = savedName || id;
+  document.getElementById('header-agency-id').textContent  = id;
+
   loadLocalData();
-  // 저장된 설정 불러오기
   const savedSettings = localStorage.getItem('bb_settings_' + id);
-  if (savedSettings) _settings = JSON.parse(savedSettings);
-  showPage('today', document.querySelector('.sb-item'));
+  if (savedSettings) _settings = Object.assign(_settings, JSON.parse(savedSettings));
+
+  showPage('today', document.getElementById('tab-today'));
   renderAll();
-  applySidebarSettings();
+  document.getElementById('sch-date').value = new Date().toISOString().split('T')[0];
 }
 
 // 자동 로그인
@@ -1132,10 +1425,6 @@ window.addEventListener('load', () => {
   const saved = localStorage.getItem('bb_current_agency');
   if (saved) { _agencyId = saved; enterDashboard(saved); }
   else { document.getElementById('page-login').style.display = 'flex'; }
-  renderPipeline();
-  renderSettings();
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('sch-date').value = today;
 });
 
 // ════════════════════════════════
@@ -1404,19 +1693,7 @@ function resetSettings() {
   toast('설정이 초기화되었습니다');
 }
 
-function applySidebarSettings() {
-  const map = {
-    today:     '[onclick*="today"]',
-    props:     '[onclick*="props"]',
-    clients:   '[onclick*="clients"]',
-    contracts: '[onclick*="contracts"]',
-    alerts:    '[onclick*="alerts"]',
-  };
-  Object.entries(map).forEach(([key, selector]) => {
-    const el = document.querySelector('.sb-item' + selector);
-    if (el) el.style.display = _settings[key] ? 'flex' : 'none';
-  });
-}
+function applySidebarSettings() { /* 모바일 탭 기반 — 사이드바 없음 */ }
 
 // ════════════════════════════════
 // 액션
@@ -1432,7 +1709,7 @@ function submitProperty() {
   const prop = { id: Date.now().toString(), address: addr, detail, contract, deposit, memo, score: '', risk: '', createdAt: new Date().toISOString() };
   _props.push(prop);
   saveLocal('props', _props);
-  closeModal('property');
+  closeSheet('property');
   renderProps(); updateKPIs();
   toast('매물 등록 완료 · AI 분석 중...');
   // 서버에도 저장
@@ -1465,7 +1742,7 @@ function submitSchedule() {
 
   _schedule.push({ id: Date.now().toString(), date, time, type, clientName: client, address: addr, memo });
   saveLocal('schedule', _schedule);
-  closeModal('schedule');
+  closeSheet('schedule');
   renderTodaySchedule(); updateKPIs();
   toast('일정 저장 완료');
 }
@@ -1493,7 +1770,7 @@ function submitClient() {
 
   // 조건에 맞는 매물 자동 매칭
   const matched = autoMatchProps(newClient);
-  closeModal('client');
+  closeSheet('client');
   renderClients(); renderProps();
   toast('고객 저장 완료' + (matched > 0 ? ' · 관심매물 ' + matched + '개 자동 매칭' : ''));
 }
@@ -1551,7 +1828,7 @@ function submitContract() {
   const newContract = { id: Date.now().toString(), agencyId: _agencyId, address: addr, clientName: client, clientPhone: phone, contract: type, deposit, stage, memo, history: '[]', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
   _contracts.push(newContract);
   saveLocal('contracts', _contracts);
-  closeModal('contract');
+  closeSheet('contract');
   renderPipeline(); updateKPIs();
   toast('계약 저장 완료');
   saveContractToServer(newContract);
@@ -1564,7 +1841,7 @@ function submitTodo() {
 
   _todos.unshift({ id: Date.now().toString(), text, priority, done: false });
   saveLocal('todos', _todos);
-  closeModal('todo');
+  closeSheet('todo');
   renderTodos();
   toast('할 일 추가 완료');
 }
@@ -1605,12 +1882,12 @@ function openPropReport(i) {
 function openAddVisitor(i) {
   _currentPropIdx = i;
   const p = _props[i];
-  document.getElementById('visitor-prop-addr-label').textContent = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">location_on</span> ' + p.address + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('visitor-prop-label').textContent = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">location_on</span> ' + p.address + (p.detail ? ' ' + p.detail : '');
   document.getElementById('vis-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('vis-name').value = '';
   document.getElementById('vis-price').value = '';
   document.getElementById('vis-memo').value = '';
-  openModal('visitor');
+  openSheet('visitor');
 }
 
 function submitVisitor() {
@@ -1626,7 +1903,7 @@ function submitVisitor() {
   visitors.unshift({ name, date, price, interest, memo, addedAt: new Date().toISOString() });
   p.visitors = JSON.stringify(visitors);
   saveLocal('props', _props);
-  closeModal('visitor');
+  closeSheet('visitor');
   renderProps();
   toast(' 관심고객 등록 완료');
 }
@@ -1634,16 +1911,16 @@ function submitVisitor() {
 function openPropEdit(i) {
   _currentPropIdx = i;
   const p = _props[i];
-  document.getElementById('prop-edit-addr-label').textContent = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">location_on</span> ' + p.address + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('prop-edit-label').textContent = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">location_on</span> ' + p.address + (p.detail ? ' ' + p.detail : '');
   document.getElementById('prop-edit-memo').value = p.memo || '';
-  openModal('prop-edit');
+  openSheet('prop-edit');
 }
 
 function submitPropEdit() {
   const memo = document.getElementById('prop-edit-memo').value.trim();
   _props[_currentPropIdx].memo = memo;
   saveLocal('props', _props);
-  closeModal('prop-edit');
+  closeSheet('prop-edit');
   renderProps();
   toast(' 특이사항 저장 완료');
 }
@@ -1700,7 +1977,7 @@ function openClientDetail(i) {
   }
 
   renderClientMemos(c);
-  openModal('client-detail');
+  openSheet('client-detail');
 }
 
 // 관심 매물 제외
@@ -1751,18 +2028,18 @@ function submitClientMemo() {
 
 function addScheduleForClient() {
   const c = _clients[_currentClientIdx];
-  closeModal('client-detail');
+  closeSheet('client-detail');
   document.getElementById('sch-client').value = c.name;
-  openModal('schedule');
+  openSheet('schedule');
 }
 
 function addContractForClient() {
   const c = _clients[_currentClientIdx];
-  closeModal('client-detail');
+  closeSheet('client-detail');
   document.getElementById('con-client').value = c.name;
   document.getElementById('con-phone').value  = c.phone || '';
   document.getElementById('con-type').value   = c.type  || '전세';
-  openModal('contract');
+  openSheet('contract');
 }
 
 // ── 계약 상세 ──
@@ -1805,7 +2082,7 @@ function openContractDetail(id) {
 
   // 히스토리
   renderConHistory(con);
-  openModal('contract-detail');
+  openSheet('contract-detail');
 }
 
 function changeConStage(id, stage) {
@@ -1868,7 +2145,7 @@ function submitConHistory() {
 }
 function openContractStage(stage) {
   document.getElementById('con-stage').value = stage;
-  openModal('contract');
+  openSheet('contract');
 }
 
 // ════════════════════════════════
@@ -1977,7 +2254,7 @@ const DEMO_TODOS = [
           <div style="font-size:11px;color:var(--text3);" id="cd-sub">—</div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeModal('client-detail')">
+      <button class="modal-close" onclick="closeSheet('client-detail')">
         <span class="material-symbols-outlined" style="font-size:16px;">close</span>
       </button>
     </div>
@@ -2059,7 +2336,7 @@ const DEMO_TODOS = [
         <div class="modal-title" id="con-detail-addr">—</div>
         <div style="font-size:11px;color:var(--text3);" id="con-detail-sub">—</div>
       </div>
-      <button class="modal-close" onclick="closeModal('contract-detail')">
+      <button class="modal-close" onclick="closeSheet('contract-detail')">
         <span class="material-symbols-outlined" style="font-size:16px;">close</span>
       </button>
     </div>
@@ -2105,5 +2382,9 @@ const DEMO_TODOS = [
   </div>
 </div>
 
+</body>
+</html>
+
+</script>
 </body>
 </html>
