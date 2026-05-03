@@ -307,7 +307,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <span class="ms ms-sm" style="color:#fff;">login</span> 로그인
       </button>
       <div style="text-align:center;margin-top:16px;">
-        <button onclick="showRegisterSheet()" style="background:none;border:none;color:var(--info);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+        <button onclick="openSheet('register')" style="background:none;border:none;color:var(--info);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
           신규 사무소 등록 →
         </button>
       </div>
@@ -1069,7 +1069,7 @@ function renderTodos() {
   el.innerHTML = _todos.map((t,i) => `
     <div class="todo-item" onclick="toggleTodo(${i})">
       <div class="todo-check ${t.done?'done':''}">
-        ${t.done?'<span class="ms" style="font-size:13px;color:#fff;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">check</span>':''}
+        ${t.done?'<span class="ms" style="font-size:13px;color:#fff;font-style:normal;">check</span>':''}
       </div>
       <span class="todo-text ${t.done?'done':''}">${t.text}</span>
       <span class="todo-tag ${t.priority==='urgent'?'tag-urgent':'tag-normal'}">${t.priority==='urgent'?'긴급':'일반'}</span>
@@ -2119,7 +2119,7 @@ function openContractDetail(id) {
   document.getElementById('con-chk-bar').style.width   = Math.round(doneCount/chkItems.length*100) + '%';
   document.getElementById('con-chk-list').innerHTML    = chkItems.map(k => `
     <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border2);cursor:pointer;" onclick="toggleConChk('${id}','${k}')">
-      <span class="material-symbols-outlined" style="font-size:18px;color:${conChks[k]?'#22c55e':'#c4c6cd'};font-variation-settings:'FILL' ${conChks[k]?1:0},'wght' 400,'GRAD' 0,'opsz' 24;">${conChks[k]?'check_box':'check_box_outline_blank'}</span>
+      <span class="material-symbols-outlined" style="font-size:18px;color:${conChks[k]?'#22c55e':'#c4c6cd'};">${conChks[k]?'check_box':'check_box_outline_blank'}</span>
       <span style="font-size:12px;color:${conChks[k]?'var(--text3)':'var(--text)'};${conChks[k]?'text-decoration:line-through;':''}">${k}</span>
     </div>`).join('');
 
