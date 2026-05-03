@@ -886,9 +886,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
         <div class="form-group">
           <label class="form-label">관심도</label>
           <select class="form-select" id="vis-interest">
-            <option value="높음">높음 ★★★</option>
-            <option value="보통">보통 ★★</option>
-            <option value="낮음">낮음 ★</option>
+            <option value="높음">높음 <span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span><span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span><span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></option>
+            <option value="보통">보통 <span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span><span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></option>
+            <option value="낮음">낮음 <span class="material-symbols-outlined" style="font-size:13px;color:#f59e0b;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">star</span></option>
             <option value="포기">관심없음</option>
           </select>
         </div>
@@ -1274,16 +1274,28 @@ function renderClients() {
     el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;"><span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">people</span>등록된 고객이 없습니다</div>';
     return;
   }
-  el.innerHTML = _clients.map((c,i) => `
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border2);cursor:pointer;" onclick="openClientDetail(${i})">
-      <div style="width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;">${c.name?.[0] || '?'}</div>
+  el.innerHTML = _clients.map((c,i) => {
+    // 이 고객이 본 매물 수 계산
+    const visitedProps = _props.filter(p => {
+      const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+      return visitors.some(v => v.name === c.name);
+    });
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .1s;" 
+      onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''"
+      onclick="openClientDetail(${i})">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;">${c.name?.[0] || '?'}</div>
       <div style="flex:1;">
-        <div style="font-size:13px;font-weight:600;color:var(--navy);">${c.name}</div>
-        <div style="font-size:11px;color:var(--text3);">${c.phone || '—'} · ${c.type} · ${c.budget ? parseInt(c.budget).toLocaleString()+'만원' : '예산미정'}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:13px;font-weight:700;color:var(--navy);">${c.name}</div>
+          ${visitedProps.length ? `<span style="font-size:10px;background:var(--info-bg);color:var(--info);padding:1px 6px;border-radius:10px;font-weight:700;">${visitedProps.length}개 매물</span>` : ''}
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${c.phone || '—'} · ${c.type} · ${c.budget ? parseInt(c.budget).toLocaleString()+'만원' : '예산미정'}</div>
         ${c.area ? `<div style="font-size:11px;color:var(--text2);margin-top:2px;">${c.area}</div>` : ''}
       </div>
       <span class="material-symbols-outlined" style="color:var(--text3);">chevron_right</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderPipeline() {
@@ -1326,7 +1338,7 @@ function renderAlerts() {
       <div class="alert-item">
         <div class="alert-dot danger"></div>
         <div>
-          <div class="alert-title">⚠ 고위험 — ${p.address}</div>
+          <div class="alert-title"><span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;color:#f59e0b;">warning</span> 고위험 — ${p.address}</div>
           <div class="alert-desc">안전점수 ${p.score}점 · ${p.contract} · 즉시 확인 필요</div>
         </div>
       </div>`),
@@ -1367,7 +1379,7 @@ function saveSettings() {
   localStorage.setItem('bb_settings_' + _agencyId, JSON.stringify(_settings));
   // 사이드바 메뉴 표시/숨김 반영
   applySidebarSettings();
-  toast('✅ 설정이 저장되었습니다');
+  toast(' 설정이 저장되었습니다');
 }
 
 function resetSettings() {
@@ -1526,7 +1538,7 @@ function openPropReport(i) {
 function openAddVisitor(i) {
   _currentPropIdx = i;
   const p = _props[i];
-  document.getElementById('visitor-prop-addr-label').textContent = '📍 ' + p.address + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('visitor-prop-addr-label').textContent = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">location_on</span> ' + p.address + (p.detail ? ' ' + p.detail : '');
   document.getElementById('vis-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('vis-name').value = '';
   document.getElementById('vis-price').value = '';
@@ -1549,13 +1561,13 @@ function submitVisitor() {
   saveLocal('props', _props);
   closeModal('visitor');
   renderProps();
-  toast('✅ 관심고객 등록 완료');
+  toast(' 관심고객 등록 완료');
 }
 
 function openPropEdit(i) {
   _currentPropIdx = i;
   const p = _props[i];
-  document.getElementById('prop-edit-addr-label').textContent = '📍 ' + p.address + (p.detail ? ' ' + p.detail : '');
+  document.getElementById('prop-edit-addr-label').textContent = '<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">location_on</span> ' + p.address + (p.detail ? ' ' + p.detail : '');
   document.getElementById('prop-edit-memo').value = p.memo || '';
   openModal('prop-edit');
 }
@@ -1566,11 +1578,198 @@ function submitPropEdit() {
   saveLocal('props', _props);
   closeModal('prop-edit');
   renderProps();
-  toast('✅ 특이사항 저장 완료');
+  toast(' 특이사항 저장 완료');
 }
 
-function openClientDetail(i) { toast('고객 상세 기능 준비 중'); }
-function openContractDetail(id) { toast('계약 상세 기능 준비 중'); }
+let _currentClientIdx = -1;
+let _currentContractId = '';
+
+function openClientDetail(i) {
+  _currentClientIdx = i;
+  const c = _clients[i];
+
+  document.getElementById('cd-name').textContent   = c.name;
+  document.getElementById('cd-sub').textContent    = c.phone || '연락처 없음';
+  document.getElementById('cd-type').textContent   = c.type  || '—';
+  document.getElementById('cd-budget').textContent = c.budget ? parseInt(c.budget).toLocaleString()+'만원' : '—';
+  document.getElementById('cd-area').textContent   = c.area  || '—';
+
+  // 본 매물 목록 (매물 visitors에서 이 고객 찾기)
+  const visitedProps = _props.filter(p => {
+    const visitors = p.visitors ? JSON.parse(p.visitors) : [];
+    return visitors.some(v => v.name === c.name);
+  });
+  const propsEl = document.getElementById('cd-props-list');
+  propsEl.innerHTML = visitedProps.length
+    ? visitedProps.map((p, pi) => {
+        const visitors = JSON.parse(p.visitors || '[]');
+        const visit    = visitors.find(v => v.name === c.name) || {};
+        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border2);cursor:pointer;" onclick="openPropReport(${_props.indexOf(p)})">
+          <span class="material-symbols-outlined" style="font-size:15px;color:var(--text3);">home_work</span>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:var(--navy);">${p.address} ${p.detail||''}</div>
+            <div style="font-size:11px;color:var(--text3);">${visit.date||''} ${visit.price ? '· '+parseInt(visit.price).toLocaleString()+'만원 협의' : ''} ${visit.interest ? '· 관심도: '+visit.interest : ''}</div>
+          </div>
+          <span class="material-symbols-outlined" style="font-size:14px;color:var(--text3);">open_in_new</span>
+        </div>`;
+      }).join('')
+    : '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px;"><span class="material-symbols-outlined" style="font-size:24px;display:block;margin-bottom:4px;">home_work</span>본 매물 없음</div>';
+
+  // 상담 메모
+  renderClientMemos(c);
+  openModal('client-detail');
+}
+
+function renderClientMemos(c) {
+  const memos  = c.memos ? JSON.parse(c.memos) : [];
+  const el     = document.getElementById('cd-memo-list');
+  el.innerHTML = memos.length
+    ? memos.map(m => `
+      <div style="padding:8px 10px;background:#fafafa;border-radius:6px;margin-bottom:6px;border:1px solid var(--border2);">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;">${m.date}</div>
+        <div style="font-size:12px;color:var(--text);">${m.text}</div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--text3);">상담 메모 없음</div>';
+}
+
+function addClientMemo() {
+  document.getElementById('cd-memo-input-wrap').style.display = 'block';
+  document.getElementById('cd-memo-input').focus();
+}
+function cancelClientMemo() {
+  document.getElementById('cd-memo-input-wrap').style.display = 'none';
+  document.getElementById('cd-memo-input').value = '';
+}
+function submitClientMemo() {
+  const text = document.getElementById('cd-memo-input').value.trim();
+  if (!text) { toast('내용을 입력하세요'); return; }
+  const c    = _clients[_currentClientIdx];
+  const memos= c.memos ? JSON.parse(c.memos) : [];
+  memos.unshift({ date: new Date().toISOString().split('T')[0], text });
+  c.memos = JSON.stringify(memos);
+  saveLocal('clients', _clients);
+  cancelClientMemo();
+  renderClientMemos(c);
+  toast('메모 저장 완료');
+}
+
+function addScheduleForClient() {
+  const c = _clients[_currentClientIdx];
+  closeModal('client-detail');
+  document.getElementById('sch-client').value = c.name;
+  openModal('schedule');
+}
+
+function addContractForClient() {
+  const c = _clients[_currentClientIdx];
+  closeModal('client-detail');
+  document.getElementById('con-client').value = c.name;
+  document.getElementById('con-phone').value  = c.phone || '';
+  document.getElementById('con-type').value   = c.type  || '전세';
+  openModal('contract');
+}
+
+// ── 계약 상세 ──
+function openContractDetail(id) {
+  const con = _contracts.find(c => c.id === id);
+  if (!con) return;
+  _currentContractId = id;
+
+  document.getElementById('con-detail-addr').textContent = con.address;
+  document.getElementById('con-detail-sub').textContent  = (con.clientName||'—') + ' · ' + con.contract + ' ' + (con.deposit ? parseInt(con.deposit).toLocaleString()+'만원' : '');
+
+  // 단계 버튼
+  const stages  = ['검토','협의','계약','완료'];
+  const stageEl = document.getElementById('con-stage-btns');
+  stageEl.innerHTML = stages.map(s => `
+    <button onclick="changeConStage('${id}','${s}')"
+      style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .12s;
+        background:${con.stage===s?'var(--navy)':'#fff'};
+        color:${con.stage===s?'#fff':'var(--text3)'};
+        border:1px solid ${con.stage===s?'var(--navy)':'var(--border)'};">
+      ${s}
+    </button>`).join('');
+
+  // 체크리스트 (계약유형 기반)
+  const CHK = {
+    '전세':['등기부 확인','전세가율 확인','국세완납 확인','HUG 보증보험','확정일자/전입신고','근저당 말소 특약'],
+    '월세':['등기부 확인','임대인 신분 확인','확정일자/전입신고','월세계좌 확인','차임인상률 확인'],
+    '매매':['갑구 확인','을구 확인','신탁등기 확인','취득세 준비','건축물대장 확인','잔금/소유권이전'],
+  };
+  const chkItems  = CHK[con.contract] || CHK['전세'];
+  const conChks   = con.checklist ? JSON.parse(con.checklist) : {};
+  const doneCount = chkItems.filter(k => conChks[k]).length;
+  document.getElementById('con-chk-label').textContent = doneCount + ' / ' + chkItems.length;
+  document.getElementById('con-chk-bar').style.width   = Math.round(doneCount/chkItems.length*100) + '%';
+  document.getElementById('con-chk-list').innerHTML    = chkItems.map(k => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border2);cursor:pointer;" onclick="toggleConChk('${id}','${k}')">
+      <span class="material-symbols-outlined" style="font-size:18px;color:${conChks[k]?'#22c55e':'#c4c6cd'};font-variation-settings:'FILL' ${conChks[k]?1:0},'wght' 400,'GRAD' 0,'opsz' 24;">${conChks[k]?'check_box':'check_box_outline_blank'}</span>
+      <span style="font-size:12px;color:${conChks[k]?'var(--text3)':'var(--text)'};${conChks[k]?'text-decoration:line-through;':''}">${k}</span>
+    </div>`).join('');
+
+  // 히스토리
+  renderConHistory(con);
+  openModal('contract-detail');
+}
+
+function changeConStage(id, stage) {
+  const con = _contracts.find(c => c.id === id);
+  if (!con) return;
+  con.stage = stage;
+  // 히스토리 자동 추가
+  const hist = con.history ? JSON.parse(con.history) : [];
+  hist.unshift({ date: new Date().toISOString().split('T')[0], text: '단계 변경: ' + stage });
+  con.history = JSON.stringify(hist);
+  saveLocal('contracts', _contracts);
+  renderPipeline();
+  openContractDetail(id);
+  toast('단계 변경: ' + stage);
+}
+
+function toggleConChk(id, key) {
+  const con = _contracts.find(c => c.id === id);
+  if (!con) return;
+  const chks = con.checklist ? JSON.parse(con.checklist) : {};
+  chks[key]  = !chks[key];
+  con.checklist = JSON.stringify(chks);
+  saveLocal('contracts', _contracts);
+  openContractDetail(id);
+}
+
+function renderConHistory(con) {
+  const hist = con.history ? JSON.parse(con.history) : [];
+  const el   = document.getElementById('con-history-list');
+  el.innerHTML = hist.length
+    ? hist.map(h => `
+      <div style="display:flex;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--border2);">
+        <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;flex-shrink:0;padding-top:2px;">${h.date}</div>
+        <div style="font-size:12px;color:var(--text);">${h.text}</div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--text3);padding:8px 0;">히스토리 없음</div>';
+}
+
+function addConHistory() {
+  document.getElementById('con-history-input-wrap').style.display = 'block';
+  document.getElementById('con-history-input').focus();
+}
+function cancelConHistory() {
+  document.getElementById('con-history-input-wrap').style.display = 'none';
+  document.getElementById('con-history-input').value = '';
+}
+function submitConHistory() {
+  const text = document.getElementById('con-history-input').value.trim();
+  if (!text) return;
+  const con  = _contracts.find(c => c.id === _currentContractId);
+  if (!con) return;
+  const hist = con.history ? JSON.parse(con.history) : [];
+  hist.unshift({ date: new Date().toISOString().split('T')[0], text });
+  con.history = JSON.stringify(hist);
+  saveLocal('contracts', _contracts);
+  cancelConHistory();
+  renderConHistory(con);
+  renderPipeline();
+  toast('히스토리 추가 완료');
+}
 function openContractStage(stage) {
   document.getElementById('con-stage').value = stage;
   openModal('contract');
@@ -1593,9 +1792,9 @@ async function doRegister() {
   if (!id || !pw) { toast('ID와 비밀번호를 입력하세요'); return; }
 
   const result = await doRegisterRemote(id, name, pw);
-  if (!result.ok) { toast('❌ ' + (result.error || '등록 실패')); return; }
+  if (!result.ok) { toast(' ' + (result.error || '등록 실패')); return; }
 
-  toast('✅ 등록 완료! 로그인해주세요');
+  toast(' 등록 완료! 로그인해주세요');
   document.getElementById('register-form').style.display = 'none';
   document.getElementById('login-id').value = id;
 }
@@ -1655,7 +1854,7 @@ const DEMO_PROPS = [
 ];
 const DEMO_CONTRACTS = [
   { id:'1', address:'역삼동 825-13 502호', clientName:'이○○', contract:'전세', deposit:'32000', stage:'협의', memo:'보증금 3.2억 협의 중', createdAt:'2026-05-01' },
-  { id:'2', address:'해운대 센텀시티 1203호', clientName:'박○○', contract:'전세', deposit:'25000', stage:'계약', memo:'⚠ 근저당 말소 특약 확인 필요', createdAt:'2026-04-28' },
+  { id:'2', address:'해운대 센텀시티 1203호', clientName:'박○○', contract:'전세', deposit:'25000', stage:'계약', memo:'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;color:#f59e0b;">warning</span> 근저당 말소 특약 확인 필요', createdAt:'2026-04-28' },
   { id:'3', address:'온천동 한양아파트 304호', clientName:'최○○', contract:'월세', deposit:'5000', stage:'완료', memo:'2026.04.30 계약 완료', createdAt:'2026-04-20' },
 ];
 const DEMO_SCHEDULE = [
