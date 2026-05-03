@@ -966,6 +966,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 
 <script>
 
+
 // ════════════════════════════════
 // 페이지 전환
 // ════════════════════════════════
@@ -1015,15 +1016,7 @@ document.addEventListener('click', e => {
 // ════════════════════════════════
 // 유틸
 // ════════════════════════════════
-function toast(msg) {
-  document.querySelectorAll('.toast').forEach(t => t.remove());
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; }, 2200);
-  setTimeout(() => el.remove(), 2500);
-}
+/* toast 구버전 제거 */
 
 function confirmLogout() {
   if (confirm('로그아웃 하시겠습니까?')) doLogout();
@@ -1036,198 +1029,37 @@ function showRegisterSheet() {
 // ════════════════════════════════
 // 렌더링 — 오늘 일정
 // ════════════════════════════════
-function renderTodaySchedule() {
-  const today = new Date().toISOString().split('T')[0];
-  const items = _schedule.filter(s => s.date === today).sort((a,b) => a.time > b.time ? 1 : -1);
-  const el    = document.getElementById('today-list');
-  if (!items.length) {
-    el.innerHTML = '<div class="empty"><span class="ms">event_available</span><div class="empty-sub">오늘 일정이 없습니다</div></div>';
-    return;
-  }
-  const dotClass = { 방문:'sch-visit', 계약:'sch-contract', 상담:'sch-consult', 기타:'sch-other' };
-  el.innerHTML = items.map(s => `
-    <div class="sch-item">
-      <div class="sch-time">${s.time||'—'}</div>
-      <div class="sch-dot ${dotClass[s.type]||'sch-other'}"></div>
-      <div class="sch-content">
-        <div class="sch-title">${s.clientName||'—'} · ${s.type}</div>
-        ${s.address?`<div class="sch-sub">${s.address}</div>`:''}
-        ${s.memo?`<div class="sch-sub" style="color:var(--text2);">${s.memo}</div>`:''}
-      </div>
-    </div>`).join('');
-}
+/* renderTodaySchedule 구버전 제거 */
 
 // ════════════════════════════════
 // 렌더링 — 투두
 // ════════════════════════════════
-function renderTodos() {
-  const el = document.getElementById('todo-list');
-  if (!_todos.length) {
-    el.innerHTML = '<div class="empty"><span class="ms">task_alt</span><div class="empty-sub">할 일이 없습니다</div></div>';
-    return;
-  }
-  el.innerHTML = _todos.map((t,i) => `
-    <div class="todo-item" onclick="toggleTodo(${i})">
-      <div class="todo-check ${t.done?'done':''}">
-        ${t.done?'<span class="ms" style="font-size:13px;color:#fff;font-style:normal;">check</span>':''}
-      </div>
-      <span class="todo-text ${t.done?'done':''}">${t.text}</span>
-      <span class="todo-tag ${t.priority==='urgent'?'tag-urgent':'tag-normal'}">${t.priority==='urgent'?'긴급':'일반'}</span>
-    </div>`).join('');
-}
+/* renderTodos 구버전 제거 */
 
 // ════════════════════════════════
 // 렌더링 — 매물
 // ════════════════════════════════
-function renderProps() {
-  const el    = document.getElementById('props-list');
-  const empty = document.getElementById('props-empty');
-  if (!_props.length) {
-    empty.style.display = 'block'; el.innerHTML = ''; return;
-  }
-  empty.style.display = 'none';
-  const rc = s => parseInt(s)>=80?'safe':parseInt(s)>=60?'warn':'danger';
-  const rl = s => parseInt(s)>=80?'안전':parseInt(s)>=60?'주의':'위험';
-  el.innerHTML = _props.map((p,i) => {
-    const visitors = p.visitors ? JSON.parse(p.visitors) : [];
-    return `
-    <div class="prop-card">
-      <div class="prop-card-bar ${rc(p.score)}"></div>
-      <div class="prop-body">
-        <div class="prop-addr">${p.address}</div>
-        <div class="prop-detail">${p.detail||''} · ${p.contract} · ${p.deposit?parseInt(p.deposit).toLocaleString()+'만원':'—'}</div>
-        <div class="prop-score-row">
-          <div>
-            <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:2px;">SAFE SCORE</div>
-            <div class="prop-score ${rc(p.score)}">${p.score||'—'}</div>
-          </div>
-          <span style="font-size:11px;font-weight:700;color:${parseInt(p.score)>=80?'var(--safe)':parseInt(p.score)>=60?'var(--warn)':'var(--danger)'};">${p.score?rl(p.score):''}</span>
-        </div>
-      </div>
-      ${p.memo?`<div class="prop-memo"><span class="ms ms-sm" style="color:var(--warn);flex-shrink:0;">info</span>${p.memo}</div>`:''}
-      <div class="prop-visitors">
-        <div class="prop-visitor-head">
-          <div style="font-size:11px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:4px;">
-            <span class="ms ms-sm">group</span> 관심고객 ${visitors.length?'('+visitors.length+'명)':''}
-          </div>
-          <button onclick="openAddVisitor(${i})" style="display:flex;align-items:center;gap:3px;border:1px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--navy);font-weight:600;font-family:inherit;padding:3px 8px;border-radius:6px;">
-            <span class="ms" style="font-size:13px;">person_add</span> 추가
-          </button>
-        </div>
-        ${visitors.length
-          ? visitors.map(v=>`<div class="prop-visitor-item">
-              <span class="ms ms-sm" style="color:var(--text3);">person</span>
-              <span style="font-size:12px;font-weight:600;color:var(--navy);flex:1;">${v.name}</span>
-              <span style="font-size:11px;color:var(--text3);">${v.date||''}</span>
-              ${v.price?`<span style="font-size:11px;color:var(--info);font-family:'IBM Plex Mono',monospace;margin-left:4px;">${parseInt(v.price).toLocaleString()}만</span>`:''}
-              <span style="font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px;background:${v.interest==='높음'?'var(--safe-bg)':v.interest==='포기'?'#f5f5f5':'var(--info-bg)'};color:${v.interest==='높음'?'var(--safe)':v.interest==='포기'?'var(--text3)':'var(--info)'};">${v.interest||''}</span>
-            </div>`).join('')
-          : '<div style="font-size:12px;color:var(--text3);padding:4px 0;">등록된 관심고객 없음</div>'
-        }
-      </div>
-      <div class="prop-actions">
-        <button class="prop-action-btn" onclick="openPropReport(${i})">
-          <span class="ms ms-sm">analytics</span> AI 리포트
-        </button>
-        <button class="prop-action-btn" onclick="openPropEdit(${i})">
-          <span class="ms ms-sm">edit_note</span> 특이사항
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-}
+/* renderProps 구버전 제거 */
 
 // ════════════════════════════════
 // 렌더링 — 고객
 // ════════════════════════════════
-function renderClients() {
-  const el    = document.getElementById('clients-list');
-  const empty = document.getElementById('clients-empty');
-  const card  = document.getElementById('clients-card');
-  if (!_clients.length) {
-    empty.style.display='block'; card.style.display='none'; return;
-  }
-  empty.style.display='none'; card.style.display='block';
-  el.innerHTML = _clients.map((c,i) => {
-    const cnt = _props.filter(p => {
-      const vs = p.visitors ? JSON.parse(p.visitors) : [];
-      return vs.some(v => v.name === c.name);
-    }).length;
-    return `
-    <div class="list-item" onclick="openClientDetail(${i})">
-      <div style="width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;">${c.name?.[0]||'?'}</div>
-      <div style="flex:1;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:13px;font-weight:700;color:var(--navy);">${c.name}</span>
-          ${cnt?`<span style="font-size:10px;background:var(--info-bg);color:var(--info);padding:1px 6px;border-radius:10px;font-weight:700;">${cnt}개 매물</span>`:''}
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${c.phone||'—'} · ${c.type} · ${c.budget?parseInt(c.budget).toLocaleString()+'만원':'예산미정'}</div>
-        ${c.area?`<div style="font-size:11px;color:var(--text2);margin-top:1px;">${c.area}</div>`:''}
-      </div>
-      <span class="ms ms-sm" style="color:var(--text3);">chevron_right</span>
-    </div>`;
-  }).join('');
-}
+/* renderClients 구버전 제거 */
 
 // ════════════════════════════════
 // 렌더링 — 계약 파이프라인
 // ════════════════════════════════
-function renderPipeline() {
-  const stages  = ['검토','협의','계약','완료'];
-  const el      = document.getElementById('pipeline-list');
-  const empty   = document.getElementById('contracts-empty');
-  const hasAny  = _contracts.length > 0;
-  empty.style.display = hasAny ? 'none' : 'block';
-
-  el.innerHTML = stages.map(stage => {
-    const items = _contracts.filter(c => c.stage === stage);
-    return `
-    <div class="pipeline-stage">
-      <div class="pipeline-stage-head">
-        <span class="pipeline-stage-title">${stage}</span>
-        <span class="pipeline-count">${items.length}</span>
-      </div>
-      ${items.map(c => `
-        <div class="pipeline-item" onclick="openContractDetail('${c.id}')">
-          <div class="pipeline-item-addr">${c.address}</div>
-          <div class="pipeline-item-meta">${c.clientName||'—'} · ${c.contract} ${c.deposit?'· '+parseInt(c.deposit).toLocaleString()+'만':''}</div>
-          ${c.memo?`<div class="pipeline-item-memo">${c.memo}</div>`:''}
-        </div>`).join('')}
-      <button class="pipeline-add" onclick="openContractStage('${stage}')">
-        <span class="ms ms-sm" style="color:var(--text3);">add</span> 추가
-      </button>
-    </div>`;
-  }).join('');
-}
+/* renderPipeline 구버전 제거 */
 
 // ════════════════════════════════
 // 렌더링 — 알림
 // ════════════════════════════════
-function renderAlerts() {
-  const badge = document.getElementById('badge-alerts');
-  // (위험알림은 오늘 탭 내 KPI로 표시)
-}
+/* renderAlerts 구버전 제거 */
 
 // ════════════════════════════════
 // 렌더링 — 설정
 // ════════════════════════════════
-function renderSettings() {
-  const items = [
-    { key:'today',     label:'오늘 현황 탭',  icon:'today' },
-    { key:'props',     label:'담당 매물 탭',  icon:'home_work' },
-    { key:'clients',   label:'고객 수첩 탭',  icon:'people' },
-    { key:'contracts', label:'계약 진행 탭',  icon:'description' },
-  ];
-  const el = document.getElementById('settings-list');
-  el.innerHTML = items.map(item => `
-    <div class="setting-item">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span class="ms ms-sm" style="color:var(--text3);">${item.icon}</span>
-        <span style="font-size:14px;">${item.label}</span>
-      </div>
-      <button class="toggle ${_settings[item.key]?'on':''}" onclick="toggleSetting('${item.key}',this)"></button>
-    </div>`).join('');
-}
+/* renderSettings 구버전 제거 */
 
 // ════════════════════════════════
 // KPI 업데이트
@@ -1255,16 +1087,7 @@ function updateKPIs() {
   setBadge('contracts', cCnt);
 }
 
-function renderAll() {
-  renderTodaySchedule();
-  renderTodos();
-  renderProps();
-  renderClients();
-  renderPipeline();
-  renderAlerts();
-  updateKPIs();
-  renderSettings();
-}
+/* renderAll 구버전 제거 */
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8CFdJNXRRbW58waE8cLQcirhgJiwrjnrsUYEbbd7P4WSBlNxIrbCYX9nAFy04sgPFkA/exec';
 
@@ -1493,26 +1316,12 @@ function renderAll() {
   updateKPIs();
 }
 
-function updateKPIs() {
-  const today = new Date().toISOString().split('T')[0];
-  const todayCount = _schedule.filter(s => s.date === today).length;
-  document.getElementById('kpi-today-schedule').textContent = todayCount;
-  document.getElementById('kpi-props').textContent          = _props.length;
-  document.getElementById('kpi-contracts').textContent      = _contracts.filter(c => c.stage !== '완료').length;
-  const alerts = _props.filter(p => parseInt(p.score) < 60).length;
-  document.getElementById('kpi-alerts').textContent         = alerts;
-  document.getElementById('badge-today').textContent        = todayCount || '';
-  document.getElementById('badge-today').style.display      = todayCount ? 'flex' : 'none';
-  document.getElementById('badge-props').textContent        = _props.length || '';
-  document.getElementById('badge-contracts').textContent    = _contracts.filter(c=>c.stage!=='완료').length || '';
-  document.getElementById('badge-alerts').textContent       = alerts || '';
-  document.getElementById('badge-alerts').style.display     = alerts ? 'flex' : 'none';
-}
+/* 구 updateKPIs 제거됨 */
 
 function renderTodaySchedule() {
   const today = new Date().toISOString().split('T')[0];
   const items = _schedule.filter(s => s.date === today).sort((a,b) => a.time > b.time ? 1 : -1);
-  const el    = document.getElementById('today-schedule-list');
+  const el    = document.getElementById('today-list');
   if (!items.length) {
     el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;"><span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">event_available</span>오늘 일정이 없습니다</div>';
     return;
@@ -1547,7 +1356,7 @@ function renderTodos() {
 }
 
 function renderProps() {
-  const grid  = document.getElementById('props-grid');
+  const grid  = document.getElementById('props-list');
   const empty = document.getElementById('props-empty');
   if (!_props.length) { grid.style.display='none'; empty.style.display='block'; return; }
   empty.style.display = 'none'; grid.style.display = 'grid';
@@ -2194,7 +2003,7 @@ function openContractStage(stage) {
 // ════════════════════════════════
 // 페이지 전환
 // ════════════════════════════════
-const PAGE_TITLES = { today:'오늘 현황', props:'담당 매물', clients:'고객 수첩', contracts:'계약 진행', alerts:'위험 알림', settings:'설정' };
+/* PAGE_TITLES 제거됨 */
 
 function showRegister() {
   const f = document.getElementById('register-form');
@@ -2216,29 +2025,12 @@ async function doRegister() {
 }
 
 
-function showPage(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
-  const page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
-  if (el) el.classList.add('active');
-  document.getElementById('topbar-title').textContent = PAGE_TITLES[id] || '';
-}
+/* 구 showPage 제거됨 */
 
 // ════════════════════════════════
 // 모달
 // ════════════════════════════════
-function openModal(name) {
-  document.getElementById('modal-' + name).classList.add('open');
-}
-function closeModal(name) {
-  document.getElementById('modal-' + name).classList.remove('open');
-}
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('modal-bg')) {
-    e.target.classList.remove('open');
-  }
-});
+/* 구 modal 함수 제거됨 */
 
 // ════════════════════════════════
 // 유틸
@@ -2252,13 +2044,7 @@ function toast(msg) {
   setTimeout(() => el.remove(), 2500);
 }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
-
-if (window.innerWidth <= 768) {
-  document.getElementById('menu-btn').style.display = 'flex';
-}
+/* toggleSidebar 제거됨 */
 
 // ════════════════════════════════
 // 데모 데이터
@@ -2282,6 +2068,7 @@ const DEMO_TODOS = [
   { id:'2', text:'이○○ 고객 특약 조건 문자 발송', priority:'normal', done:true },
   { id:'3', text:'강남 역삼동 등기부 재확인', priority:'urgent', done:false },
 ];
+
 </script>
 
 <!-- ══ 고객 상세 모달 ══ -->
