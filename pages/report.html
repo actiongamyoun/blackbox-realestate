@@ -313,12 +313,12 @@ tailwind.config = {
     </section>
   </div>
 
-  <!-- ② 경고 배너 -->
-  <div class="alert-banner bg-red-50 fade-up-2" style="border-color:#dc2626;">
+  <!-- ② 동적 경고 배너 (분석 결과에 따라 자동 표시/숨김) -->
+  <div id="dynamic-alert-banner" class="alert-banner bg-red-50 fade-up-2" style="border-color:#dc2626;display:none;">
     <span class="material-symbols-outlined text-red-600 text-xl flex-shrink-0 mt-0.5">warning</span>
     <div>
-      <div class="text-sm font-bold text-red-800 mb-0.5">HUG 전세보증금 반환보증 가입 불가</div>
-      <div class="text-xs text-red-700 leading-relaxed">전세가율(77.7%)이 HUG 기준(90%) 이하이나, 선순위 근저당으로 인해 실질 보증 가능 금액이 보증금에 미달합니다. 계약 전 반드시 중개사를 통해 보증보험 가입 가능 여부를 재확인하세요.</div>
+      <div class="text-sm font-bold text-red-800 mb-0.5" id="alert-banner-title">—</div>
+      <div class="text-xs text-red-700 leading-relaxed" id="alert-banner-desc">—</div>
     </div>
   </div>
 
@@ -327,47 +327,10 @@ tailwind.config = {
     <div class="sec-head">
       <span class="material-symbols-outlined text-red-600 text-base">report</span>
       <span class="sec-head-title">위험 요소 — Red Flags</span>
-      <span class="ml-auto px-2 py-0.5 chip-danger text-xs font-bold rounded-full">위험 2건</span>
+      <span class="ml-auto px-2 py-0.5 chip-danger text-xs font-bold rounded-full" id="redflag-count">— 건</span>
     </div>
-    <div class="divide-y divide-outline-variant">
-      <!-- Red Flag 1 -->
-      <div class="redflag-item">
-        <button class="redflag-head" onclick="toggleRedFlag(this)">
-          <span class="redflag-icon-wrap chip-danger">
-            <span class="material-symbols-outlined" style="font-size:18px;">account_balance</span>
-          </span>
-          <div class="redflag-head-text">
-            <div class="redflag-title">근저당 비율 높음 (65%)</div>
-            <div class="redflag-meta">
-              <span class="chip-danger text-xs font-bold px-2 py-0.5 rounded-full">DANGER</span>
-              <span class="mono text-xs text-on-surface-variant">채권최고액 2.1억 원 · 2건</span>
-            </div>
-          </div>
-          <span class="material-symbols-outlined redflag-chevron">expand_more</span>
-        </button>
-        <div class="redflag-body">
-          <p class="text-sm text-on-surface-variant leading-relaxed">선순위 채권액이 매매 시세의 60%를 초과합니다. 경매 시 보증금 회수가 어려울 수 있습니다. <strong class="text-red-700">잔금 전 말소 특약 필수.</strong></p>
-        </div>
-      </div>
-      <!-- Red Flag 2 -->
-      <div class="redflag-item">
-        <button class="redflag-head" onclick="toggleRedFlag(this)">
-          <span class="redflag-icon-wrap chip-warning">
-            <span class="material-symbols-outlined" style="font-size:18px;">history</span>
-          </span>
-          <div class="redflag-head-text">
-            <div class="redflag-title">최근 2년간 소유권 변동 3회</div>
-            <div class="redflag-meta">
-              <span class="chip-warning text-xs font-bold px-2 py-0.5 rounded-full">CAUTION</span>
-              <span class="mono text-xs text-on-surface-variant">2022.03 → 2023.11 → 2024.09</span>
-            </div>
-          </div>
-          <span class="material-symbols-outlined redflag-chevron">expand_more</span>
-        </button>
-        <div class="redflag-body">
-          <p class="text-sm text-on-surface-variant leading-relaxed">단기간 내 잦은 소유주 변경은 권리 관계 불안정을 시사합니다. 갭투자·기획부동산 여부를 추가로 확인하세요.</p>
-        </div>
-      </div>
+    <div class="divide-y divide-outline-variant" id="redflag-list">
+      <div class="p-6 text-center text-sm text-on-surface-variant">분석 데이터를 불러오는 중...</div>
     </div>
   </section>
 
@@ -395,7 +358,7 @@ tailwind.config = {
     <div class="sec-head">
       <span class="material-symbols-outlined text-primary text-base">table_chart</span>
       <span class="sec-head-title">정밀 데이터 분석</span>
-      <span class="ml-auto text-xs" style="color:#dc2626;">⚠ 샘플 데이터</span>
+      <span class="ml-auto text-xs" id="forensic-source-badge"></span>
     </div>
     <div style="position:relative;">
       <table class="w-full text-left border-collapse">
@@ -404,58 +367,11 @@ tailwind.config = {
             <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Data Category</th>
             <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Analysis Result</th>
             <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">Risk Level</th>
-            <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">확인 방법</th>
+            <th class="px-5 py-2.5 mono text-xs font-bold tracking-widest text-primary uppercase">비고</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-outline-variant text-sm">
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">등기부 갑구 (소유권)</td>
-            <td class="px-5 py-3 mono text-xs">Clean — No Seizures</td>
-            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-          </tr>
-          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">등기부 을구 (근저당)</td>
-            <td class="px-5 py-3 mono text-xs">Mortgage 2건 · 2.1억 KRW</td>
-            <td class="px-5 py-3"><span class="chip-danger px-2 py-0.5 rounded-full text-xs font-bold uppercase">Danger</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">전세가율</td>
-            <td class="px-5 py-3 mono text-xs">77.7% — KB시세 4.12억 기준</td>
-            <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">KB부동산 시세 자동 조회</td>
-          </tr>
-          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">국세 체납</td>
-            <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
-            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">홈택스 완납증명 요청</td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">지방세 체납</td>
-            <td class="px-5 py-3 mono text-xs">No Delinquency Found</td>
-            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">정부24 과세증명 요청</td>
-          </tr>
-          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">HUG 보증보험</td>
-            <td class="px-5 py-3 mono text-xs">조건부 가입 가능 (재확인 필요)</td>
-            <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">HUG 가입조건 시뮬레이션</td>
-          </tr>
-          <tr class="hover:bg-surface-container-low transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">신탁 등기</td>
-            <td class="px-5 py-3 mono text-xs">Not Detected</td>
-            <td class="px-5 py-3"><span class="chip-safe px-2 py-0.5 rounded-full text-xs font-bold uppercase">Safe</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">인터넷 등기소 자동 조회</td>
-          </tr>
-          <tr class="bg-surface-container-low hover:bg-surface-container transition-colors">
-            <td class="px-5 py-3 font-medium text-on-surface">소유권 변동 이력</td>
-            <td class="px-5 py-3 mono text-xs">3회 / 24개월 — Unusual</td>
-            <td class="px-5 py-3"><span class="chip-warning px-2 py-0.5 rounded-full text-xs font-bold uppercase">Caution</span></td>
-            <td class="px-5 py-3 text-xs text-on-surface-variant">등기 이력 자동 분석</td>
-          </tr>
+        <tbody class="divide-y divide-outline-variant text-sm" id="forensic-tbody">
+          <tr><td colspan="4" class="px-5 py-6 text-center text-on-surface-variant">분석 데이터를 불러오는 중...</td></tr>
         </tbody>
       </table>
       <!-- 잠금 오버레이 -->
@@ -792,6 +708,7 @@ if ('serviceWorker' in navigator) {
   // ── 체크리스트 적용 ──
   window.addEventListener('load', () => {
     if (typeof applyContractChecklist === 'function') applyContractChecklist(contract);
+    if (typeof renderAnalysisResult === 'function') renderAnalysisResult();
     updateUserBtn();
   });
 })();
@@ -800,9 +717,8 @@ if ('serviceWorker' in navigator) {
 function waitForKakaoAndInit(address, attempts) {
   attempts = attempts || 0;
   if (attempts > 30) {
-    // 6초 대기 후에도 SDK 미로드 — 에러 표시
-    const c = document.getElementById('kakao-map');
-    if (c) c.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a2b3c;color:#8192a7;font-size:11px;text-align:center;padding:8px;">카카오맵 SDK 로드 실패<br>(인앱 브라우저는 미지원)</div>';
+    // 6초 대기 후에도 SDK 미로드 — 정적 이미지로 fallback
+    showStaticMapFallback(address);
     return;
   }
   if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
@@ -812,11 +728,48 @@ function waitForKakaoAndInit(address, attempts) {
   }
 }
 
-function initKakaoMap(address) {
-  if (!address || typeof kakao === 'undefined') return;
+// ── 정적 지도 fallback (인앱 브라우저, SDK 미로드 시) ──
+function showStaticMapFallback(address) {
   const container = document.getElementById('kakao-map');
   if (!container) return;
-  // 컨테이너가 비표시 상태면 잠시 후 재시도 (display:none 등)
+  // OpenStreetMap 정적 이미지 (키 불필요)
+  // 1. 주소 → 좌표 (Nominatim) → 정적 지도 URL
+  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address) + '&limit=1')
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.length) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        // OpenStreetMap 정적 지도 (타일 기반)
+        const zoom = 16;
+        const w = container.offsetWidth || 400;
+        const h = container.offsetHeight || 140;
+        const staticUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=${zoom}&size=${w}x${h}&maptype=mapnik&markers=${lat},${lon},red-pushpin`;
+        container.innerHTML = `
+          <div style="width:100%;height:100%;position:relative;background:#1a2b3c;overflow:hidden;">
+            <img src="${staticUrl}" style="width:100%;height:100%;object-fit:cover;" alt="지도"
+              onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#8192a7;font-size:11px;text-align:center;padding:8px;\\'>지도 정보 불가<br>외부 브라우저에서 다시 시도해주세요</div>'"/>
+            <div style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;">
+              OpenStreetMap (정적)
+            </div>
+          </div>`;
+        window._mapCoords = { lat, lng: lon };
+      } else {
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a2b3c;color:#8192a7;font-size:11px;text-align:center;padding:8px;">위치를 찾을 수 없습니다<br><button onclick="openKakaoMapLink()" style="margin-top:8px;padding:4px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit;">카카오맵 외부 열기</button></div>';
+      }
+    })
+    .catch(() => {
+      container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a2b3c;color:#8192a7;font-size:11px;text-align:center;padding:8px;">지도 로드 실패<br><button onclick="openKakaoMapLink()" style="margin-top:8px;padding:4px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit;">카카오맵 외부 열기</button></div>';
+    });
+}
+
+function initKakaoMap(address) {
+  if (!address || typeof kakao === 'undefined') {
+    showStaticMapFallback(address);
+    return;
+  }
+  const container = document.getElementById('kakao-map');
+  if (!container) return;
   if (container.offsetHeight === 0 || container.offsetWidth === 0) {
     setTimeout(() => initKakaoMap(address), 300);
     return;
@@ -830,11 +783,10 @@ function initKakaoMap(address) {
         draggable: false, scrollwheel: false, disableDoubleClick: true
       });
       new kakao.maps.Marker({ map, position: coords });
-      // 지도 강제 relayout
       setTimeout(() => map.relayout(), 100);
       window._mapCoords = { lat: result[0].y, lng: result[0].x };
     } else {
-      // 주소 검색 실패 시 키워드 검색으로 fallback
+      // 키워드 검색 fallback
       const places = new kakao.maps.services.Places();
       places.keywordSearch(address, function(data, status2) {
         if (status2 === kakao.maps.services.Status.OK && data.length) {
@@ -846,7 +798,8 @@ function initKakaoMap(address) {
           setTimeout(() => map.relayout(), 100);
           window._mapCoords = { lat: data[0].y, lng: data[0].x };
         } else {
-          container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1a2b3c;color:#8192a7;font-size:11px;text-align:center;padding:8px;">위치를 찾을 수 없습니다<br>주소를 다시 확인해주세요</div>';
+          // 카카오 검색도 실패하면 OSM 정적 지도로
+          showStaticMapFallback(address);
         }
       });
     }
@@ -983,6 +936,211 @@ function applyContractChecklist(contract) {
   }
 
   updateProgress();
+}
+
+// ════════════════════════════════════════════
+// 분석 결과 동적 렌더링 (sessionStorage.bb_analysis 기반)
+// ════════════════════════════════════════════
+function renderAnalysisResult() {
+  let analysis = null;
+  try {
+    const raw = sessionStorage.getItem('bb_analysis');
+    if (raw) analysis = JSON.parse(raw);
+  } catch(e) {}
+
+  if (!analysis) {
+    // 분석 데이터가 없으면 안내 표시
+    const tbody = document.getElementById('forensic-tbody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-6 text-center text-on-surface-variant">분석 데이터가 없습니다. 분석을 먼저 진행해주세요.</td></tr>';
+    }
+    const flagList = document.getElementById('redflag-list');
+    if (flagList) {
+      flagList.innerHTML = '<div class="p-6 text-center text-sm text-on-surface-variant">분석 데이터가 없습니다</div>';
+    }
+    const cnt = document.getElementById('redflag-count');
+    if (cnt) cnt.textContent = '— 건';
+    return;
+  }
+
+  // ── 정밀 데이터 표 ──
+  const tbody = document.getElementById('forensic-tbody');
+  if (tbody && Array.isArray(analysis.forensicData)) {
+    if (!analysis.forensicData.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="px-5 py-6 text-center text-on-surface-variant">분석된 데이터가 없습니다</td></tr>';
+    } else {
+      tbody.innerHTML = analysis.forensicData.map((d, i) => {
+        const lvl = (d.riskLevel || 'safe').toLowerCase();
+        const chipClass = lvl === 'danger' ? 'chip-danger'
+                       : lvl === 'caution' || lvl === 'warning' ? 'chip-warning'
+                       : lvl === 'pending' ? 'chip-info'
+                       : 'chip-safe';
+        const lvlText = lvl === 'danger' ? 'Danger'
+                      : lvl === 'caution' || lvl === 'warning' ? 'Caution'
+                      : lvl === 'pending' ? 'Pending'
+                      : 'Safe';
+        const rowBg = i % 2 === 1 ? 'bg-surface-container-low' : '';
+        const note  = d.note || '';
+        const result = (d.result || '—');
+        const isPending = lvl === 'pending';
+        return `
+          <tr class="${rowBg} ${isPending ? 'opacity-60' : ''} hover:bg-surface-container-low transition-colors">
+            <td class="px-5 py-3 font-medium text-on-surface">${escapeHtml(d.category || '항목')}</td>
+            <td class="px-5 py-3 mono text-xs">${escapeHtml(result)}</td>
+            <td class="px-5 py-3"><span class="${chipClass} px-2 py-0.5 rounded-full text-xs font-bold uppercase">${lvlText}</span></td>
+            <td class="px-5 py-3 text-xs text-on-surface-variant">${escapeHtml(note)}</td>
+          </tr>`;
+      }).join('');
+    }
+  }
+
+  // ── Red Flags 표시 ──
+  const flagList = document.getElementById('redflag-list');
+  const cntEl    = document.getElementById('redflag-count');
+  if (flagList && Array.isArray(analysis.redFlags)) {
+    if (!analysis.redFlags.length) {
+      flagList.innerHTML = `
+        <div class="p-8 text-center">
+          <span class="material-symbols-outlined" style="font-size:36px;color:#22c55e;display:block;margin-bottom:8px;">verified</span>
+          <div class="text-base font-bold text-primary mb-1">발견된 위험 요소가 없습니다</div>
+          <div class="text-xs text-on-surface-variant">현재까지 분석된 데이터 기준 (등기부 미연동)</div>
+        </div>`;
+      if (cntEl) {
+        cntEl.textContent = '0 건';
+        cntEl.className = 'ml-auto px-2 py-0.5 chip-safe text-xs font-bold rounded-full';
+      }
+    } else {
+      const dangerCount = analysis.redFlags.filter(f => (f.severity || '').toLowerCase() === 'danger').length;
+      flagList.innerHTML = analysis.redFlags.map((f, i) => {
+        const sev    = (f.severity || 'caution').toLowerCase();
+        const chipCls = sev === 'danger' ? 'chip-danger' : 'chip-warning';
+        const iconCls = sev === 'danger' ? 'chip-danger' : 'chip-warning';
+        const sevText = sev === 'danger' ? 'DANGER' : 'CAUTION';
+        const icon = sev === 'danger' ? 'report' : 'warning';
+        return `
+          <div class="redflag-item">
+            <button class="redflag-head" onclick="toggleRedFlag(this)">
+              <span class="redflag-icon-wrap ${iconCls}">
+                <span class="material-symbols-outlined" style="font-size:18px;">${icon}</span>
+              </span>
+              <div class="redflag-head-text">
+                <div class="redflag-title">${escapeHtml(f.title || '경고')}</div>
+                <div class="redflag-meta">
+                  <span class="${chipCls} text-xs font-bold px-2 py-0.5 rounded-full">${sevText}</span>
+                </div>
+              </div>
+              <span class="material-symbols-outlined redflag-chevron">expand_more</span>
+            </button>
+            <div class="redflag-body">
+              <p class="text-sm text-on-surface-variant leading-relaxed">${escapeHtml(f.description || '')}</p>
+            </div>
+          </div>`;
+      }).join('');
+      if (cntEl) {
+        cntEl.textContent = analysis.redFlags.length + ' 건';
+        cntEl.className = dangerCount > 0
+          ? 'ml-auto px-2 py-0.5 chip-danger text-xs font-bold rounded-full'
+          : 'ml-auto px-2 py-0.5 chip-warning text-xs font-bold rounded-full';
+      }
+
+      // 가장 심각한 Red Flag를 상단 경고 배너로 (DANGER만)
+      const topFlag = analysis.redFlags.find(f => (f.severity || '').toLowerCase() === 'danger');
+      if (topFlag) {
+        const banner = document.getElementById('dynamic-alert-banner');
+        const tEl = document.getElementById('alert-banner-title');
+        const dEl = document.getElementById('alert-banner-desc');
+        if (banner && tEl && dEl) {
+          tEl.textContent = topFlag.title || '주의 필요';
+          dEl.textContent = topFlag.description || '';
+          banner.style.display = 'flex';
+        }
+      }
+    }
+  }
+
+  // ── 데이터 출처 배지 ──
+  const sourceBadge = document.getElementById('forensic-source-badge');
+  if (sourceBadge && analysis.sources) {
+    if (analysis.hasMock) {
+      sourceBadge.textContent = '⚠ 일부 데이터 미연동';
+      sourceBadge.style.color = '#dc2626';
+    } else {
+      sourceBadge.textContent = '✓ 실시간 공공데이터';
+      sourceBadge.style.color = '#22c55e';
+    }
+  }
+
+  // ── 점수 게이지 업데이트 (URL 파라미터로 받은 값보다 sessionStorage가 우선) ──
+  if (analysis.score) {
+    const scoreNum = document.querySelector('.gauge-num');
+    if (scoreNum) scoreNum.textContent = analysis.score;
+    const arc = document.getElementById('gauge-arc');
+    if (arc) {
+      const offset = Math.round(528 - (analysis.score/100)*528);
+      arc.style.setProperty('--offset', offset);
+    }
+    // 위험 칩 + 설명
+    const chip = document.getElementById('score-chip');
+    const desc = document.getElementById('score-desc');
+    if (chip && desc) {
+      const s = analysis.score;
+      if (s >= 80) {
+        chip.className = 'mt-6 px-6 py-2 chip-safe text-lg font-bold';
+        chip.style.borderRadius = '9999px';
+        chip.textContent = '✓ 안전 (Safe)';
+        desc.textContent = '주요 위험 요소가 발견되지 않았습니다.';
+      } else if (s >= 60) {
+        chip.className = 'mt-6 px-6 py-2 chip-warning text-lg font-bold';
+        chip.style.borderRadius = '9999px';
+        chip.textContent = '⚠ 보통 (Caution)';
+        desc.innerHTML = '일부 위험 요소가 발견되었습니다.<br>아래 분석 내용을 면밀히 검토하십시오.';
+      } else {
+        chip.className = 'mt-6 px-6 py-2 chip-danger text-lg font-bold';
+        chip.style.borderRadius = '9999px';
+        chip.textContent = '⛔ 고위험 (Danger)';
+        desc.textContent = '복수의 위험 요소 — 전문가 자문 후 계약 결정 권장';
+      }
+    }
+  }
+
+  // ── 체크리스트 자동 체크 (analysis.autoChecked 활용) ──
+  if (analysis.autoChecked && Object.keys(analysis.autoChecked).length) {
+    setTimeout(() => {
+      document.querySelectorAll('.chk-row').forEach(row => {
+        const text = row.querySelector('.text-sm')?.textContent.trim();
+        if (text && analysis.autoChecked[text]) {
+          // 자동체크 표시
+          const icon = row.querySelector('.material-symbols-outlined');
+          if (icon && !icon.classList.contains('fill-icon')) {
+            icon.classList.add('fill-icon', 'text-green-600');
+            icon.classList.remove('text-outline');
+            icon.textContent = 'check_box';
+            row.dataset.locked = 'true';
+            row.style.cursor = 'default';
+            const right = row.querySelector('.chk-right');
+            if (right) {
+              const aiSpan = right.querySelector('span:last-child');
+              if (aiSpan) {
+                aiSpan.outerHTML = '<span class="text-xs font-bold text-green-700" style="display:flex;align-items:center;gap:3px;"><span class="material-symbols-outlined" style="font-size:13px;">smart_toy</span> AI 확인</span>';
+              }
+            }
+          }
+        }
+      });
+      updateProgress();
+    }, 200);
+  }
+}
+
+// HTML 이스케이프 (renderAnalysisResult용)
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 </script>
 

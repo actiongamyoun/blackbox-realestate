@@ -354,6 +354,18 @@ async function doAnalyze() {
     sessionStorage.setItem('bb_risk',     data.riskLevel || 'warning');
     sessionStorage.setItem('bb_contract', _contractType);
     sessionStorage.setItem('bb_deposit',  getDepositStr());
+    // ⭐ 전체 분석 결과 저장 (report.html에서 동적 렌더링용)
+    sessionStorage.setItem('bb_analysis', JSON.stringify({
+      score:        data.score,
+      riskLevel:    data.riskLevel,
+      redFlags:     data.redFlags     || [],
+      forensicData: data.forensicData || [],
+      autoChecked:  data.autoChecked  || {},
+      summary:      data.summary      || {},
+      sources:      data.sources      || {},
+      hasMock:      data.hasMock      || false,
+      analyzedAt:   data.analyzedAt   || new Date().toISOString(),
+    }));
     if (typeof activateTabs === 'function') activateTabs();
     btn.innerHTML = '✓ 분석 완료!';
     btn.style.background = '#166534';

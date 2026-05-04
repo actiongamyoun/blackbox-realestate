@@ -2344,9 +2344,23 @@ function submitProperty() {
   prop.agencyId = _agencyId;
   savePropToServer(prop);
 
-  // AI 분석 호출 (도로명주소 + 동/호수 + 계약유형 + 보증금)
+  // AI 분석 호출 (단지명, 시/구/동, bdMgtSn 함께 전달)
   const fullAddr = (addr + ' ' + detail).trim();
-  fetch('/api/analyze?address=' + encodeURIComponent(fullAddr) + '&contract=' + encodeURIComponent(contract) + '&deposit=' + encodeURIComponent(deposit))
+  const analyzeParams = new URLSearchParams({
+    address: fullAddr,
+    contract: contract,
+    deposit: deposit || '',
+  });
+  if (complexName) analyzeParams.set('apt', complexName);
+  if (sido && gu) {
+    // sigunguCd 5자리 = bdMgtSn 앞 5자리
+    if (bdMgtSn && bdMgtSn.length >= 5) {
+      analyzeParams.set('lawdCd', bdMgtSn.substring(0, 5));
+    }
+  }
+  if (bdMgtSn) analyzeParams.set('bdMgtSn', bdMgtSn);
+
+  fetch('/api/analyze?' + analyzeParams.toString())
     .then(r => r.json()).then(data => {
       if (data.ok) {
         prop.score = data.score;
@@ -2355,9 +2369,19 @@ function submitProperty() {
         saveLocal('props', _props);
         renderProps(); updateKPIs();
         toast('AI 분석 완료 · 점수: ' + data.score + '점');
+      } else {
+        // API 응답은 ok=false라도 표시 (오류 분석)
+        prop.score = data.score || '';
+        prop.risk  = data.riskLevel || '';
+        prop.analysis = JSON.stringify(data);
+        saveLocal('props', _props);
+        renderProps(); updateKPIs();
+        toast('분석 완료 (일부 데이터 미연동)');
       }
-    }).catch(() => {
+    }).catch((e) => {
+      console.error('분석 호출 실패:', e);
       saveLocal('props', _props); renderProps();
+      toast('분석 호출 실패');
     });
 }
 
@@ -2516,14 +2540,26 @@ function renderPropReportData(analysis, contract) {
   if (data.length) {
     dataEl.innerHTML = data.map(d => {
       const lvl = (d.riskLevel || d.level || 'safe').toLowerCase();
-      const lvlBg  = lvl === 'danger' ? 'rgba(220,38,38,.08)' : lvl === 'caution' || lvl === 'warning' ? 'rgba(245,158,11,.08)' : 'rgba(34,197,94,.08)';
-      const lvlCol = lvl === 'danger' ? 'var(--danger)' : lvl === 'caution' || lvl === 'warning' ? 'var(--warn)' : 'var(--safe)';
-      const lvlLbl = lvl === 'danger' ? 'DANGER' : lvl === 'caution' || lvl === 'warning' ? 'CAUTION' : 'SAFE';
+      const isPending = lvl === 'pending';
+      const lvlBg  = isPending ? 'rgba(148,163,184,.08)'
+                   : lvl === 'danger' ? 'rgba(220,38,38,.08)'
+                   : lvl === 'caution' || lvl === 'warning' ? 'rgba(245,158,11,.08)'
+                   : 'rgba(34,197,94,.08)';
+      const lvlCol = isPending ? '#64748b'
+                   : lvl === 'danger' ? 'var(--danger)'
+                   : lvl === 'caution' || lvl === 'warning' ? 'var(--warn)'
+                   : 'var(--safe)';
+      const lvlLbl = isPending ? 'PENDING'
+                   : lvl === 'danger' ? 'DANGER'
+                   : lvl === 'caution' || lvl === 'warning' ? 'CAUTION'
+                   : 'SAFE';
+      const opacity = isPending ? '0.6' : '1';
       return `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border2);opacity:${opacity};">
         <div style="flex:1;min-width:0;">
           <div style="font-size:12px;font-weight:600;color:var(--navy);">${escapeHtml(d.category || d.name || '항목')}</div>
           <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:1px;">${escapeHtml(d.result || d.value || '—')}</div>
+          ${d.note ? `<div style="font-size:10px;color:var(--text3);margin-top:2px;font-style:italic;">${escapeHtml(d.note)}</div>` : ''}
         </div>
         <span style="font-size:9px;font-weight:900;padding:3px 7px;border-radius:10px;background:${lvlBg};color:${lvlCol};font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;flex-shrink:0;">${lvlLbl}</span>
       </div>`;
@@ -2593,13 +2629,21 @@ function renderPropReportData(analysis, contract) {
 // ── 분석 API 호출 (필요 시) ──
 async function fetchPropAnalysis(p, force) {
   const fullAddr = (p.address + (p.detail ? ' ' + p.detail : '')).trim();
+  const analyzeParams = new URLSearchParams({
+    address: fullAddr,
+    contract: p.contract || '전세',
+    deposit: p.deposit || '',
+  });
+  if (p.complexName) analyzeParams.set('apt', p.complexName);
+  if (p.bdMgtSn) {
+    analyzeParams.set('bdMgtSn', p.bdMgtSn);
+    if (p.bdMgtSn.length >= 5) analyzeParams.set('lawdCd', p.bdMgtSn.substring(0, 5));
+  }
   try {
-    const res = await fetch('/api/analyze?address=' + encodeURIComponent(fullAddr)
-      + '&contract=' + encodeURIComponent(p.contract || '전세')
-      + '&deposit='  + encodeURIComponent(p.deposit || ''));
+    const res = await fetch('/api/analyze?' + analyzeParams.toString());
     const data = await res.json();
-    if (data.ok) {
-      data.analyzedAt = new Date().toISOString();
+    if (data && (data.ok || data.score !== undefined)) {
+      data.analyzedAt = data.analyzedAt || new Date().toISOString();
       p.score    = data.score;
       p.risk     = data.riskLevel;
       p.analysis = JSON.stringify(data);
@@ -2609,9 +2653,9 @@ async function fetchPropAnalysis(p, force) {
       if (_currentPropIdx >= 0 && _props[_currentPropIdx]?.id === p.id) {
         renderPropReport(p);
       }
-      if (force) toast('분석 완료');
+      if (force) toast('분석 완료 · 점수: ' + (data.score || '—'));
     } else {
-      if (force) toast('분석 실패: ' + (data.error || ''));
+      if (force) toast('분석 실패: ' + ((data && data.error) || ''));
     }
   } catch(e) {
     console.error('분석 오류:', e);
