@@ -126,6 +126,52 @@ function calculateScore(factors) {
     });
   }
 
+  // ⑦ HUG 보증보험 가입 가능성 (룰 기반 추정 — 전세가율 90% 이하면 가능)
+  if (factors.contract === '전세' && factors.jeonseRatio !== null && factors.jeonseRatio > 0) {
+    if (factors.jeonseRatio <= 90) {
+      data.push({
+        category: 'HUG 보증보험 가입 가능성',
+        result: `가입 가능 추정 (전세가율 ${factors.jeonseRatio}% ≤ 90%)`,
+        riskLevel: 'safe',
+        note: '실제 가입은 HUG 심사를 거쳐야 합니다',
+      });
+      auto['HUG / SGI 전세보증금 반환보증 가입 가능 여부 확인'] = true;
+    } else {
+      data.push({
+        category: 'HUG 보증보험 가입 가능성',
+        result: `가입 어려움 (전세가율 ${factors.jeonseRatio}% > 90%)`,
+        riskLevel: 'danger',
+        note: 'HUG 가입 기준 초과 — 보증보험 가입 거절 가능성',
+      });
+    }
+  }
+
+  // ⑧ 등기부 관련 정보 — API 연결 대기 placeholder
+  data.push({
+    category: '등기부 갑구 (소유권)',
+    result: 'API 연결 대기',
+    riskLevel: 'pending',
+    note: '등기부 등본 API 연동 시 자동 표시됩니다',
+  });
+  data.push({
+    category: '등기부 을구 (근저당·전세권)',
+    result: 'API 연결 대기',
+    riskLevel: 'pending',
+    note: '등기부 등본 API 연동 시 자동 표시됩니다',
+  });
+  data.push({
+    category: '신탁 등기 여부',
+    result: 'API 연결 대기',
+    riskLevel: 'pending',
+    note: '등기부 등본 API 연동 시 자동 표시됩니다',
+  });
+  data.push({
+    category: '소유권 변동 이력',
+    result: 'API 연결 대기',
+    riskLevel: 'pending',
+    note: '등기부 등본 API 연동 시 자동 표시됩니다',
+  });
+
   if (score < 0) score = 0;
   if (score > 100) score = 100;
 
