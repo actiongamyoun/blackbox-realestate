@@ -1,102 +1,130 @@
 // /api/price.js
 //
-// 부동산 실거래가 + 시세 조회 API
-//
-// 사용처: 분석 리포트의 매매가 / 전세가 / 전세가율 산출
-// 데이터 출처: 국토교통부 실거래가 (공공데이터 포털)
+// 부동산 실거래가 + 시세 조회 API (방어적 버전)
 //
 // Vercel 환경변수:
-//   DATA_GO_KR_KEY_APT_TRADE  ← 아파트 매매 실거래가 키 (Encoding 키)
-//   DATA_GO_KR_KEY_APT_RENT   ← 아파트 전월세 실거래가 키
-//
-// 두 키가 없으면 자동으로 mock 응답을 반환합니다.
-//
-// 호출 방법:
-//   GET /api/price?lawdCd=11680&dealYmd=202611&type=trade
-//   GET /api/price?lawdCd=11680&dealYmd=202611&type=rent
-//   GET /api/price?lawdCd=11680&dealYmd=202611&type=both     ← 매매+전세 동시
-//
-// 또는 주소+계약유형 기반:
-//   GET /api/price?address=서울특별시강남구역삼동&contract=전세&deposit=32000
-//
-// 파라미터:
-//   lawdCd:    법정동코드 5자리 (예: 11680 = 서울 강남구)
-//   dealYmd:   조회연월 6자리 (예: 202611, 미지정 시 최근 3개월)
-//   type:      trade(매매) | rent(전월세) | both(둘다)
-//   apt:       아파트명 필터 (선택)
-//   address:   대안 진입점 — 주소 문자열 (lawdCd 자동 추출)
-//   contract:  전세/월세/매매 (응답 가공용)
-//   deposit:   사용자 보증금 (만원, 전세가율 계산용)
+//   DATA_GO_KR_KEY_APT_TRADE  ← 아파트 매매 키 (Encoding 또는 Decoding 형태 모두 허용)
+//   DATA_GO_KR_KEY_APT_RENT   ← 아파트 전월세 키
 
-// ── 매매 API endpoint ─────────────────────────────
-const APT_TRADE_URL = 'https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev';
+// 매매 API endpoint 후보 (자동 시도)
+const APT_TRADE_URLS = [
+  'https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev',
+  'https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade',
+];
+const APT_RENT_URLS = [
+  'https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent',
+];
 
-// ── 전월세 API endpoint ───────────────────────────
-const APT_RENT_URL  = 'https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent';
-
-// ── XML → JS 객체 (Vercel은 fetch 응답이 텍스트)
+// ── 안전한 XML 파서 ─────────────────────────
 function parseXml(xmlText) {
-  // 간단한 XML 파서 (의존성 없이) — items > item 추출
-  const items = [];
-  const itemMatches = xmlText.match(/<item>[\s\S]*?<\/item>/g) || [];
-  itemMatches.forEach(itemXml => {
-    const item = {};
-    const fieldMatches = itemXml.matchAll(/<(\w+)>([^<]*)<\/\w+>/g);
-    for (const m of fieldMatches) {
-      item[m[1]] = m[2].trim();
+  const result = { items: [], resultCode: '', resultMsg: '', totalCount: 0 };
+  if (!xmlText || typeof xmlText !== 'string') return result;
+  try {
+    const codeMatch = xmlText.match(/<resultCode>(\d+)<\/resultCode>/);
+    if (codeMatch) result.resultCode = codeMatch[1];
+    const msgMatch = xmlText.match(/<resultMsg>([^<]*)<\/resultMsg>/);
+    if (msgMatch) result.resultMsg = msgMatch[1];
+    const countMatch = xmlText.match(/<totalCount>(\d+)<\/totalCount>/);
+    if (countMatch) result.totalCount = parseInt(countMatch[1]) || 0;
+
+    const itemMatches = xmlText.match(/<item>[\s\S]*?<\/item>/g) || [];
+    for (const itemXml of itemMatches) {
+      try {
+        const item = {};
+        const fieldRegex = /<(\w+)>([^<]*)<\/\w+>/g;
+        let m;
+        while ((m = fieldRegex.exec(itemXml)) !== null) {
+          item[m[1]] = (m[2] || '').trim();
+        }
+        result.items.push(item);
+      } catch (e) {
+        // 개별 파싱 실패 무시
+      }
     }
-    items.push(item);
-  });
-
-  // 결과 코드/메시지
-  const resultCode = (xmlText.match(/<resultCode>(\d+)<\/resultCode>/) || [])[1];
-  const resultMsg  = (xmlText.match(/<resultMsg>([^<]*)<\/resultMsg>/) || [])[1];
-  const totalCount = parseInt((xmlText.match(/<totalCount>(\d+)<\/totalCount>/) || [])[1] || '0');
-
-  return { items, resultCode, resultMsg, totalCount };
-}
-
-// ── 호출 헬퍼 (매매 또는 전월세) ────────────────────
-async function fetchPriceData(endpoint, key, lawdCd, dealYmd, options) {
-  options = options || {};
-  const params = new URLSearchParams({
-    serviceKey: key,                  // URLSearchParams가 자동 인코딩하므로 raw key 사용
-    LAWD_CD:    lawdCd,
-    DEAL_YMD:   dealYmd,
-    pageNo:     '1',
-    numOfRows:  String(options.numOfRows || 100),
-  });
-  // serviceKey는 이미 인코딩된 키로 들어왔다면 다시 인코딩하지 않도록 처리
-  // 공공데이터 포털 키는 보통 URL 인코딩된 형태로 제공됨 — 그대로 사용
-  const url = endpoint + '?' + params.toString().replace(
-    /serviceKey=([^&]+)/,
-    'serviceKey=' + encodeURIComponent(decodeURIComponent(key))
-  );
-
-  const res  = await fetch(url, { headers: { 'Accept': 'application/xml' } });
-  const text = await res.text();
-
-  // 에러 응답 (JSON으로 오는 경우 있음)
-  if (text.startsWith('{') || text.includes('OpenAPI_ServiceResponse')) {
-    const errMatch = text.match(/<returnReasonCode>(\d+)<\/returnReasonCode>/);
-    const errMsg   = text.match(/<returnAuthMsg>([^<]+)<\/returnAuthMsg>/);
-    throw new Error(`API 오류: ${errMsg ? errMsg[1] : (errMatch ? errMatch[1] : '알 수 없음')}`);
+  } catch (e) {
+    console.error('XML 파싱 오류:', e.message);
   }
-
-  return parseXml(text);
+  return result;
 }
 
-// ── 주소 → lawdCd 추정 (간단 매핑, 차후 행정구역코드 DB로 정밀화) ──
+// ── 키 정규화: 인코딩/디코딩 형태 자동 처리 ──
+function normalizeKey(key) {
+  if (!key) return null;
+  // %가 있으면 이미 인코딩됨
+  if (key.includes('%')) return key;
+  // 없으면 디코딩 형태 → 인코딩 처리
+  return encodeURIComponent(key);
+}
+
+// ── 호출 헬퍼 (URL 여러 개 자동 시도) ──────────
+async function fetchPriceData(endpoints, key, lawdCd, dealYmd, options) {
+  options = options || {};
+  const normalizedKey = normalizeKey(key);
+  if (!normalizedKey) throw new Error('API 키가 비어있습니다');
+
+  let lastError = null;
+  for (const endpoint of endpoints) {
+    try {
+      const url = endpoint
+        + '?serviceKey=' + normalizedKey
+        + '&LAWD_CD=' + encodeURIComponent(lawdCd)
+        + '&DEAL_YMD=' + encodeURIComponent(dealYmd)
+        + '&pageNo=1'
+        + '&numOfRows=' + (options.numOfRows || 100);
+
+      const controller = new AbortController();
+      const timeoutId  = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/xml' },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const text = await res.text();
+
+      if (text.includes('SERVICE_KEY_IS_NOT_REGISTERED')
+       || text.includes('SERVICE KEY IS NOT REGISTERED')) {
+        throw new Error('SERVICE_KEY_NOT_REGISTERED — 키 미등록 또는 승인 대기 중');
+      }
+      if (text.includes('NO_OPENAPI_SERVICE_ERROR')) {
+        lastError = new Error('NO_OPENAPI_SERVICE — endpoint 미지원');
+        continue;   // 다음 endpoint
+      }
+      if (text.includes('LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR')) {
+        throw new Error('일일 호출 한도 초과');
+      }
+
+      const parsed = parseXml(text);
+      if (parsed.resultCode === '00' || parsed.items.length > 0) {
+        return parsed;
+      }
+      if (parsed.resultCode && parsed.resultCode !== '00') {
+        lastError = new Error(`API 응답 오류: ${parsed.resultMsg || parsed.resultCode}`);
+        continue;
+      }
+      // resultCode 없는 경우 — 빈 응답일 수도, 다른 문제일 수도
+      if (!parsed.resultCode && parsed.items.length === 0) {
+        // 응답 첫 200자를 에러로 (디버깅용)
+        lastError = new Error('알 수 없는 응답 형식: ' + text.substring(0, 200));
+        continue;
+      }
+      return parsed;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError || new Error('모든 endpoint 호출 실패');
+}
+
+// ── 주소 → lawdCd 추정 ────────────────────────
 function guessLawdCdFromAddress(address) {
   if (!address) return null;
-  // 부산 해운대구 = 26350, 강남구 = 11680, ...
-  // 정식으로는 행정안전부의 법정동 코드 데이터 필요 (~3MB JSON)
   const map = {
     '강남구': '11680', '서초구': '11650', '송파구': '11710', '강동구': '11740',
     '마포구': '11440', '용산구': '11170', '성동구': '11200', '광진구': '11215',
-    '해운대구': '26350', '수영구': '26260', '남구': '26290', '동래구': '26260',
-    '부산진구': '26230', '중구': '26110', '서구': '26140', '영도구': '26170',
-    '동구': '26170', '북구': '26320', '강서구': '26440', '연제구': '26470',
+    '해운대구': '26350', '수영구': '26260', '동래구': '26260',
+    '부산진구': '26230', '영도구': '26170',
+    '강서구': '26440', '연제구': '26470',
     '사상구': '26530', '사하구': '26380', '금정구': '26410', '기장군': '26710',
   };
   for (const [gu, code] of Object.entries(map)) {
@@ -105,136 +133,135 @@ function guessLawdCdFromAddress(address) {
   return null;
 }
 
-// ── Mock 데이터 (키 없을 때 또는 실패 시) ──────────
-function mockData(type, query) {
+// ── Mock 데이터 ────────────────────────────────
+function mockData(type) {
   const baseDate = new Date();
   const base = {
-    apt:        query.apt || '샘플아파트',
-    dealYear:   String(baseDate.getFullYear()),
-    dealMonth:  String(baseDate.getMonth() + 1).padStart(2, '0'),
-    dealDay:    String(baseDate.getDate()).padStart(2, '0'),
+    aptNm: '샘플아파트 (mock)',
+    dealYear: String(baseDate.getFullYear()),
+    dealMonth: String(baseDate.getMonth() + 1).padStart(2, '0'),
+    dealDay: String(baseDate.getDate()).padStart(2, '0'),
     excluUseAr: '84.99',
-    floor:      String(Math.floor(Math.random() * 20) + 3),
-    buildYear:  String(2000 + Math.floor(Math.random() * 25)),
+    floor: String(Math.floor(Math.random() * 20) + 3),
+    buildYear: String(2000 + Math.floor(Math.random() * 25)),
   };
-
   if (type === 'trade') {
-    return [{
-      ...base, dealAmount: '110,000',  // 11억
-    }, {
-      ...base, dealAmount: '125,000', floor: '12',
-    }];
+    return [
+      { ...base, dealAmount: '110,000' },
+      { ...base, dealAmount: '125,000', floor: '12' },
+    ];
   }
   if (type === 'rent') {
-    return [{
-      ...base, deposit: '85,000', monthlyRent: '0',  // 전세 8.5억
-    }, {
-      ...base, deposit: '5,000', monthlyRent: '300',  // 보증금 5천 / 월 300
-    }];
+    return [
+      { ...base, deposit: '85,000', monthlyRent: '0' },
+      { ...base, deposit: '5,000',  monthlyRent: '300' },
+    ];
   }
   return [];
 }
 
-// ── 통계 산출 ──────────────────────────────────
+// ── 통계 ──────────────────────────────────────
 function summarizeTrades(items) {
-  if (!items.length) return null;
-  const prices = items
-    .map(i => parseInt((i.dealAmount || i.dealAmt || '0').replace(/,/g, '').trim()))
-    .filter(n => n > 0);
-  if (!prices.length) return null;
-  prices.sort((a, b) => a - b);
-  const avg = Math.round(prices.reduce((s, n) => s + n, 0) / prices.length);
-  const median = prices[Math.floor(prices.length / 2)];
-  return {
-    count:  prices.length,
-    avg,                                         // 만원 단위
-    median,
-    min:    prices[0],
-    max:    prices[prices.length - 1],
-    range:  [prices[0], prices[prices.length - 1]],
-  };
+  if (!items || !items.length) return null;
+  try {
+    const prices = items
+      .map(i => {
+        const raw = (i.dealAmount || i.dealAmt || '').toString().replace(/,/g, '').trim();
+        return parseInt(raw);
+      })
+      .filter(n => !isNaN(n) && n > 0);
+    if (!prices.length) return null;
+    prices.sort((a, b) => a - b);
+    const avg = Math.round(prices.reduce((s, n) => s + n, 0) / prices.length);
+    return {
+      count: prices.length,
+      avg,
+      median: prices[Math.floor(prices.length / 2)],
+      min: prices[0],
+      max: prices[prices.length - 1],
+      range: [prices[0], prices[prices.length - 1]],
+    };
+  } catch (e) {
+    return null;
+  }
 }
 
 function summarizeRents(items) {
-  if (!items.length) return null;
-  const jeonse = items.filter(i => {
-    const monthly = parseInt((i.monthlyRent || '0').replace(/,/g, '').trim());
-    return monthly === 0;
-  });
-  const monthly = items.filter(i => {
-    const m = parseInt((i.monthlyRent || '0').replace(/,/g, '').trim());
-    return m > 0;
-  });
-  // 전세 (보증금만)
-  const jeonsePrices = jeonse
-    .map(i => parseInt((i.deposit || '0').replace(/,/g, '').trim()))
-    .filter(n => n > 0);
-  const monthlyDeposits = monthly
-    .map(i => parseInt((i.deposit || '0').replace(/,/g, '').trim()))
-    .filter(n => n > 0);
-  const monthlyRents = monthly
-    .map(i => parseInt((i.monthlyRent || '0').replace(/,/g, '').trim()))
-    .filter(n => n > 0);
+  if (!items || !items.length) return { jeonse: null, monthly: null };
+  try {
+    const result = { jeonse: null, monthly: null };
+    const jeonse = [];
+    const monthlyDeposits = [];
+    const monthlyRents = [];
 
-  const result = {
-    jeonse:  null,
-    monthly: null,
-  };
-  if (jeonsePrices.length) {
-    jeonsePrices.sort((a, b) => a - b);
-    result.jeonse = {
-      count: jeonsePrices.length,
-      avg:    Math.round(jeonsePrices.reduce((s, n) => s + n, 0) / jeonsePrices.length),
-      median: jeonsePrices[Math.floor(jeonsePrices.length / 2)],
-      range:  [jeonsePrices[0], jeonsePrices[jeonsePrices.length - 1]],
-    };
+    for (const i of items) {
+      const dep = parseInt((i.deposit || '').toString().replace(/,/g, '').trim());
+      const m   = parseInt((i.monthlyRent || '0').toString().replace(/,/g, '').trim()) || 0;
+      if (isNaN(dep) || dep <= 0) continue;
+      if (m === 0) {
+        jeonse.push(dep);
+      } else {
+        monthlyDeposits.push(dep);
+        monthlyRents.push(m);
+      }
+    }
+
+    if (jeonse.length) {
+      jeonse.sort((a, b) => a - b);
+      result.jeonse = {
+        count: jeonse.length,
+        avg: Math.round(jeonse.reduce((s, n) => s + n, 0) / jeonse.length),
+        median: jeonse[Math.floor(jeonse.length / 2)],
+        range: [jeonse[0], jeonse[jeonse.length - 1]],
+      };
+    }
+    if (monthlyDeposits.length) {
+      monthlyDeposits.sort((a, b) => a - b);
+      monthlyRents.sort((a, b) => a - b);
+      result.monthly = {
+        count: monthlyDeposits.length,
+        avgDeposit: Math.round(monthlyDeposits.reduce((s, n) => s + n, 0) / monthlyDeposits.length),
+        avgRent: Math.round(monthlyRents.reduce((s, n) => s + n, 0) / monthlyRents.length),
+        depositRange: [monthlyDeposits[0], monthlyDeposits[monthlyDeposits.length - 1]],
+        rentRange: [monthlyRents[0], monthlyRents[monthlyRents.length - 1]],
+      };
+    }
+    return result;
+  } catch (e) {
+    return { jeonse: null, monthly: null };
   }
-  if (monthlyDeposits.length) {
-    monthlyDeposits.sort((a, b) => a - b);
-    monthlyRents.sort((a, b) => a - b);
-    result.monthly = {
-      count:        monthlyDeposits.length,
-      avgDeposit:   Math.round(monthlyDeposits.reduce((s, n) => s + n, 0) / monthlyDeposits.length),
-      avgRent:      Math.round(monthlyRents.reduce((s, n) => s + n, 0) / monthlyRents.length),
-      depositRange: [monthlyDeposits[0], monthlyDeposits[monthlyDeposits.length - 1]],
-      rentRange:    [monthlyRents[0], monthlyRents[monthlyRents.length - 1]],
-    };
-  }
-  return result;
 }
 
 // ── 메인 핸들러 ────────────────────────────────
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // 절대 크래시 안 나도록 모든 처리 try-catch
   try {
-    const q = req.query || {};
-    let lawdCd = q.lawdCd || '';
-    // contract와 type 분리: 사용자 의도(contract)와 별개로 데이터(type)를 결정
-    // 전세가율 산출엔 매매+전세 둘 다 필요하므로 both 기본값
-    const type    = q.type || 'both';
-    const aptName = q.apt  || q.complexName || '';
+    const q = (req.query && typeof req.query === 'object') ? req.query : {};
+    let lawdCd = (q.lawdCd || '').toString().trim();
+    const type = (q.type || 'both').toString().trim();
+    const aptName = (q.apt || q.complexName || '').toString().trim();
     const userDeposit = parseInt(q.deposit) || 0;
 
-    // 주소만 있으면 lawdCd 추정
     if (!lawdCd && q.address) {
-      lawdCd = guessLawdCdFromAddress(q.address);
+      lawdCd = guessLawdCdFromAddress(q.address.toString()) || '';
     }
     if (!lawdCd) {
       return res.status(200).json({
         ok: false,
-        error: 'lawdCd 또는 address가 필요합니다 (예: lawdCd=26350, 또는 address=부산 해운대구...)',
-        source: 'mock',
+        error: 'lawdCd 또는 인식 가능한 address가 필요합니다',
+        source: 'error',
         fetchedAt: new Date().toISOString(),
       });
     }
 
-    // 조회연월: 미지정 시 최근 3개월
+    // 최근 3개월 (지정 없으면)
     let dealYmds = [];
     if (q.dealYmd) {
-      dealYmds = [q.dealYmd];
+      dealYmds = [q.dealYmd.toString()];
     } else {
       const now = new Date();
       for (let i = 0; i < 3; i++) {
@@ -243,87 +270,87 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // 키 확인
     const tradeKey = process.env.DATA_GO_KR_KEY_APT_TRADE;
     const rentKey  = process.env.DATA_GO_KR_KEY_APT_RENT;
-    const useMock  = !tradeKey && !rentKey;
 
     let trades = [];
     let rents  = [];
-    let usedSource = useMock ? 'mock' : 'publicData';
-    let warnings = [];
+    let usedSource = 'mock';
+    const warnings = [];
 
-    // ── 매매 데이터 ──
+    // ── 매매 ──
     if (type === 'trade' || type === 'both') {
       if (tradeKey) {
-        try {
-          for (const ymd of dealYmds) {
-            const result = await fetchPriceData(APT_TRADE_URL, tradeKey, lawdCd, ymd);
-            trades = trades.concat(result.items);
+        for (const ymd of dealYmds) {
+          try {
+            const result = await fetchPriceData(APT_TRADE_URLS, tradeKey, lawdCd, ymd);
+            trades = trades.concat(result.items || []);
             if (trades.length >= 200) break;
+          } catch (e) {
+            warnings.push(`매매 ${ymd} 호출 실패: ${e.message}`);
           }
-        } catch (e) {
-          console.error('매매 API 오류:', e.message);
-          warnings.push('매매 API 호출 실패: ' + e.message);
-          trades = mockData('trade', { apt: aptName });
+        }
+        if (trades.length > 0) {
+          usedSource = 'publicData';
+        } else {
+          trades = mockData('trade');
           usedSource = 'mock-fallback';
+          warnings.push('매매 실거래 없음 → mock 사용');
         }
       } else {
-        trades = mockData('trade', { apt: aptName });
+        trades = mockData('trade');
+        warnings.push('DATA_GO_KR_KEY_APT_TRADE 환경변수 미설정');
       }
     }
 
-    // ── 전월세 데이터 ──
+    // ── 전월세 ──
     if (type === 'rent' || type === 'both') {
       if (rentKey) {
-        try {
-          for (const ymd of dealYmds) {
-            const result = await fetchPriceData(APT_RENT_URL, rentKey, lawdCd, ymd);
-            rents = rents.concat(result.items);
+        for (const ymd of dealYmds) {
+          try {
+            const result = await fetchPriceData(APT_RENT_URLS, rentKey, lawdCd, ymd);
+            rents = rents.concat(result.items || []);
             if (rents.length >= 200) break;
+          } catch (e) {
+            warnings.push(`전월세 ${ymd} 호출 실패: ${e.message}`);
           }
-        } catch (e) {
-          console.error('전월세 API 오류:', e.message);
-          warnings.push('전월세 API 호출 실패: ' + e.message);
-          rents = mockData('rent', { apt: aptName });
-          usedSource = 'mock-fallback';
+        }
+        if (rents.length > 0) {
+          if (usedSource === 'mock') usedSource = 'publicData';
+        } else {
+          rents = mockData('rent');
+          if (usedSource !== 'publicData') usedSource = 'mock-fallback';
+          warnings.push('전월세 실거래 없음 → mock 사용');
         }
       } else {
-        rents = mockData('rent', { apt: aptName });
+        rents = mockData('rent');
+        warnings.push('DATA_GO_KR_KEY_APT_RENT 환경변수 미설정');
       }
     }
 
-    // ── 아파트명 필터 ── (실제 데이터일 때만 필터, mock은 단지명이 placeholder)
+    // 아파트명 필터 (실데이터에만)
     if (aptName && usedSource === 'publicData') {
-      const norm = (s) => (s || '').replace(/\s+/g, '').toLowerCase();
+      const norm = (s) => (s || '').toString().replace(/\s+/g, '').toLowerCase();
       trades = trades.filter(t => norm(t.aptNm || t.apartment).includes(norm(aptName)));
       rents  = rents.filter (r => norm(r.aptNm || r.apartment).includes(norm(aptName)));
     }
 
-    // ── 통계 ──
     const tradeStats = summarizeTrades(trades);
     const rentStats  = summarizeRents(rents);
 
-    // ── 전세가율 (사용자 보증금이 있으면) ──
     let jeonseRatio = null;
-    if (userDeposit > 0 && tradeStats?.median) {
-      jeonseRatio = Math.round(userDeposit / tradeStats.median * 1000) / 10;  // 소수점 1자리
+    if (userDeposit > 0 && tradeStats && tradeStats.median) {
+      jeonseRatio = Math.round(userDeposit / tradeStats.median * 1000) / 10;
     }
 
     return res.status(200).json({
       ok: true,
       source: usedSource,
       query: { lawdCd, type, aptName, dealYmds, userDeposit },
-      trade: {
-        items: trades.slice(0, 50),    // 최대 50건만 응답
-        stats: tradeStats,
-      },
-      rent: {
-        items: rents.slice(0, 50),
-        stats: rentStats,
-      },
+      trade: { items: trades.slice(0, 50), stats: tradeStats },
+      rent:  { items: rents.slice(0, 50),  stats: rentStats },
       analysis: {
-        jeonseRatio,                    // 전세가율 (%)
+        jeonseRatio,
         jeonseRatioWarn: jeonseRatio !== null ? jeonseRatio > 80 : null,
       },
       warnings,
@@ -331,12 +358,14 @@ module.exports = async function handler(req, res) {
     });
 
   } catch (e) {
-    console.error('price.js 처리 오류:', e);
-    return res.status(500).json({
+    // 마지막 방어선 — 어떤 에러든 200 OK로 응답 (Vercel 500 방지)
+    console.error('price.js 최상위 에러:', e);
+    return res.status(200).json({
       ok: false,
-      error: e.message || '서버 오류',
+      error: (e && e.message) || '알 수 없는 서버 오류',
+      stack: (e && e.stack) ? e.stack.split('\n').slice(0, 3).join(' | ') : null,
       source: 'error',
       fetchedAt: new Date().toISOString(),
     });
   }
-};
+}
