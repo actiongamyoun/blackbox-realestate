@@ -292,8 +292,8 @@ tailwind.config = {
             <span class="text-xs" style="color:#8192a7;">주변 실거래 중앙값</span>
             <span class="mono text-xs text-white" id="meta-price-val">조회 중...</span>
           </div>
-          <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">전세가율</span>
+          <div class="flex justify-between py-3 border-b" id="meta-ratio-row" style="border-color:rgba(255,255,255,.08);">
+            <span class="text-xs" style="color:#8192a7;" id="meta-ratio-label">전세가율</span>
             <span class="mono text-xs font-bold" style="color:#fcd34d;" id="meta-ratio-val">—</span>
           </div>
           <div class="flex justify-between py-3">
@@ -742,38 +742,71 @@ if ('serviceWorker' in navigator) {
     }
   }
 
-  // ── 시세 / 전세가율 (sessionStorage 분석 결과에서 읽기) ──
+  // ── 시세 / 비율 (계약유형별 라벨 변경) ──
   let _analysis = null;
   try { _analysis = JSON.parse(sessionStorage.getItem('bb_analysis') || 'null'); } catch(e) {}
 
   const priceEl = document.getElementById('meta-price-val');
   if (priceEl) {
     if (_analysis?.raw?.price?.trade?.stats?.median) {
-      const medianMan = _analysis.raw.price.trade.stats.median;  // 만원
+      const medianMan = _analysis.raw.price.trade.stats.median;
       const eok = Math.floor(medianMan / 10000);
       const man = medianMan % 10000;
       const cnt = _analysis.raw.price.trade.stats.count;
       priceEl.innerHTML = (eok > 0
         ? (man > 0 ? `${eok}억 ${man.toLocaleString()}만원` : `${eok}억원`)
         : `${medianMan.toLocaleString()}만원`)
-        + ` <span style="color:rgba(255,255,255,.4);">(${cnt}건 기준)</span>`;
+        + ` <span style="color:rgba(255,255,255,.4);">(${cnt}건)</span>`;
     } else {
       priceEl.textContent = '실거래 데이터 부족';
       priceEl.style.color = 'rgba(255,255,255,.5)';
     }
   }
-  const ratioEl = document.getElementById('meta-ratio-val');
-  if (ratioEl) {
-    if (_analysis?.raw?.price?.analysis?.jeonseRatio !== null && _analysis?.raw?.price?.analysis?.jeonseRatio !== undefined) {
-      const r = _analysis.raw.price.analysis.jeonseRatio;
-      ratioEl.textContent = `${r}%`;
-      // 위험도에 따라 색상
-      if (r > 90) ratioEl.style.color = '#ff6b6b';
-      else if (r > 80) ratioEl.style.color = '#fcd34d';
-      else ratioEl.style.color = '#86efac';
-    } else {
-      ratioEl.textContent = '— (시세 조회 후)';
-      ratioEl.style.color = 'rgba(255,255,255,.5)';
+
+  // ── 비율 라벨/값 — 계약유형별 ──
+  const ratioLabelEl = document.getElementById('meta-ratio-label');
+  const ratioValEl   = document.getElementById('meta-ratio-val');
+  const ratioRowEl   = document.getElementById('meta-ratio-row');
+
+  if (ratioLabelEl && ratioValEl) {
+    const userDeposit = parseInt(deposit) || 0;
+    const median      = _analysis?.raw?.price?.trade?.stats?.median || 0;
+
+    if (contract === '전세') {
+      ratioLabelEl.textContent = '전세가율';
+      const r = _analysis?.raw?.price?.analysis?.jeonseRatio;
+      if (r !== null && r !== undefined) {
+        ratioValEl.textContent = `${r}%`;
+        if (r > 90)      ratioValEl.style.color = '#ff6b6b';
+        else if (r > 80) ratioValEl.style.color = '#fcd34d';
+        else             ratioValEl.style.color = '#86efac';
+      } else {
+        ratioValEl.textContent = '— (산출 불가)';
+        ratioValEl.style.color = 'rgba(255,255,255,.5)';
+      }
+    } else if (contract === '월세') {
+      ratioLabelEl.textContent = '보증금/시세 비율';
+      if (userDeposit > 0 && median > 0) {
+        const r = Math.round(userDeposit / median * 1000) / 10;
+        ratioValEl.textContent = `${r}%`;
+        if (r > 50)      ratioValEl.style.color = '#ff6b6b';
+        else if (r > 30) ratioValEl.style.color = '#fcd34d';
+        else             ratioValEl.style.color = '#86efac';
+      } else {
+        ratioValEl.textContent = '— (산출 불가)';
+        ratioValEl.style.color = 'rgba(255,255,255,.5)';
+      }
+    } else if (contract === '매매') {
+      ratioLabelEl.textContent = '시세 대비 매매가';
+      if (userDeposit > 0 && median > 0) {
+        const r = Math.round(userDeposit / median * 1000) / 10;
+        ratioValEl.textContent = `${r}%`;
+        if (r > 115 || r < 85) ratioValEl.style.color = '#fcd34d';
+        else                   ratioValEl.style.color = '#86efac';
+      } else {
+        ratioValEl.textContent = '— (산출 불가)';
+        ratioValEl.style.color = 'rgba(255,255,255,.5)';
+      }
     }
   }
 
@@ -976,41 +1009,19 @@ const CHECKLISTS = {
 function applyContractChecklist(contract) {
   const raw = CHECKLISTS[contract] || CHECKLISTS['전세'];
 
-  const p = new URLSearchParams(window.location.search);
-  const score = parseInt(p.get('score') || sessionStorage.getItem('bb_score') || '0');
+  // analyze.js 응답의 autoChecked 직접 사용 (이전: 자체 추정 로직)
+  let autoChecked = {};
+  try {
+    const analysis = JSON.parse(sessionStorage.getItem('bb_analysis') || 'null');
+    if (analysis && analysis.autoChecked) {
+      autoChecked = analysis.autoChecked;
+    }
+  } catch(e) {}
 
-  const analysisResult = JSON.parse(sessionStorage.getItem('bb_analysis') || 'null') || {
-    registryClean:    score >= 70,
-    mortgageDetected: score < 80,
-    trustDetected:    false,
-    jeonseRatioOk:    score >= 75,
-    taxClearOk:       score >= 65,
-    auctionClear:     score >= 60,
-  };
-
-  const AI_AUTO = {
-    '전세': {
-      '등기부 을구 — 근저당·가압류 확인 및 말소 특약':        !analysisResult.mortgageDetected,
-      '전세가율 확인 (80% 이하 권장)':                        analysisResult.jeonseRatioOk,
-      '신탁 등기 여부 확인 (수익자 동의 없는 임대 금지)':     !analysisResult.trustDetected,
-    },
-    '월세': {
-      '등기부 을구 — 근저당·가압류 확인':                     !analysisResult.mortgageDetected,
-      '소액임차인 최우선변제금 요건 해당 여부 확인':           score >= 70,
-    },
-    '매매': {
-      '등기부 갑구 — 가압류·압류·경매 개시 여부 확인':        analysisResult.registryClean,
-      '등기부 을구 — 근저당·전세권 말소 여부 확인':           !analysisResult.mortgageDetected,
-      '신탁 등기 여부 확인':                                  !analysisResult.trustDetected,
-      '실거래가 및 공시지가 대비 매매가 적정성 확인':          score >= 65,
-    },
-  };
-
-  const autoMap = AI_AUTO[contract] || AI_AUTO['전세'];
   const items = raw.map(item => ({
     ...item,
-    done:    autoMap[item.text] === true,
-    aiDone:  autoMap[item.text] === true,
+    done:    autoChecked[item.text] === true,
+    aiDone:  autoChecked[item.text] === true,
   }));
 
   const container = document.querySelector('.chk-container');
@@ -1054,7 +1065,8 @@ function applyContractChecklist(contract) {
     titleEl.textContent = (typeNames[contract] || '블랙박스') + ' 체크리스트';
   }
 
-  updateProgress();
+  // 진행률 즉시 업데이트
+  setTimeout(updateProgress, 50);
 }
 
 // ════════════════════════════════════════════
@@ -1234,8 +1246,8 @@ function renderAnalysisResult() {
     }
   }
 
-  // ── 점수 게이지 업데이트 (URL 파라미터로 받은 값보다 sessionStorage가 우선) ──
-  if (analysis.score) {
+  // ── 점수 게이지 (분석 결과로 업데이트) ──
+  if (typeof analysis.score === 'number') {
     const scoreNum = document.querySelector('.gauge-num');
     if (scoreNum) scoreNum.textContent = analysis.score;
     const arc = document.getElementById('gauge-arc');
@@ -1243,7 +1255,6 @@ function renderAnalysisResult() {
       const offset = Math.round(528 - (analysis.score/100)*528);
       arc.style.setProperty('--offset', offset);
     }
-    // 위험 칩 + 설명
     const chip = document.getElementById('score-chip');
     const desc = document.getElementById('score-desc');
     if (chip && desc) {
@@ -1267,33 +1278,8 @@ function renderAnalysisResult() {
     }
   }
 
-  // ── 체크리스트 자동 체크 (analysis.autoChecked 활용) ──
-  if (analysis.autoChecked && Object.keys(analysis.autoChecked).length) {
-    setTimeout(() => {
-      document.querySelectorAll('.chk-row').forEach(row => {
-        const text = row.querySelector('.text-sm')?.textContent.trim();
-        if (text && analysis.autoChecked[text]) {
-          // 자동체크 표시
-          const icon = row.querySelector('.material-symbols-outlined');
-          if (icon && !icon.classList.contains('fill-icon')) {
-            icon.classList.add('fill-icon', 'text-green-600');
-            icon.classList.remove('text-outline');
-            icon.textContent = 'check_box';
-            row.dataset.locked = 'true';
-            row.style.cursor = 'default';
-            const right = row.querySelector('.chk-right');
-            if (right) {
-              const aiSpan = right.querySelector('span:last-child');
-              if (aiSpan) {
-                aiSpan.outerHTML = '<span class="text-xs font-bold text-green-700" style="display:flex;align-items:center;gap:3px;"><span class="material-symbols-outlined" style="font-size:13px;">smart_toy</span> AI 확인</span>';
-              }
-            }
-          }
-        }
-      });
-      updateProgress();
-    }, 200);
-  }
+  // 진행률 강제 업데이트 (체크리스트 자동체크가 위에서 적용됨)
+  setTimeout(updateProgress, 100);
 }
 
 // ════════════════════════════════════════════
@@ -1303,8 +1289,9 @@ function renderScoreBreakdown(analysis) {
   const el = document.getElementById('score-breakdown-list');
   if (!el || !analysis) return;
 
-  const items = [];
-  items.push({ label: '시작 점수', delta: '+100', color: '#22c55e' });
+  const total = analysis.score || 0;
+  const deductions = [];
+  let totalDeducted = 0;
 
   if (Array.isArray(analysis.redFlags)) {
     analysis.redFlags.forEach(f => {
@@ -1313,34 +1300,42 @@ function renderScoreBreakdown(analysis) {
       const match = t.match(/-(\d+)점/);
       let delta = null;
       if (match) {
-        delta = '-' + match[1];
+        delta = parseInt(match[1]);
       } else {
-        if (t.includes('등기부 미연동')) delta = '-30';
-        else if (t.includes('전세가율 위험 수준')) delta = '-30';
-        else if (t.includes('전세가율 주의')) delta = '-15';
-        else if (t.includes('보증금 위험 수준')) delta = '-25';
-        else if (t.includes('보증금이 시세 대비 높음')) delta = '-15';
-        else if (t.includes('월세가 주변 평균')) delta = '-5';
-        else if (t.includes('매매가 시세 대비 고평가')) delta = '-15';
-        else if (t.includes('매매가 시세 대비 저평가')) delta = '-5';
-        else if (t.includes('매매가 적정성 분석 불가')) delta = '-5';
-        else if (t.includes('전세가율 산출 불가')) delta = '-5';
-        else if (t.includes('위반건축물 등재')) delta = '-20';
-        else if (t.includes('노후 건물')) delta = '-5';
-        else if (t.includes('실거래 데이터 부족')) delta = '-5';
-        else delta = sev === 'danger' ? '-15' : '-5';
+        if (t.includes('등기부 미연동')) delta = 30;
+        else if (t.includes('전세가율 위험 수준')) delta = 30;
+        else if (t.includes('전세가율 주의')) delta = 15;
+        else if (t.includes('보증금 위험 수준')) delta = 25;
+        else if (t.includes('보증금이 시세 대비 높음')) delta = 15;
+        else if (t.includes('월세가 주변 평균')) delta = 5;
+        else if (t.includes('매매가 시세 대비 고평가')) delta = 15;
+        else if (t.includes('매매가 시세 대비 저평가')) delta = 5;
+        else if (t.includes('매매가 적정성 분석 불가')) delta = 5;
+        else if (t.includes('전세가율 산출 불가')) delta = 5;
+        else if (t.includes('위반건축물 등재')) delta = 20;
+        else if (t.includes('노후 건물')) delta = 5;
+        else if (t.includes('실거래 데이터 부족')) delta = 5;
+        else delta = sev === 'danger' ? 15 : 5;
       }
       const color = sev === 'danger' ? '#dc2626' : '#f59e0b';
-      items.push({
+      deductions.push({
         label: t.replace(/\s*\(-\d+점\)/, ''),
-        delta: delta,
+        delta: '-' + delta,
         color: color,
       });
+      totalDeducted += delta;
     });
   }
 
-  const total = analysis.score || 0;
-  items.push({ label: '최종 점수', delta: `${total}/100`, color: '#041627', isTotal: true });
+  // 시작 점수 역산 (최종점수 + 총감점)
+  // 이렇게 하면 표시값과 실제 합계가 항상 일치
+  const startScore = total + totalDeducted;
+
+  const items = [
+    { label: '시작 점수', delta: '+' + startScore, color: '#22c55e' },
+    ...deductions,
+    { label: '최종 점수', delta: `${total}/100`, color: '#041627', isTotal: true },
+  ];
 
   el.innerHTML = items.map(it => {
     const isTotal = it.isTotal;

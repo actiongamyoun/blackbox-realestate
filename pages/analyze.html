@@ -361,9 +361,11 @@ async function doAnalyze() {
       redFlags:     data.redFlags     || [],
       forensicData: data.forensicData || [],
       autoChecked:  data.autoChecked  || {},
+      riskBars:     data.riskBars     || [],
       summary:      data.summary      || {},
       sources:      data.sources      || {},
       hasMock:      data.hasMock      || false,
+      raw:          data.raw          || {},
       analyzedAt:   data.analyzedAt   || new Date().toISOString(),
     }));
     if (typeof activateTabs === 'function') activateTabs();
