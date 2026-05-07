@@ -181,6 +181,18 @@ tailwind.config = {
   @media (max-width: 480px) {
     .bb-stats, .grid.grid-cols-4 { grid-template-columns: 1fr 1fr !important; }
   }
+
+  /* PDF 인쇄용 */
+  @media print {
+    header, nav, footer, button, #detail-report-locked,
+    #forensic-lock-overlay, #clause-lock-overlay { display: none !important; }
+    body { background: #fff !important; }
+    main { max-width: 100% !important; padding: 10mm !important; }
+    section { page-break-inside: avoid; break-inside: avoid; box-shadow: none !important; }
+    .redflag-item.open .redflag-body { max-height: none !important; }
+    .redflag-body { max-height: none !important; padding: 14px 18px 18px 62px !important; border-top: 0.5px solid #e4e7ec !important; }
+    a[href]:after { content: ""; }
+  }
 </style>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=52b23b080ca355ccf759fc1686d95d15&libraries=services"></script>
 </head>
@@ -277,7 +289,7 @@ tailwind.config = {
             <span class="mono text-xs text-white" id="meta-deposit-val">—</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
-            <span class="text-xs" style="color:#8192a7;">KB 시세 (추정)</span>
+            <span class="text-xs" style="color:#8192a7;">주변 실거래 중앙값</span>
             <span class="mono text-xs text-white" id="meta-price-val">조회 중...</span>
           </div>
           <div class="flex justify-between py-3 border-b" style="border-color:rgba(255,255,255,.08);">
@@ -417,6 +429,59 @@ tailwind.config = {
     </div>
   </section>
 
+  <!-- ⑦ 상세 리포트 다운로드 (로그인 한정) -->
+  <section class="bg-white border border-outline-variant fade-up-4">
+    <div class="sec-head">
+      <span class="material-symbols-outlined text-primary text-base">summarize</span>
+      <span class="sec-head-title">상세 분석 리포트</span>
+      <span class="ml-auto text-xs" style="color:#8192a7;font-family:'IBM Plex Mono',monospace;">PDF · 공유</span>
+    </div>
+    <div id="detail-report-container" style="padding:20px;">
+      <!-- 미로그인: 잠금 안내 -->
+      <div id="detail-report-locked" style="text-align:center;padding:24px 16px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:50%;background:rgba(4,22,39,.06);margin-bottom:14px;">
+          <span class="material-symbols-outlined fill-icon" style="font-size:30px;color:#041627;">picture_as_pdf</span>
+        </div>
+        <div style="font-size:16px;font-weight:900;color:#041627;margin-bottom:8px;letter-spacing:-0.3px;">상세 분석은 로그인 후 제공됩니다</div>
+        <div style="font-size:13px;color:#74777d;margin-bottom:20px;line-height:1.6;max-width:380px;margin-left:auto;margin-right:auto;">
+          • 항목별 점수 · 감점 내역 상세<br>
+          • 위험 요소 분석 보고서 (PDF)<br>
+          • 카톡·이메일·링크로 공유<br>
+          • 계약 후 등기부 변동 모니터링
+        </div>
+        <button onclick="goLogin()"
+          style="padding:12px 32px;background:#041627;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+          <span class="material-symbols-outlined" style="font-size:18px;">login</span>
+          무료 로그인하기
+        </button>
+        <div style="font-size:11px;color:#aaa;margin-top:10px;">카톡 1초 로그인 — 가입 절차 없음</div>
+      </div>
+
+      <!-- 로그인 후: 상세 리포트 액션 -->
+      <div id="detail-report-unlocked" style="display:none;">
+        <!-- 점수 분해 -->
+        <div style="background:#f8f9fb;border-radius:8px;padding:16px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;color:#041627;letter-spacing:1.5px;font-family:'IBM Plex Mono',monospace;margin-bottom:10px;">SCORE BREAKDOWN — 점수 분해</div>
+          <div id="score-breakdown-list" style="font-size:13px;line-height:1.7;color:#1b1c1d;">
+            <!-- JS가 채움 -->
+          </div>
+        </div>
+        <!-- 액션 버튼들 -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="downloadPdf()" style="flex:1;min-width:140px;padding:11px 16px;background:#041627;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">picture_as_pdf</span>
+            PDF 다운로드
+          </button>
+          <button onclick="doShareReport()" style="flex:1;min-width:140px;padding:11px 16px;background:#fff;color:#041627;border:1px solid #041627;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">share</span>
+            링크 공유
+          </button>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:8px;text-align:center;">PDF는 분석 시점 데이터 기준입니다 · 등기부 변동은 모니터링 페이지에서 확인</div>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- ══════════════════════════════════
@@ -548,15 +613,51 @@ function updateUserBtn() {
   }
 }
 
-// ── 공유 ──
+// ── 공유 (로그인 한정) ──
 function doShare() {
+  if (!isLoggedIn()) {
+    if (confirm('공유 기능은 로그인 후 이용 가능합니다.\n로그인하시겠습니까?')) {
+      goLogin();
+    }
+    return;
+  }
+  doShareReport();
+}
+
+function doShareReport() {
+  // 로그인된 사용자만 호출됨
+  const url = window.location.href;
+  const title = "부동산 블랙박스 분석 리포트";
   if (navigator.share) {
-    navigator.share({ title: "부동산 블랙박스 분석 리포트", url: window.location.href });
+    navigator.share({ title, url }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(window.location.href)
-      .then(() => alert("링크가 복사되었습니다."))
+    navigator.clipboard.writeText(url)
+      .then(() => alert("리포트 링크가 복사되었습니다.\n카톡·이메일에 붙여넣어 공유하세요."))
       .catch(() => alert("주소창에서 직접 복사해주세요."));
   }
+}
+
+// ── PDF 다운로드 (로그인 한정) ──
+function downloadPdf() {
+  if (!isLoggedIn()) {
+    goLogin();
+    return;
+  }
+  // 브라우저 인쇄 → PDF 저장 (window.print 활용)
+  // 인쇄 시 잠금 오버레이는 숨김 처리
+  const overlays = document.querySelectorAll('#forensic-lock-overlay, #clause-lock-overlay, #detail-report-locked');
+  overlays.forEach(o => o.style.display = 'none');
+  // 잠시 대기 후 인쇄
+  setTimeout(() => {
+    window.print();
+    // 다시 표시
+    setTimeout(() => {
+      overlays.forEach(o => {
+        if (o.id === 'detail-report-locked' && isLoggedIn()) return;  // 로그인 상태면 잠금 표시 X
+        o.style.display = '';
+      });
+    }, 500);
+  }, 100);
 }
 </script>
 
@@ -641,11 +742,40 @@ if ('serviceWorker' in navigator) {
     }
   }
 
-  // ── KB 시세 / 전세가율 ──
+  // ── 시세 / 전세가율 (sessionStorage 분석 결과에서 읽기) ──
+  let _analysis = null;
+  try { _analysis = JSON.parse(sessionStorage.getItem('bb_analysis') || 'null'); } catch(e) {}
+
   const priceEl = document.getElementById('meta-price-val');
-  if (priceEl) priceEl.textContent = 'API 연동 후 표시';
+  if (priceEl) {
+    if (_analysis?.raw?.price?.trade?.stats?.median) {
+      const medianMan = _analysis.raw.price.trade.stats.median;  // 만원
+      const eok = Math.floor(medianMan / 10000);
+      const man = medianMan % 10000;
+      const cnt = _analysis.raw.price.trade.stats.count;
+      priceEl.innerHTML = (eok > 0
+        ? (man > 0 ? `${eok}억 ${man.toLocaleString()}만원` : `${eok}억원`)
+        : `${medianMan.toLocaleString()}만원`)
+        + ` <span style="color:rgba(255,255,255,.4);">(${cnt}건 기준)</span>`;
+    } else {
+      priceEl.textContent = '실거래 데이터 부족';
+      priceEl.style.color = 'rgba(255,255,255,.5)';
+    }
+  }
   const ratioEl = document.getElementById('meta-ratio-val');
-  if (ratioEl) ratioEl.textContent = '— (시세 조회 후 계산)';
+  if (ratioEl) {
+    if (_analysis?.raw?.price?.analysis?.jeonseRatio !== null && _analysis?.raw?.price?.analysis?.jeonseRatio !== undefined) {
+      const r = _analysis.raw.price.analysis.jeonseRatio;
+      ratioEl.textContent = `${r}%`;
+      // 위험도에 따라 색상
+      if (r > 90) ratioEl.style.color = '#ff6b6b';
+      else if (r > 80) ratioEl.style.color = '#fcd34d';
+      else ratioEl.style.color = '#86efac';
+    } else {
+      ratioEl.textContent = '— (시세 조회 후)';
+      ratioEl.style.color = 'rgba(255,255,255,.5)';
+    }
+  }
 
   // ── 카카오맵 ──
   if (address) {
@@ -1090,6 +1220,20 @@ function renderAnalysisResult() {
     }
   }
 
+  // ── 상세 리포트 (로그인 한정) ──
+  const lockedEl = document.getElementById('detail-report-locked');
+  const unlockedEl = document.getElementById('detail-report-unlocked');
+  if (lockedEl && unlockedEl) {
+    if (isLoggedIn()) {
+      lockedEl.style.display = 'none';
+      unlockedEl.style.display = 'block';
+      renderScoreBreakdown(analysis);
+    } else {
+      lockedEl.style.display = 'block';
+      unlockedEl.style.display = 'none';
+    }
+  }
+
   // ── 점수 게이지 업데이트 (URL 파라미터로 받은 값보다 sessionStorage가 우선) ──
   if (analysis.score) {
     const scoreNum = document.querySelector('.gauge-num');
@@ -1150,6 +1294,62 @@ function renderAnalysisResult() {
       updateProgress();
     }, 200);
   }
+}
+
+// ════════════════════════════════════════════
+// 점수 분해 (로그인 사용자에게 표시)
+// ════════════════════════════════════════════
+function renderScoreBreakdown(analysis) {
+  const el = document.getElementById('score-breakdown-list');
+  if (!el || !analysis) return;
+
+  const items = [];
+  items.push({ label: '시작 점수', delta: '+100', color: '#22c55e' });
+
+  if (Array.isArray(analysis.redFlags)) {
+    analysis.redFlags.forEach(f => {
+      const t = f.title || '';
+      const sev = (f.severity || '').toLowerCase();
+      const match = t.match(/-(\d+)점/);
+      let delta = null;
+      if (match) {
+        delta = '-' + match[1];
+      } else {
+        if (t.includes('등기부 미연동')) delta = '-30';
+        else if (t.includes('전세가율 위험 수준')) delta = '-30';
+        else if (t.includes('전세가율 주의')) delta = '-15';
+        else if (t.includes('보증금 위험 수준')) delta = '-25';
+        else if (t.includes('보증금이 시세 대비 높음')) delta = '-15';
+        else if (t.includes('월세가 주변 평균')) delta = '-5';
+        else if (t.includes('매매가 시세 대비 고평가')) delta = '-15';
+        else if (t.includes('매매가 시세 대비 저평가')) delta = '-5';
+        else if (t.includes('매매가 적정성 분석 불가')) delta = '-5';
+        else if (t.includes('전세가율 산출 불가')) delta = '-5';
+        else if (t.includes('위반건축물 등재')) delta = '-20';
+        else if (t.includes('노후 건물')) delta = '-5';
+        else if (t.includes('실거래 데이터 부족')) delta = '-5';
+        else delta = sev === 'danger' ? '-15' : '-5';
+      }
+      const color = sev === 'danger' ? '#dc2626' : '#f59e0b';
+      items.push({
+        label: t.replace(/\s*\(-\d+점\)/, ''),
+        delta: delta,
+        color: color,
+      });
+    });
+  }
+
+  const total = analysis.score || 0;
+  items.push({ label: '최종 점수', delta: `${total}/100`, color: '#041627', isTotal: true });
+
+  el.innerHTML = items.map(it => {
+    const isTotal = it.isTotal;
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:${isTotal ? '10px 0 0' : '4px 0'};${isTotal ? 'border-top:1px solid #dde0e6;margin-top:6px;' : ''}">
+        <span style="${isTotal ? 'font-weight:700;' : ''}color:${isTotal ? '#041627' : '#1b1c1d'};">${escapeHtml(it.label)}</span>
+        <span style="font-weight:${isTotal ? '900' : '700'};color:${it.color};font-family:'IBM Plex Mono',monospace;font-size:${isTotal ? '15px' : '13px'};">${escapeHtml(it.delta)}</span>
+      </div>`;
+  }).join('');
 }
 
 // HTML 이스케이프 (renderAnalysisResult용)
